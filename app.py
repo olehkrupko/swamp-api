@@ -1,10 +1,13 @@
 import os
+import sys
+
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
 
 # config
+sys.dont_write_bytecode = True  # avoid writing __pycache__ and .pyc
 SQLALCHEMY_TRACK_MODIFICATIONS = True
 app = Flask(__name__)
 # app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
