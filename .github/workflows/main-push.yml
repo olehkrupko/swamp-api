@@ -1,5 +1,5 @@
 name: main-push
-run-name: ${{ github.actor }} deploys on push to main | ${{ env.GITHUB_REPOSITORY }}
+run-name: ${{ github.actor }} deploys on push to main | ${{ GITHUB_REPOSITORY }}
 on:
   push:
     branches:
