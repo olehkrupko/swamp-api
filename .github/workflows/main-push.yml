@@ -1,5 +1,5 @@
 name: main-push
-run-name: ${{ github.actor }} deploys on push to main | ${{ GITHUB_REPOSITORY }}
+run-name: ${{ github.actor }} deploys on push to main
 on:
   push:
     branches:
@@ -13,3 +13,4 @@ jobs:
         uses: actions/checkout@v3
         with:
           path: my-tools
+      - uses: ls ~
