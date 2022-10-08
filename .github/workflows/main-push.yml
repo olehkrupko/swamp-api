@@ -1,0 +1,15 @@
+name: main-push
+run-name: ${{ github.actor }} deploys on push to main | $env:GITHUB_REPOSITORY
+on:
+  push:
+    branches:
+      - 'main'
+jobs:
+  deploy:
+    runs-on: [self-hosted, linux]
+    # runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          path: my-tools
