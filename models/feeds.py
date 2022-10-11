@@ -2,7 +2,7 @@ import datetime
 
 from sqlalchemy.dialects.postgresql import JSONB
 
-from __main__ import db
+from __main__ import db, FREQUENCIES
 
 
 class Feed(db.Model):
@@ -28,7 +28,11 @@ class Feed(db.Model):
         self.href = data.pop('href')
 
         self.private = data.pop('private')
-        self.frequency = data.pop('frequency')
+        frequency = data.pop('frequency')
+        if frequency in FREQUENCIES:
+            self.frequency = frequency
+        else:
+            raise Exception(f"Frequency {frequency} is not in {FREQUENCIES}")
         self.notes = data.pop('notes')
         self.json = data.pop('json')
 

@@ -2,19 +2,8 @@ import json
 
 from flask_cors import cross_origin
 
-from __main__ import app, db
+from __main__ import app, db, FREQUENCIES
 from models.feeds import Feed
-
-
-FREQUENCIES = (
-    'minutes',
-    'hours',
-    'days',
-    'weeks',
-    'months',
-    'years',
-    'never',
-)
 
 def frequency_validate(val):
     return val in FREQUENCIES
