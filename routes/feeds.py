@@ -2,19 +2,8 @@ import json
 
 from flask_cors import cross_origin
 
-from __main__ import app, db
+from __main__ import app, db, FREQUENCIES
 from models.feeds import Feed
-
-
-FREQUENCIES = (
-    'minutes',
-    'hours',
-    'days',
-    'weeks',
-    'months',
-    'years',
-    'never',
-)
 
 def frequency_validate(val):
     return val in FREQUENCIES
@@ -152,4 +141,54 @@ def delete_item(feed_id):
         }),
         status=200,
         mimetype='application/json'
+    )
+
+@app.route('/feeds/file', methods=['GET'])
+def feeds_file():
+    from static_feeds import feeds
+
+    feeds_created = []
+    for each_feed in feeds:
+        if 'title_full' in each_feed:
+            each_feed['title'] = each_feed.pop('title_full')
+        if db.session.query(Feed).filter_by(title=each_feed['title']).all():
+            continue
+        emojis = list(each_feed.pop('emojis', ''))
+        each_feed['private'] = '🏮' in emojis
+        if 'x' in emojis:
+            emojis.remove('x')
+        if '+' in emojis:
+            emojis.remove('+')
+        if '💎' in emojis:
+            each_feed['frequency'] = 'hours'
+            emojis.remove('💎')
+        elif '📮' in emojis:
+            each_feed['frequency'] = 'days'
+            emojis.remove('📮')
+        else:
+            each_feed['frequency'] = 'weeks'
+        each_feed['notes'] = ''
+        each_feed['json'] = {}
+        if 'filter' in each_feed:
+            each_feed['json']['filter'] = each_feed.pop('filter')
+        if 'href_title' in each_feed:
+            each_feed['href_user'] = each_feed.pop('href_title')
+        else:
+            each_feed['href_user'] = None
+
+        feed = Feed(each_feed)
+
+        db.session.add(feed)
+        db.session.commit()
+        db.session.refresh(feed)
+
+        feeds_created.append(feed.id)
+
+    return app.response_class(
+        response=json.dumps({
+            'feeds_file': len(feeds),
+            'feeds_created': len(feeds_created),
+        }),
+        status=200,
+        mimetype='application/json',
     )

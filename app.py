@@ -13,6 +13,15 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 # app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://krupko_space:IGNOMINY-envisage-godly@192.168.0.155:54327/krupko_space'
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://krupko_space:sterhedsg45whes@192.168.0.158:54321/krupko_space'
+FREQUENCIES = (
+    'minutes',
+    'hours',
+    'days',
+    'weeks',
+    'months',
+    'years',
+    'never',
+)
 
 # database
 db = SQLAlchemy(app)
