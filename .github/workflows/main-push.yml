@@ -1,16 +1,12 @@
 name: main-push
 run-name: ${{ github.actor }} deploys on push to main
-on: push
-  # push:
-  #   branches:
-  #     - 'main'
+on:
+  push:
+    branches:
+      - 'main'
 jobs:
   deploy:
     runs-on: self-hosted
-    # runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        # with:
-        #   path: my-tools
-      - run: ls ~
