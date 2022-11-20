@@ -33,9 +33,8 @@ feeds = ({
         'emojis': '💎'
     }, {
         'title': 'SupremeMagus',
-        'href': 'https://www.lightnovelpub.com/novel/supreme-magus-webnovel-27072152/chapters?chorder=desc',
-        'href_title': 'https://www.lightnovelpub.com/novel/supreme-magus-webnovel-27072152',
-        'emojis': '📮xx'
+        'href': 'https://www.lightnovelpub.com/novel/supreme-magus-webnovel-09111244/chapters?chorder=desc',
+        'href_title': 'https://www.lightnovelpub.com/novel/supreme-magus-webnovel-09111244',
     }, {
         'title': 'TruthPursuit',
         'title_full': 'Pursuit of the Truth (остановился на 106',
@@ -1086,7 +1085,7 @@ feeds = ({
     }, {
         'title': 'JessJackdaw',
         'href': 'https://www.youtube.com/channel/UC3HyvfrwscLKtE_NmOQfWGw/videos',
-        'emojis': '📮xx'
+        'emojis': '📮xxxx'
     }, {
         'title': 'ВладимирЧайкин',
         'href': 'https://www.youtube.com/channel/UC_mPBfl442yiubiPyswqulA/videos',
@@ -1417,18 +1416,6 @@ feeds = ({
         'href': 'feed://www.lunarbaboon.com/comics/rss.xml',
         'href_title': 'http://www.lunarbaboon.com',
         'emojis': '📮xx'
-    }, {
-        'title': 'ГосподствоКланов',
-        'href': 'https://fantasy-worlds.org/series/id5683/',
-        'emojis': '💎'
-    }, {
-        'title': 'СточныеВодыАльгоры',
-        'href': 'https://fantasy-worlds.org/series/id5684/',
-        'emojis': '💎'
-    }, {
-        'title': 'Кроу',
-        'href': 'https://fantasy-worlds.org/series/id4976/',
-        'emojis': '💎'
     }, {
         'title': 'KharkovGo',
         'href': 'https://kharkovgo.com/feed/',
@@ -2687,7 +2674,7 @@ feeds = ({
         'title': 'liangxing_ArtStation',
         'href': 'https://liangxing.artstation.com/rss',
         'href_title': 'https://liangxing.artstation.com/projects',
-        'emojis': '🏮📮xxx'
+        'emojis': '🏮📮xxxx'
     }, {
         'title': 'citemer',
         'href': 'https://citemer.artstation.com/rss',
@@ -3754,7 +3741,7 @@ feeds = ({
         'title': 'neneart',
         'href': 'https://neneart.artstation.com/rss',
         'href_title': 'https://neneart.artstation.com/projects',
-        'emojis': '💎🏮'
+        'emojis': '💎🏮x'
     }, {
         'title': 'ivantao',
         'href': 'https://ivantao.artstation.com/rss',
