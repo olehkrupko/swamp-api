@@ -192,3 +192,18 @@ def feeds_file():
         status=200,
         mimetype='application/json',
     )
+
+@app.route('/feeds/test_parse', methods=['GET'])
+def feeds_test_parse():
+    feed = db.session.query(Feed).filter_by(title='diia_gov_ua').first()
+
+    feed_updates = feed.parse_href()
+
+    return app.response_class(
+        response=json.dumps({
+            'feed_updates_len': len(feed_updates),
+            'feed_updates':         feed_updates,
+        }, indent=4, sort_keys=True, default=str),
+        status=200,
+        mimetype='application/json',
+    )
