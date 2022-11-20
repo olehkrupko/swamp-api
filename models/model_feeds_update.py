@@ -3,7 +3,7 @@ import datetime
 from __main__ import db
 
 
-class Update(db.Model):
+class FeedUpdate(db.Model):
     # technical
     id       = db.Column(db.Integer,  primary_key=True)
     feed_id  = db.Column(db.Integer,  ForeignKey("feed.id"), nullable=False)
