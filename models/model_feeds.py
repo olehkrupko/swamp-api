@@ -18,7 +18,7 @@ class Feed(db.Model):
     # metadata
     private   = db.Column(db.Boolean,     default=False  )
     frequency = db.Column(db.String(20),  default='weeks')
-    notes     = db.Column(db.String(200), default='', unique=False, nullable=True)
+    notes     = db.Column(db.String(200), default='',   nullable=True, unique=False)
     json      = db.Column(JSONB)
 
     def __init__(self, data: dict):
