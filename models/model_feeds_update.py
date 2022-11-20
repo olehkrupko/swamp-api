@@ -5,12 +5,12 @@ from __main__ import db
 
 class FeedUpdate(db.Model):
     # technical
-    id       = db.Column(db.Integer,  primary_key=True)
-    feed_id  = db.Column(db.Integer,  db.ForeignKey("feed.id"), nullable=False)
-    created  = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    id       = db.Column(db.Integer,     primary_key=True)
+    feed_id  = db.Column(db.Integer,     db.ForeignKey("feed.id"), nullable=False)
+    created  = db.Column(db.DateTime,    default=datetime.datetime.utcnow)
     # core/required
-    name     = db.Column(db.String(100), unique=False,          nullable=False)
-    href     = db.Column(db.String(200), unique=True,           nullable=False)
+    name     = db.Column(db.String(100), unique=False,             nullable=False)
+    href     = db.Column(db.String(200), unique=True,              nullable=False)
     datetime = db.Column(db.DateTime,    default=None)
 
     def __init__(self, data: dict):

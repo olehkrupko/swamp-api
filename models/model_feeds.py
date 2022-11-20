@@ -18,10 +18,9 @@ from models.model_feeds_update import FeedUpdate
 
 class Feed(db.Model):
     # technical
-    id = db.Column(db.Integer, primary_key=True)
-    created_feed  = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_feed  = db.Column(db.DateTime, default=None)
-    updated_items = db.Column(db.DateTime, default=None)
+    id        = db.Column(db.Integer,     primary_key=True)
+    created   = db.Column(db.DateTime,    default=datetime.utcnow)
+    updated   = db.Column(db.DateTime,    default=None)
     # core/required
     title     = db.Column(db.String(100), unique=True,  nullable=False)
     href      = db.Column(db.String(200), unique=False, nullable=False)
