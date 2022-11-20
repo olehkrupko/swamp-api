@@ -25,7 +25,7 @@ FREQUENCIES = (
 
 # database
 db = SQLAlchemy(app)
-import models.feeds
+import models.model_feeds
 db.create_all()
 
 # routes

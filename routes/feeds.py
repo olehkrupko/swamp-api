@@ -3,7 +3,7 @@ import json
 from flask_cors import cross_origin
 
 from __main__ import app, db, FREQUENCIES
-from models.feeds import Feed
+from models.model_feeds import Feed
 
 def frequency_validate(val):
     return val in FREQUENCIES
