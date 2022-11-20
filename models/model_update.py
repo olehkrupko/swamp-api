@@ -6,10 +6,11 @@ from __main__ import db
 class Update(db.Model):
     # technical
     id       = db.Column(db.Integer,  primary_key=True)
+    feed_id  = db.Column(db.Integer,  ForeignKey("feed.id"), nullable=False)
     created  = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     # core/required
-    title    = db.Column(db.String(100), unique=False, nullable=False)
-    href     = db.Column(db.String(200), unique=True,  nullable=False)
+    title    = db.Column(db.String(100), unique=False,       nullable=False)
+    href     = db.Column(db.String(200), unique=True,        nullable=False)
     datetime = db.Column(db.DateTime,    default=None)
 
     def __init__(self, data: dict):
