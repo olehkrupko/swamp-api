@@ -30,7 +30,7 @@ db.create_all()
 
 # routes
 CORS(app)
-import routes.feeds
+import routes.route_feeds
 
 # run app
 app.run('127.0.0.1', port=30010, debug=True)
