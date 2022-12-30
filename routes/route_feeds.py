@@ -1,5 +1,6 @@
 import json
 
+import random
 from flask_cors import cross_origin
 
 from __main__ import app, db, FREQUENCIES
@@ -193,8 +194,8 @@ def feeds_file():
         mimetype='application/json',
     )
 
-@app.route('/feeds/parse/<feed_id>', methods=['POST'])
-def feeds_test_parse(feed_id):
+@app.route('/feeds/parse', methods=['POST'])
+def feeds_test_parse():
     if not request.is_json:
         return app.response_class(
             response=json.dumps({
@@ -204,8 +205,9 @@ def feeds_test_parse(feed_id):
             mimetype='application/json'
         )
 
-    feed = db.session.query(Feed).filter_by(id=feed_id).first()
     body = request.get_json()
+    feed_id = getattr(body, 'feed_id', random.choice(db.query(Feed).all()).id)
+    feed = db.session.query(Feed).filter_by(id=body.feed_id).first()
 
     feed_updates = feed.parse_href(
         proxy  = getattr(body, 'proxy', True),
