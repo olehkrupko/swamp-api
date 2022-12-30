@@ -3,6 +3,7 @@ import json
 import random
 from flask_cors import cross_origin
 
+import shared
 from __main__ import app, db, FREQUENCIES
 from models.model_feeds import Feed
 
@@ -34,18 +35,10 @@ def list_feeds():
         mimetype='application/json'
     )
 
+@shared.data_is_json
 @app.route('/feeds/', methods=['PUT', 'OPTIONS'])
 @cross_origin(headers=['Content-Type']) # Send Access-Control-Allow-Headers
 def create_feed():
-    if not request.is_json:
-        return app.response_class(
-            response=json.dumps({
-                "response": "Data is not JSON"
-            }),
-            status=400,
-            mimetype='application/json'
-        )
-    
     body = request.get_json()
 
     if db.session.query(Feed).filter_by(title=body["title"]).all():
@@ -91,19 +84,11 @@ def read_feed(feed_id):
         mimetype='application/json'
     )
 
+@shared.data_is_json
 @app.route('/feeds/<feed_id>', methods=['PUT', 'OPTIONS'])
 @cross_origin(headers=['Content-Type']) # Send Access-Control-Allow-Headers
 def update_feed(feed_id):
     feed = db.session.query(Feed).filter_by(id=feed_id).first()
-
-    if not request.is_json:
-        return app.response_class(
-            response=json.dumps({
-                "response": "Data is not JSON"
-            }),
-            status=400,
-            mimetype='application/json'
-        )
     body = request.get_json()
 
     for key, value in body.items():
@@ -194,17 +179,9 @@ def feeds_file():
         mimetype='application/json',
     )
 
+@shared.data_is_json
 @app.route('/feeds/parse', methods=['POST'])
 def feeds_test_parse():
-    if not request.is_json:
-        return app.response_class(
-            response=json.dumps({
-                "response": "Data is not JSON"
-            }),
-            status=400,
-            mimetype='application/json'
-        )
-
     body = request.get_json()
     feed_id = getattr(body, 'feed_id', random.choice(db.query(Feed).all()).id)
     feed = db.session.query(Feed).filter_by(id=body.feed_id).first()
