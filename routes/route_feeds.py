@@ -204,15 +204,17 @@ def feeds_test_parse(feed_id):
             mimetype='application/json'
         )
 
-    feed = db.session.query(Feed).filter_by(
-        title=feed_id,
-    ).first()
+    feed = db.session.query(Feed).filter_by(id=feed_id).first()
     body = request.get_json()
 
     feed_updates = feed.parse_href(
         proxy  = getattr(body, 'proxy', True),
         reduce = False,
     )
+    if getattr(body, 'store_new', True):
+        for each in feed_updates:
+            if len(db.session.query(FeedUpdate).filter_by(href=each.href) > 0:
+                each.save()
 
     return app.response_class(
         response=json.dumps({
