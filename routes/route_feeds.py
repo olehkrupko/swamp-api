@@ -143,7 +143,7 @@ def delete_item(feed_id):
         mimetype='application/json'
     )
 
-@app.route('/feeds/file', methods=['GET'])
+@app.route('/feeds/parse/file', methods=['GET'])
 def feeds_file():
     from static_feeds import feeds
 
@@ -193,11 +193,26 @@ def feeds_file():
         mimetype='application/json',
     )
 
-@app.route('/feeds/test_parse', methods=['GET'])
-def feeds_test_parse():
-    feed = db.session.query(Feed).filter_by(title='diia_gov_ua').first()
+@app.route('/feeds/parse/<feed_id>', methods=['POST'])
+def feeds_test_parse(feed_id):
+    if not request.is_json:
+        return app.response_class(
+            response=json.dumps({
+                "response": "Data is not JSON"
+            }),
+            status=400,
+            mimetype='application/json'
+        )
 
-    feed_updates = feed.parse_href()
+    body = request.get_json()
+    feed = db.session.query(Feed).filter_by(
+        title=body.feed_id,
+    ).first()
+
+    feed_updates = feed.parse_href(
+        proxy  = getattr(body, 'proxy', True),
+        reduce = False,
+    )
 
     return app.response_class(
         response=json.dumps({
