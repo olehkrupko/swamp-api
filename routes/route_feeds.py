@@ -204,10 +204,10 @@ def feeds_test_parse(feed_id):
             mimetype='application/json'
         )
 
-    body = request.get_json()
     feed = db.session.query(Feed).filter_by(
-        title=body.feed_id,
+        title=feed_id,
     ).first()
+    body = request.get_json()
 
     feed_updates = feed.parse_href(
         proxy  = getattr(body, 'proxy', True),
