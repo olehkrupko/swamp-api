@@ -26,11 +26,12 @@ FREQUENCIES = (
 # database
 db = SQLAlchemy(app)
 import models.model_feeds
-db.create_all()
+with app.app_context():
+    db.create_all()
 
 # routes
 CORS(app)
 import routes.route_feeds
 
 # run app
-app.run('127.0.0.1', port=30010, debug=True)
+app.run('localhost', port=30010, debug=True)

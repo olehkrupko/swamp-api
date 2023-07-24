@@ -3,7 +3,7 @@ import json
 import random
 from flask_cors import cross_origin
 
-import shared
+import routes.shared as shared
 from __main__ import app, db, FREQUENCIES
 from models.model_feeds import Feed
 
@@ -192,7 +192,7 @@ def feeds_test_parse():
     )
     if getattr(body, 'store_new', True):
         for each in feed_updates:
-            if len(db.session.query(FeedUpdate).filter_by(href=each.href) > 0:
+            if len(db.session.query(FeedUpdate).filter_by(href=each.href)) > 0:
                 each.save()
 
     return app.response_class(
