@@ -1,11 +1,13 @@
 import json
 
 import random
+from flask import request
 from flask_cors import cross_origin
 
 import routes.shared as shared
 from __main__ import app, db, FREQUENCIES
 from models.model_feeds import Feed
+from models.model_feeds_update import FeedUpdate
 
 def frequency_validate(val):
     return val in FREQUENCIES
@@ -180,20 +182,24 @@ def feeds_file():
     )
 
 @shared.data_is_json
-@app.route('/feeds/parse', methods=['POST'])
+@app.route('/feeds/parse', methods=['PUT'])
 def feeds_test_parse():
     body = request.get_json()
-    feed_id = getattr(body, 'feed_id', random.choice(db.query(Feed).all()).id)
-    feed = db.session.query(Feed).filter_by(id=body.feed_id).first()
+    feed = db.session.query(Feed).filter_by(
+        id=body.get('feed_id')
+    ).first()
 
     feed_updates = feed.parse_href(
-        proxy  = getattr(body, 'proxy', True),
+        proxy  = body.get('proxy', False),
         reduce = False,
     )
-    if getattr(body, 'store_new', True):
+    if body.get('store_new', True):
         for each in feed_updates:
-            if len(db.session.query(FeedUpdate).filter_by(href=each.href)) > 0:
-                each.save()
+            if db.session.query(FeedUpdate).filter_by(href=each['href']).count() == 0:
+                new_feedupdate = FeedUpdate(each)
+                db.session.add(new_feedupdate)
+
+        db.session.commit()
 
     return app.response_class(
         response=json.dumps({
