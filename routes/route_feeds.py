@@ -183,7 +183,7 @@ def feeds_file():
 
 @shared.data_is_json
 @app.route('/feeds/parse', methods=['PUT'])
-def feeds_test_parse():
+def parse_feed():
     body = request.get_json()
     feed = db.session.query(Feed).filter_by(
         id=body.get('feed_id')
@@ -198,7 +198,6 @@ def feeds_test_parse():
             if db.session.query(FeedUpdate).filter_by(href=each['href']).count() == 0:
                 new_feedupdate = FeedUpdate(each)
                 db.session.add(new_feedupdate)
-
         db.session.commit()
 
     return app.response_class(
@@ -206,6 +205,20 @@ def feeds_test_parse():
             'feed_updates_len': len(feed_updates),
             'feed_updates':         feed_updates,
         }, indent=4, sort_keys=True, default=str),
+        status=200,
+        mimetype='application/json',
+    )
+
+@app.route('/feeds/parse/runner', methods=['PUT'])
+def parse_runner():
+    result = Feed.process_parsing_multi(
+        force_all=True,
+    )
+
+    return app.response_class(
+        response=json.dumps(
+            result
+        , indent=4, sort_keys=True, default=str),
         status=200,
         mimetype='application/json',
     )

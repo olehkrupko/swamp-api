@@ -4,7 +4,7 @@ import random
 import ssl
 import string
 import urllib
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil import parser, tz  # adding custom timezones
 from typing import List, Dict
 
@@ -32,6 +32,7 @@ class Feed(db.Model):
     json      = db.Column(JSONB)
 
     def __init__(self, data: dict):
+        data = data.copy()
         if not isinstance(data, dict):
             raise Exception(f"__init__ data {data} has to be a dict, not {type(data)}")
 
@@ -67,6 +68,20 @@ class Feed(db.Model):
 
     def __str__(self):
         return str(self.as_dict())
+    
+    def requires_update(self):
+        if not self.updated:
+            return True
+        elif self.frequency == 'never':
+            return False
+        
+        delta = timedelta(**{
+            self.frequency: random.randint(1, 10),
+        })
+        if self.updated + delta <= datetime.now():
+            return True
+        
+        return False
 
     ####################################################
     ####          FEED PARSING LOGIC BELOW          ####
@@ -74,7 +89,63 @@ class Feed(db.Model):
 
     def parse_list(self, results: List[Dict]):
         return results
-        # return [FeedUpdate(x) for x in results]
+    
+    @staticmethod
+    def process_parsing(feed_id, store_new=True, proxy=False):
+        # Preparing
+        new_items = []
+        feed = db.session.query(Feed).filter_by(
+            id=feed_id
+        ).first()
+
+        # Processing
+        feed_updates = feed.parse_href(
+            proxy  = proxy,
+            reduce = False,
+        )
+
+        # Finishing with results
+        if store_new:
+            for each in feed_updates:
+                if db.session.query(FeedUpdate).filter_by(href=each['href']).count() == 0:
+                    new_feedupdate = FeedUpdate(each)
+                    feed.updated = datetime.now()
+                    db.session.add(new_feedupdate)
+                new_items.append(each)
+            db.session.commit()
+        else:
+            new_items = feed_updates.copy()
+        
+        # Return data
+        return {
+            "len":  len(new_items),
+            "items":    new_items,
+            "feed":     feed,
+        }
+    
+    @staticmethod
+    def process_parsing_multi(force_all=False, store_new=True, proxy=False):
+        results = []
+        feed_todo_ids = []
+        feed_list = db.session.query(Feed).all()  # TODO: remove limiter
+        # feed_list = db.session.query(Feed).filter_by(id=40).all()
+
+        for feed in feed_list:
+            if feed.frequency not in FREQUENCIES:
+                raise ValueError(f"Feed { feed.title }'s frequency is invalid. Feed dict: { feed.as_dict() }")
+            elif force_all or feed.requires_update():
+                feed_todo_ids.append(feed.id)
+        
+        for feed_id in feed_todo_ids:
+            results.append(
+                Feed.process_parsing(
+                    feed_id=feed_id,
+                    store_new=store_new,
+                    proxy=proxy,
+                )
+            )
+
+        return results
 
     def parse_href(self, proxy: bool = True, reduce: bool = True):
         #######################################

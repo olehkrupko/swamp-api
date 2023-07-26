@@ -14,6 +14,7 @@ class FeedUpdate(db.Model):
     datetime = db.Column(db.DateTime,    default=None)
 
     def __init__(self, data: dict):
+        data = data.copy()
         if not isinstance(data, dict):
             raise Exception(f"__init__ data {data} has to be a dict, not {type(data)}")
 
