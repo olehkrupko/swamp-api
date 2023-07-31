@@ -10,7 +10,7 @@ class FeedUpdate(db.Model):
     created  = db.Column(db.DateTime,    default=datetime.datetime.utcnow)
     # core/required
     name     = db.Column(db.String(100), unique=False,             nullable=False)
-    href     = db.Column(db.String(200), unique=True,              nullable=False)
+    href     = db.Column(db.String(300), unique=True,              nullable=False)
     datetime = db.Column(db.DateTime,    default=None)
 
     def __init__(self, data: dict):
