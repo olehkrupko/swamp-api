@@ -3,7 +3,7 @@ run-name: ${{ github.actor }} deploys on push to main
 on:
   push:
     branches:
-      - '14-migrate-data-parsing-logic'
+      - 'main'
 jobs:
   deploy:
     runs-on: self-hosted

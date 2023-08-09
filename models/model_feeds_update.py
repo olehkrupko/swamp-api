@@ -50,7 +50,7 @@ class FeedUpdate(db.Model):
         # #     if end != -1:
         # #         each.name = each.name[:end]
 
-        self.name = data.pop('name')
+        self.name = data.pop('name')[:100]
         self.href = data.pop('href')
         self.datetime = data.pop('datetime')
         self.feed_id = data.pop('feed_id')

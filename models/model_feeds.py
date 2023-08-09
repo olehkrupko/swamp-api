@@ -1,5 +1,6 @@
 
 import feedparser
+import json
 import random
 import ssl
 import string
@@ -125,10 +126,10 @@ class Feed(db.Model):
     
     @staticmethod
     def process_parsing_multi(force_all=False, store_new=True, proxy=False):
-        results = []
+        results = 0
         feed_todo_ids = []
-        feed_list = db.session.query(Feed).all()  # TODO: remove limiter
-        # feed_list = db.session.query(Feed).filter_by(id=40).all()
+        feed_list = db.session.query(Feed).all()
+        random.shuffle(feed_list)
 
         for feed in feed_list:
             if feed.frequency not in FREQUENCIES:
@@ -137,17 +138,44 @@ class Feed(db.Model):
                 feed_todo_ids.append(feed.id)
         
         for feed_id in feed_todo_ids:
-            results.append(
-                Feed.process_parsing(
-                    feed_id=feed_id,
-                    store_new=store_new,
-                    proxy=proxy,
-                )
+            response = requests.put("http://localhost:30010/feeds/parse",
+                headers = {"Content-Type": "application/json"},
+                data=json.dumps({
+                    "feed_id": feed_id,
+                    "store_new": store_new,
+                    "proxy": proxy,
+                })
             )
+            response = response.json()
+            results += response["feed_updates_len"]
+            # results += len(
+            #     Feed.process_parsing(
+            #         feed_id=feed_id,
+            #         store_new=store_new,
+            #         proxy=proxy,
+            #     )
+            # )
+
+        # with Executor() as executor:
+        #     executor = executor.map(Feed.process_parsing, feed_todo_ids, [store_new]*len(feed_todo_ids), [proxy]*len(feed_todo_ids))
+        #     if options['logBar']:
+        #         executor = tqdm(executor, total=len(parse_feeds))
+
+        #     for result in executor:
+        #         print(result['len'])
+        #         if options['logEach'] or (options["logEmpty"] and result['amount_total'] == 0):
+        #             Command.print_feed(
+        #                 title=result['title'], 
+        #                 amount=result['amount'], 
+        #                 time=result['time']
+        #             )
+                
+        #         if options['log']:
+        #             total_items += result['amount']
 
         return results
 
-    def parse_href(self, proxy: bool = True, reduce: bool = True):
+    def parse_href(self, proxy: bool = True, reduce: bool = False):
         #######################################
         ####  PREPARING REQUIRED VARIABLES ####
         #######################################
@@ -232,7 +260,7 @@ class Feed(db.Model):
         #     if not feed.parse_reduce(self.emojis, reduce):
         #         return []
 
-        #     self.href_title = self.href[:]
+        #     self.href_user = self.href[:]
         #     # caching server list: https://git.sr.ht/~cadence/bibliogram-docs/tree/master/docs/Instances.md
         #     caching_servers = (
         #         'https://bibliogram.snopyta.org',
@@ -271,7 +299,7 @@ class Feed(db.Model):
             # if not feed.parse_reduce(self.emojis, reduce):
             #     return []
 
-            self.href_title = self.href[:]
+            self.href_user = self.href[:]
             caching_servers = (
                 'https://nitter.net',
                 'https://nitter.42l.fr',  # +
@@ -322,7 +350,7 @@ class Feed(db.Model):
 
         # custom RSS YouTube converter (link to feed has to be converted manually)
         elif 'https://www.youtube.com/channel/' in self.href:
-            self.href_title = self.href[:]
+            self.href_user = self.href[:]
             # 32 = len('https://www.youtube.com/channel/')
             # 7 = len('/videos')
             self.href = "https://www.youtube.com/feeds/videos.xml?channel_id=" + self.href[32:-7]
@@ -343,12 +371,12 @@ class Feed(db.Model):
                 each['href'] = '/'.join(split)
 
         # custom RSS mintmanga converter (link to feed has to be converted manually to simplify feed object creation)
-        elif 'http://mintmanga.com/' in self.href and self.href.find('mintmanga.com/rss/manga') == -1 and self.href_title == None:
+        elif 'http://mintmanga.com/' in self.href and self.href.find('mintmanga.com/rss/manga') == -1 and self.href_user == None:
             # 21 = len('http://mintmanga.com/')
             name = self.href[21:]
             self.href = "feed://mintmanga.com/rss/manga?name=" + name
 
-            results = feed.parse(self)
+            results = self.parse_href(self)
 
             for each in results:
                 split = each['href'].split('/')
@@ -357,7 +385,7 @@ class Feed(db.Model):
 
         # custom RSS deviantart converter (link to feed has to be converted manually to simplify feed object creation)
         elif 'https://www.deviantart.com/' in self.href:
-            self.href_title = self.href[:]
+            self.href_user = self.href[:]
             # 27 = len('https://www.deviantart.com/')
             # 9 = len('/gallery/')
             self.href = self.href[27:-9]

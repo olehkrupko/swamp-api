@@ -8,4 +8,4 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Send request
-        run: curl -X PUT "http://localhost:30010/feeds/parse/runner"
+        run: curl -X PUT "http://krupko.space:30010/feeds/parse/runner"
