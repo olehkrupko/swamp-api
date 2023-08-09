@@ -1,5 +1,5 @@
-name: main-push
-run-name: ${{ github.actor }} starts feed update process
+name: schedule-data-parsing
+run-name: ${{ github.actor }} starts scheduled data parsing
 on:
   schedule:
     - cron: '0 */8 * * *'
