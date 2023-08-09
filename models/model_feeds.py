@@ -98,6 +98,9 @@ class Feed(db.Model):
         feed = db.session.query(Feed).filter_by(
             id=feed_id
         ).first()
+        feed_len = db.session.query(FeedUpdate).filter_by(
+            feed_id=feed_id
+        ).count()
 
         # Processing
         feed_updates = feed.parse_href(
@@ -108,8 +111,13 @@ class Feed(db.Model):
         # Finishing with results
         if store_new:
             for each in feed_updates:
-                if db.session.query(FeedUpdate).filter_by(href=each['href']).count() == 0:
+                if db.session.query(FeedUpdate).filter_by(
+                    feed_id=feed_id,
+                    href=each['href']
+                ).count() == 0:
                     new_feedupdate = FeedUpdate(each)
+                    if feed_len != 0:
+                        new_feedupdate.datetime = datetime.now()
                     feed.updated = datetime.now()
                     db.session.add(new_feedupdate)
                 new_items.append(each)
