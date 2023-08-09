@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'main'
+      - '14-migrate-data-parsing-logic'
 jobs:
   deploy:
     runs-on: self-hosted
