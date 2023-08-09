@@ -2,19 +2,10 @@ name: main-push
 run-name: ${{ github.actor }} starts feed update process
 on:
   schedule:
-    - cron: '* * * * *'
+    - cron: '0 */8 * * *'
 jobs:
   deploy:
     runs-on: self-hosted
     steps:
       - name: Send request
-        run: |
-          curl --request POST \
-          --header 'content-type: application/json' \
-          --url http://192.168.0.155:30010 \
-          # --data '{
-          #  "merge_method": "squash",
-          #  "commit_title": "Squash and Merge for Pull Request ${{ github.event.inputs.pr_num }}",
-          #  "commit_message": "expected sha value = ${{ github.event.inputs.pr_head_sha }}",
-          #  "sha":"${{ github.event.inputs.pr_head_sha }}"
-          #  }'
+        run: curl -X PUT "http://localhost:30010/feeds/parse/runner"
