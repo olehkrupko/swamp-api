@@ -1,9 +1,13 @@
 import json
 
+import random
+from flask import request
 from flask_cors import cross_origin
 
+import routes.shared as shared
 from __main__ import app, db, FREQUENCIES
-from models.feeds import Feed
+from models.model_feeds import Feed
+from models.model_feeds_update import FeedUpdate
 
 def frequency_validate(val):
     return val in FREQUENCIES
@@ -33,18 +37,10 @@ def list_feeds():
         mimetype='application/json'
     )
 
+@shared.data_is_json
 @app.route('/feeds/', methods=['PUT', 'OPTIONS'])
 @cross_origin(headers=['Content-Type']) # Send Access-Control-Allow-Headers
 def create_feed():
-    if not request.is_json:
-        return app.response_class(
-            response=json.dumps({
-                "response": "Data is not JSON"
-            }),
-            status=400,
-            mimetype='application/json'
-        )
-    
     body = request.get_json()
 
     if db.session.query(Feed).filter_by(title=body["title"]).all():
@@ -90,19 +86,11 @@ def read_feed(feed_id):
         mimetype='application/json'
     )
 
+@shared.data_is_json
 @app.route('/feeds/<feed_id>', methods=['PUT', 'OPTIONS'])
 @cross_origin(headers=['Content-Type']) # Send Access-Control-Allow-Headers
 def update_feed(feed_id):
     feed = db.session.query(Feed).filter_by(id=feed_id).first()
-
-    if not request.is_json:
-        return app.response_class(
-            response=json.dumps({
-                "response": "Data is not JSON"
-            }),
-            status=400,
-            mimetype='application/json'
-        )
     body = request.get_json()
 
     for key, value in body.items():
@@ -143,7 +131,7 @@ def delete_item(feed_id):
         mimetype='application/json'
     )
 
-@app.route('/feeds/file', methods=['GET'])
+@app.route('/feeds/parse/file', methods=['GET'])
 def feeds_file():
     from static_feeds import feeds
 
@@ -189,6 +177,48 @@ def feeds_file():
             'feeds_file': len(feeds),
             'feeds_created': len(feeds_created),
         }),
+        status=200,
+        mimetype='application/json',
+    )
+
+@shared.data_is_json
+@app.route('/feeds/parse', methods=['PUT'])
+def parse_feed():
+    body = request.get_json()
+    feed = db.session.query(Feed).filter_by(
+        id=body.get('feed_id')
+    ).first()
+
+    feed_updates = feed.parse_href(
+        proxy  = body.get('proxy', False),
+        reduce = False,
+    )
+    if body.get('store_new', True):
+        for each in feed_updates:
+            if db.session.query(FeedUpdate).filter_by(href=each['href']).count() == 0:
+                new_feedupdate = FeedUpdate(each)
+                db.session.add(new_feedupdate)
+        db.session.commit()
+
+    return app.response_class(
+        response=json.dumps({
+            'feed_updates_len': len(feed_updates),
+            'feed_updates':         feed_updates,
+        }, indent=4, sort_keys=True, default=str),
+        status=200,
+        mimetype='application/json',
+    )
+
+@app.route('/feeds/parse/runner', methods=['PUT'])
+def parse_runner():
+    result = Feed.process_parsing_multi(
+        force_all=True,
+    )
+
+    return app.response_class(
+        response=json.dumps(
+            result
+        , indent=4, sort_keys=True, default=str),
         status=200,
         mimetype='application/json',
     )

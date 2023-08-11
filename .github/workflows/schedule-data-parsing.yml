@@ -1,0 +1,11 @@
+name: schedule-data-parsing
+run-name: ${{ github.actor }} starts scheduled data parsing
+on:
+  schedule:
+    - cron: '0 */8 * * *'
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Send request
+        run: curl -X PUT "http://krupko.space:30010/feeds/parse/runner"

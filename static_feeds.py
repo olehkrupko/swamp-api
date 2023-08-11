@@ -3411,7 +3411,7 @@ feeds = ({
         'title': 'albyu',
         'href': 'https://albyu.artstation.com/rss',
         'href_title': 'https://albyu.artstation.com/projects',
-        'emojis': '💎xx'
+        'emojis': '💎xxx'
     }, {
         'title': 'missamethysa',
         'href': 'https://missamethysa.artstation.com/rss',
@@ -4554,7 +4554,7 @@ feeds = ({
         'title': 'NamiWaifu',
         'href': 'https://www.hentai-foundry.com/feed/userPictures/username/NamiWaifu',
         'href_title': 'http://www.hentai-foundry.com/pictures/user/NamiWaifu',
-        'emojis': '🏮📮x'
+        'emojis': '🏮📮xx'
     }, {
         'title': 'zxc338093',
         'href': 'https://www.hentai-foundry.com/feed/userPictures/username/zxc338093',
