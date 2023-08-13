@@ -10,6 +10,7 @@ from dateutil import parser, tz  # adding custom timezones
 from typing import List, Dict
 
 import requests
+import sentry_sdk
 from bs4 import BeautifulSoup, SoupStrainer
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -469,7 +470,7 @@ class Feed(db.Model):
 
             for each in request["items"]:
                 if not each:
-                    raise DeprecationWarning(f"Data returned by feed {self} is empty, skipping iteration")
+                    sentry_sdk.capture_exception(f"Data returned by feed {self} is empty, skipping iteration")
                     continue
                 result_href = each["links"][0]["href"]
 
