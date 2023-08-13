@@ -468,6 +468,9 @@ class Feed(db.Model):
                 request = feedparser.parse(self.href, request_headers=headers, handlers=[proxyDict])
 
             for each in request["items"]:
+                if not each:
+                    raise DeprecationWarning(f"Data returned by feed {self} is empty, skipping iteration")
+                    continue
                 result_href = each["links"][0]["href"]
 
                 # DATE RESULT: parsing dates

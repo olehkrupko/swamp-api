@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'main'
+      - '18-raise-error-when-no-rss-links-provided'
 jobs:
   deploy:
     runs-on: self-hosted
