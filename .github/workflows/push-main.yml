@@ -1,4 +1,4 @@
-name: main-push
+name: push-main
 run-name: ${{ github.actor }} deploys on push to main
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - 'main'
       - '18-raise-error-when-no-rss-links-provided'
 jobs:
-  deploy:
+  deploy_code:
     runs-on: self-hosted
     steps:
       - name: Checkout repository
