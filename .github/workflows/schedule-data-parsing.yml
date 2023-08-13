@@ -2,7 +2,7 @@ name: schedule-data-parsing
 run-name: ${{ github.actor }} starts scheduled data parsing
 on:
   schedule:
-    - cron: '0 */8 * * *'
+    - cron: '0 * * * *'
 jobs:
   deploy:
     runs-on: self-hosted
