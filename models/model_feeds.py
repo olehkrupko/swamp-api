@@ -470,7 +470,7 @@ class Feed(db.Model):
 
             for each in request["items"]:
                 if not each:
-                    sentry_sdk.capture_exception(f"Data returned by feed {self} is empty, skipping iteration")
+                    sentry_sdk.capture_exception(ValueError(f"Data returned by feed {self} is empty, skipping iteration"))
                     continue
                 result_href = each["links"][0]["href"]
 
