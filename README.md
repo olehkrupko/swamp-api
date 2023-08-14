@@ -1,12 +1,12 @@
 # swamp-api
-It's backend API for swamp project
+It's backend API for swamp projects
 
-## Useful URLs:
-[Sentry logs](https://swamp.sentry.io/issues/?groupStatsPeriod=auto&project=4505676561317888&query=is%3Aunresolved&sort=freq&statsPeriod=24h)
+## Useful URLs
+- [Sentry logs](https://swamp.sentry.io/issues/?groupStatsPeriod=auto&project=4505676561317888&query=is%3Aunresolved&sort=freq&statsPeriod=24h)
 
-## Description:
+## Description
 
-## Notes:
+## Notes
 
 ```
 curl "http://localhost:30010/feeds/parse/file"
