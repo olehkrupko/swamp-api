@@ -471,7 +471,7 @@ class Feed(db.Model):
 
             for each in request["items"]:
                 if not each:
-                    sentry_sdk.capture_exception(DeprecationWarning(f"Data returned by feed {self} is empty, skipping iteration"))
+                    raise DeprecationWarning(f"Data returned by feed {self} is empty, skipping iteration")
                     continue
                 result_href = each["links"][0]["href"]
 
