@@ -212,7 +212,7 @@ def parse_feed():
 @app.route('/feeds/parse/runner', methods=['PUT'])
 def parse_runner():
     result = Feed.process_parsing_multi(
-        force_all=True,
+        force_all=False,
     )
 
     return app.response_class(

@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: '0 * * * *'
 jobs:
-  deploy:
+  data_parsing:
     runs-on: self-hosted
     steps:
       - name: Send request

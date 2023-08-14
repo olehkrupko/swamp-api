@@ -10,6 +10,7 @@ from dateutil import parser, tz  # adding custom timezones
 from typing import List, Dict
 
 import requests
+import sentry_sdk
 from bs4 import BeautifulSoup, SoupStrainer
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -188,6 +189,7 @@ class Feed(db.Model):
         ####  PREPARING REQUIRED VARIABLES ####
         #######################################
         results = []
+        DEFAULT_NO_NAME = "no name"
 
         # avoiding blocks
         headers = {
@@ -468,6 +470,9 @@ class Feed(db.Model):
                 request = feedparser.parse(self.href, request_headers=headers, handlers=[proxyDict])
 
             for each in request["items"]:
+                if not each:
+                    sentry_sdk.capture_exception(DeprecationWarning(f"Data returned by feed {self} is empty, skipping iteration"))
+                    continue
                 result_href = each["links"][0]["href"]
 
                 # DATE RESULT: parsing dates
@@ -487,9 +492,14 @@ class Feed(db.Model):
                 elif not isinstance(result_datetime, datetime):
                     result_datetime = parser.parse(result_datetime, tzinfos=tzinfos)
 
+                if each["title_detail"]:
+                    result_name = each["title_detail"]["value"]
+                else:
+                    result_name = DEFAULT_NO_NAME
+
                 # APPEND RESULT
                 results.append({
-                    'name':     each["title_detail"]["value"],
+                    'name':     result_name,
                     'href':     result_href,
                     'datetime': result_datetime,
                     'feed_id':  self.id,
