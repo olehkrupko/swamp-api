@@ -76,7 +76,6 @@ class Feed(db.Model):
             return True
         elif self.frequency == 'never':
             return False
-        Warning(self.frequency)
         
         delta = timedelta(**{
             self.frequency: random.randint(1, 10),
