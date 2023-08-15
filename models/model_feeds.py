@@ -472,7 +472,7 @@ class Feed(db.Model):
 
             for each in request["items"]:
                 if not each:
-                    raise DeprecationWarning(f"Data returned by feed {self} is empty, skipping iteration")
+                    raise DeprecationWarning(f"Data returned by {'active' if self.requires_update() else 'disabled'} feed {self} is empty, skipping iteration")
                     continue
                 result_href = each["links"][0]["href"]
 
