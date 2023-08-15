@@ -72,10 +72,11 @@ class Feed(db.Model):
         return str(self.as_dict())
     
     def requires_update(self):
+        if self.frequency == 'never':
+            return False
+
         if not self.updated:
             return True
-        elif self.frequency == 'never':
-            return False
         
         delta = timedelta(**{
             self.frequency: random.randint(1, 10),
