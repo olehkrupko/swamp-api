@@ -493,7 +493,7 @@ class Feed(db.Model):
                 elif not isinstance(result_datetime, datetime):
                     result_datetime = parser.parse(result_datetime, tzinfos=tzinfos)
 
-                if each["title_detail"]:
+                if each.get("title_detail", False):
                     result_name = each["title_detail"]["value"]
                 else:
                     result_name = DEFAULT_NO_NAME
