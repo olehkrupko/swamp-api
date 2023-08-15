@@ -72,10 +72,11 @@ class Feed(db.Model):
         return str(self.as_dict())
     
     def requires_update(self):
+        if self.frequency == 'never':
+            return False
+
         if not self.updated:
             return True
-        elif self.frequency == 'never':
-            return False
         
         delta = timedelta(**{
             self.frequency: random.randint(1, 10),
@@ -471,7 +472,7 @@ class Feed(db.Model):
 
             for each in request["items"]:
                 if not each:
-                    sentry_sdk.capture_exception(DeprecationWarning(f"Data returned by feed {self} is empty, skipping iteration"))
+                    raise DeprecationWarning(f"Data returned by {'active' if self.requires_update() else 'disabled'} feed {self} is empty, skipping iteration")
                     continue
                 result_href = each["links"][0]["href"]
 
@@ -492,7 +493,7 @@ class Feed(db.Model):
                 elif not isinstance(result_datetime, datetime):
                     result_datetime = parser.parse(result_datetime, tzinfos=tzinfos)
 
-                if each.get("title_detail", False):
+                if each.get("title_detail"):
                     result_name = each["title_detail"]["value"]
                 else:
                     result_name = DEFAULT_NO_NAME
