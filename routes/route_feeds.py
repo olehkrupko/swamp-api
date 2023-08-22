@@ -18,12 +18,8 @@ def frequency_validate(val):
 
 @app.route(f"{ ROUTE_PATH }/frequencies", methods=['GET'])
 def feeds_frequencies():
-    return app.response_class(
-        response=json.dumps({
-            'response': FREQUENCIES,
-        }),
-        status=200,
-        mimetype='application/json',
+    return shared.return_json(
+        response=FREQUENCIES,
     )
 
 @app.route(f"{ ROUTE_PATH }/", methods=['GET'])
@@ -33,12 +29,8 @@ def list_feeds():
     
     feeds = [feed.as_dict() for feed in feeds]
 
-    return app.response_class(
-        response=json.dumps({
-            "response": feeds,
-        }),
-        status=200,
-        mimetype='application/json'
+    return shared.return_json(
+        response=feeds,
     )
 
 @shared.data_is_json
@@ -48,20 +40,14 @@ def create_feed():
     body = request.get_json()
 
     if db.session.query(Feed).filter_by(title=body["title"]).all():
-        return app.response_class(
-            response=json.dumps({
-                "response": "Title already exists"
-            }),
+        return shared.return_json(
+            response="Title already exists",
             status=400,
-            mimetype='application/json'
         )
     elif not frequency_validate(body['frequency']):
-        return app.response_class(
-            response=json.dumps({
-                "response": "Invalid frequency"
-            }),
+        return shared.return_json(
+            response="Invalid frequency",
             status=400,
-            mimetype='application/json'
         )
     
     feed = Feed(body)
@@ -70,24 +56,16 @@ def create_feed():
     db.session.commit()
     db.session.refresh(feed)
 
-    return app.response_class(
-        response=json.dumps({
-            "response": int(feed.id)
-        }),
-        status=200,
-        mimetype='application/json'
+    return shared.return_json(
+        response=int(feed.id),
     )
 
 @app.route(f"{ ROUTE_PATH }/<feed_id>", methods=['GET'])
 def read_feed(feed_id):
     feed = db.session.query(Feed).filter_by(id=feed_id).first()
 
-    return app.response_class(
-        response=json.dumps({
-            "response": feed.as_dict(),
-        }),
-        status=200,
-        mimetype='application/json'
+    return shared.return_json(
+        response=feed.as_dict(),
     )
 
 @shared.data_is_json
@@ -101,22 +79,15 @@ def update_feed(feed_id):
         if hasattr(feed, key):
             setattr(feed, key, value)
         else:
-            return app.response_class(
-                response=json.dumps({
-                    "response": f"Data field {key} does not exist in DB"
-                }),
+            return shared.return_json(
+                response=f"Data field {key} does not exist in DB",
                 status=400,
-                mimetype='application/json'
             )
     
     db.session.commit()
 
-    return app.response_class(
-        response=json.dumps({
-            "response": feed.as_dict(),
-        }),
-        status=200,
-        mimetype='application/json'
+    return shared.return_json(
+        response=feed.as_dict(),
     )
 
 
@@ -128,11 +99,7 @@ def delete_item(feed_id):
     db.session.commit()
 
     return app.response_class(
-        response=json.dumps({
-            "response": "Feed deleted",
-        }),
-        status=200,
-        mimetype='application/json'
+        response="Feed deleted",
     )
 
 @app.route(f"{ ROUTE_PATH }/parse/file", methods=['GET'])
@@ -176,13 +143,11 @@ def feeds_file():
 
         feeds_created.append(feed.id)
 
-    return app.response_class(
-        response=json.dumps({
+    return shared.return_json(
+        response={
             'feeds_file': len(feeds),
             'feeds_created': len(feeds_created),
-        }),
-        status=200,
-        mimetype='application/json',
+        },
     )
 
 @shared.data_is_json
@@ -204,23 +169,17 @@ def parse_feed():
                 db.session.add(new_feedupdate)
         db.session.commit()
 
-    return app.response_class(
-        response=json.dumps({
+    return shared.return_json(
+        response={
             'feed_updates_len': len(feed_updates),
             'feed_updates':         feed_updates,
-        }, indent=4, sort_keys=True, default=str),
-        status=200,
-        mimetype='application/json',
+        },
     )
 
 @app.route(f"{ ROUTE_PATH }/parse/runner", methods=['PUT'])
 def parse_runner():
     result = Feed.process_parsing_multi()
 
-    return app.response_class(
-        response=json.dumps(
-            result
-        , indent=4, sort_keys=True, default=str),
-        status=200,
-        mimetype='application/json',
+    return shared.return_json(
+        response=result,
     )
