@@ -9,10 +9,14 @@ from __main__ import app, db, FREQUENCIES
 from models.model_feeds import Feed
 from models.model_feeds_update import FeedUpdate
 
+
+ROUTE_PATH = "/feeds"
+
 def frequency_validate(val):
     return val in FREQUENCIES
 
-@app.route('/feeds/frequencies', methods=['GET'])
+
+@app.route(f"{ ROUTE_PATH }/frequencies", methods=['GET'])
 def feeds_frequencies():
     return app.response_class(
         response=json.dumps({
@@ -22,7 +26,7 @@ def feeds_frequencies():
         mimetype='application/json',
     )
 
-@app.route('/feeds/', methods=['GET'])
+@app.route(f"{ ROUTE_PATH }/", methods=['GET'])
 @cross_origin(headers=['Content-Type']) # Send Access-Control-Allow-Headers
 def list_feeds():
     feeds = db.session.query(Feed).all()
@@ -38,7 +42,7 @@ def list_feeds():
     )
 
 @shared.data_is_json
-@app.route('/feeds/', methods=['PUT', 'OPTIONS'])
+@app.route(f"{ ROUTE_PATH }/", methods=['PUT', 'OPTIONS'])
 @cross_origin(headers=['Content-Type']) # Send Access-Control-Allow-Headers
 def create_feed():
     body = request.get_json()
@@ -74,7 +78,7 @@ def create_feed():
         mimetype='application/json'
     )
 
-@app.route('/feeds/<feed_id>', methods=['GET'])
+@app.route(f"{ ROUTE_PATH }/<feed_id>", methods=['GET'])
 def read_feed(feed_id):
     feed = db.session.query(Feed).filter_by(id=feed_id).first()
 
@@ -87,7 +91,7 @@ def read_feed(feed_id):
     )
 
 @shared.data_is_json
-@app.route('/feeds/<feed_id>', methods=['PUT', 'OPTIONS'])
+@app.route(f"{ ROUTE_PATH }/<feed_id>", methods=['PUT', 'OPTIONS'])
 @cross_origin(headers=['Content-Type']) # Send Access-Control-Allow-Headers
 def update_feed(feed_id):
     feed = db.session.query(Feed).filter_by(id=feed_id).first()
@@ -116,7 +120,7 @@ def update_feed(feed_id):
     )
 
 
-@app.route('/feeds/<feed_id>', methods=['DELETE'])
+@app.route(f"{ ROUTE_PATH }/<feed_id>", methods=['DELETE'])
 def delete_item(feed_id):
     feed = db.session.query(Feed).filter_by(id=feed_id)
 
@@ -131,7 +135,7 @@ def delete_item(feed_id):
         mimetype='application/json'
     )
 
-@app.route('/feeds/parse/file', methods=['GET'])
+@app.route(f"{ ROUTE_PATH }/parse/file", methods=['GET'])
 def feeds_file():
     from static_feeds import feeds
 
@@ -209,7 +213,7 @@ def parse_feed():
         mimetype='application/json',
     )
 
-@app.route('/feeds/parse/runner', methods=['PUT'])
+@app.route(f"{ ROUTE_PATH }/parse/runner", methods=['PUT'])
 def parse_runner():
     result = Feed.process_parsing_multi()
 

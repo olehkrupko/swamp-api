@@ -7,7 +7,10 @@ from __main__ import app, db
 from models.model_feeds_update import FeedUpdate
 
 
-@app.route('/feed-updates/', methods=['GET'])
+ROUTE_PATH = "/feed-updates"
+
+
+@app.route(f"{ ROUTE_PATH }/", methods=['GET'])
 @cross_origin(headers=['Content-Type']) # Send Access-Control-Allow-Headers
 def list_feed_updates():
     return app.response_class(
