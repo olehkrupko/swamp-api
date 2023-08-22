@@ -12,10 +12,9 @@ ROUTE_PATH = "/feed-updates"
 
 
 @app.route(f"{ ROUTE_PATH }/", methods=['GET'])
-@cross_origin(headers=['Content-Type']) # Send Access-Control-Allow-Headers
 def list_feed_updates():
     kwargs = request.args
-    if limit in kwargs:
+    if "limit" in kwargs:
         limit = kwargs.pop(limit)
     else:
         limit = 140
