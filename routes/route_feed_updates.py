@@ -20,5 +20,11 @@ def list_feed_updates():
         limit = 140
 
     return shared.return_json(
-        response=[x.as_dict() for x in db.session.query(FeedUpdate).filter_by(**kwargs).limit(limit).all()]
+        response=[
+            x.as_dict() for x in db.session.query(FeedUpdate)
+                .filter_by(**kwargs)
+                .order_by(FeedUpdate.datetime.desc())
+                .limit(limit)
+                .all()
+        ]
     )
