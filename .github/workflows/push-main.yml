@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'main'
+      - '23-feed-update-routes'
 jobs:
   deploy_code:
     runs-on: self-hosted
