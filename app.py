@@ -46,6 +46,7 @@ with app.app_context():
 # routes
 CORS(app)
 import routes.route_feeds
+import routes.route_feed_updates
 
 # run app
 if __name__ == '__main__':

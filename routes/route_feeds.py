@@ -4,60 +4,50 @@ import random
 from flask import request
 from flask_cors import cross_origin
 
-import routes.shared as shared
+import routes._shared as shared
 from __main__ import app, db, FREQUENCIES
 from models.model_feeds import Feed
 from models.model_feeds_update import FeedUpdate
 
+
+ROUTE_PATH = "/feeds"
+
 def frequency_validate(val):
     return val in FREQUENCIES
 
-@app.route('/feeds/frequencies', methods=['GET'])
+
+@app.route(f"{ ROUTE_PATH }/frequencies", methods=['GET'])
 def feeds_frequencies():
-    return app.response_class(
-        response=json.dumps({
-            'response': FREQUENCIES,
-        }),
-        status=200,
-        mimetype='application/json',
+    return shared.return_json(
+        response=FREQUENCIES,
     )
 
-@app.route('/feeds/', methods=['GET'])
+@app.route(f"{ ROUTE_PATH }/", methods=['GET'])
 @cross_origin(headers=['Content-Type']) # Send Access-Control-Allow-Headers
 def list_feeds():
     feeds = db.session.query(Feed).all()
     
     feeds = [feed.as_dict() for feed in feeds]
 
-    return app.response_class(
-        response=json.dumps({
-            "response": feeds,
-        }),
-        status=200,
-        mimetype='application/json'
+    return shared.return_json(
+        response=feeds,
     )
 
 @shared.data_is_json
-@app.route('/feeds/', methods=['PUT', 'OPTIONS'])
+@app.route(f"{ ROUTE_PATH }/", methods=['PUT', 'OPTIONS'])
 @cross_origin(headers=['Content-Type']) # Send Access-Control-Allow-Headers
 def create_feed():
     body = request.get_json()
 
     if db.session.query(Feed).filter_by(title=body["title"]).all():
-        return app.response_class(
-            response=json.dumps({
-                "response": "Title already exists"
-            }),
+        return shared.return_json(
+            response="Title already exists",
             status=400,
-            mimetype='application/json'
         )
     elif not frequency_validate(body['frequency']):
-        return app.response_class(
-            response=json.dumps({
-                "response": "Invalid frequency"
-            }),
+        return shared.return_json(
+            response="Invalid frequency",
             status=400,
-            mimetype='application/json'
         )
     
     feed = Feed(body)
@@ -66,28 +56,20 @@ def create_feed():
     db.session.commit()
     db.session.refresh(feed)
 
-    return app.response_class(
-        response=json.dumps({
-            "response": int(feed.id)
-        }),
-        status=200,
-        mimetype='application/json'
+    return shared.return_json(
+        response=int(feed.id),
     )
 
-@app.route('/feeds/<feed_id>', methods=['GET'])
+@app.route(f"{ ROUTE_PATH }/<feed_id>", methods=['GET'])
 def read_feed(feed_id):
     feed = db.session.query(Feed).filter_by(id=feed_id).first()
 
-    return app.response_class(
-        response=json.dumps({
-            "response": feed.as_dict(),
-        }),
-        status=200,
-        mimetype='application/json'
+    return shared.return_json(
+        response=feed.as_dict(),
     )
 
 @shared.data_is_json
-@app.route('/feeds/<feed_id>', methods=['PUT', 'OPTIONS'])
+@app.route(f"{ ROUTE_PATH }/<feed_id>", methods=['PUT', 'OPTIONS'])
 @cross_origin(headers=['Content-Type']) # Send Access-Control-Allow-Headers
 def update_feed(feed_id):
     feed = db.session.query(Feed).filter_by(id=feed_id).first()
@@ -97,26 +79,19 @@ def update_feed(feed_id):
         if hasattr(feed, key):
             setattr(feed, key, value)
         else:
-            return app.response_class(
-                response=json.dumps({
-                    "response": f"Data field {key} does not exist in DB"
-                }),
+            return shared.return_json(
+                response=f"Data field {key} does not exist in DB",
                 status=400,
-                mimetype='application/json'
             )
     
     db.session.commit()
 
-    return app.response_class(
-        response=json.dumps({
-            "response": feed.as_dict(),
-        }),
-        status=200,
-        mimetype='application/json'
+    return shared.return_json(
+        response=feed.as_dict(),
     )
 
 
-@app.route('/feeds/<feed_id>', methods=['DELETE'])
+@app.route(f"{ ROUTE_PATH }/<feed_id>", methods=['DELETE'])
 def delete_item(feed_id):
     feed = db.session.query(Feed).filter_by(id=feed_id)
 
@@ -124,14 +99,10 @@ def delete_item(feed_id):
     db.session.commit()
 
     return app.response_class(
-        response=json.dumps({
-            "response": "Feed deleted",
-        }),
-        status=200,
-        mimetype='application/json'
+        response="Feed deleted",
     )
 
-@app.route('/feeds/parse/file', methods=['GET'])
+@app.route(f"{ ROUTE_PATH }/parse/file", methods=['GET'])
 def feeds_file():
     from static_feeds import feeds
 
@@ -172,13 +143,11 @@ def feeds_file():
 
         feeds_created.append(feed.id)
 
-    return app.response_class(
-        response=json.dumps({
+    return shared.return_json(
+        response={
             'feeds_file': len(feeds),
             'feeds_created': len(feeds_created),
-        }),
-        status=200,
-        mimetype='application/json',
+        },
     )
 
 @shared.data_is_json
@@ -200,23 +169,17 @@ def parse_feed():
                 db.session.add(new_feedupdate)
         db.session.commit()
 
-    return app.response_class(
-        response=json.dumps({
+    return shared.return_json(
+        response={
             'feed_updates_len': len(feed_updates),
             'feed_updates':         feed_updates,
-        }, indent=4, sort_keys=True, default=str),
-        status=200,
-        mimetype='application/json',
+        },
     )
 
-@app.route('/feeds/parse/runner', methods=['PUT'])
+@app.route(f"{ ROUTE_PATH }/parse/runner", methods=['PUT'])
 def parse_runner():
     result = Feed.process_parsing_multi()
 
-    return app.response_class(
-        response=json.dumps(
-            result
-        , indent=4, sort_keys=True, default=str),
-        status=200,
-        mimetype='application/json',
+    return shared.return_json(
+        response=result,
     )
