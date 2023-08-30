@@ -1,4 +1,4 @@
-name: push-main
+name: deploy-prod
 run-name: ${{ github.actor }} deploys on push to ${{ github.ref_name }}
 on:
   push:
