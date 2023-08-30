@@ -1,9 +1,10 @@
-name: push-main
+name: deploy-prod
 run-name: ${{ github.actor }} deploys on push to ${{ github.ref_name }}
 on:
   push:
     branches:
       - 'main'
+      - '28-fix-no-longer-accessible-outside-local-network'
 jobs:
   deploy_code:
     runs-on: self-hosted
