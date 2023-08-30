@@ -1,5 +1,5 @@
 name: push-main
-run-name: ${{ github.actor }} deploys on push to main
+run-name: ${{ github.actor }} deploys on push to ${GITHUB_REF##*/}
 on:
   push:
     branches:
