@@ -120,8 +120,9 @@ class Feed(db.Model):
                     new_feedupdate = FeedUpdate(each)
                     if feed_len != 0:
                         new_feedupdate.datetime = datetime.now()
-                    feed.updated = datetime.now()
                     db.session.add(new_feedupdate)
+                    feed.updated = datetime.now()
+                    db.session.add(feed)
                 new_items.append(each)
             db.session.commit()
         else:
