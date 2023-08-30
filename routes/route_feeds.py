@@ -84,6 +84,7 @@ def update_feed(feed_id):
                 status=400,
             )
     
+    db.session.add(feed)
     db.session.commit()
 
     return shared.return_json(
