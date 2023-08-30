@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'main'
+      - '30-feedupdated-db-field-is-not-updated'
 jobs:
   deploy_code:
     runs-on: self-hosted
