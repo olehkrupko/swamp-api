@@ -115,7 +115,7 @@ class Feed(db.Model):
             for each in feed_updates:
                 if db.session.query(FeedUpdate).filter_by(
                     feed_id=feed_id,
-                    href=each['href']
+                    href=each['href'],
                 ).count() == 0:
                     new_feedupdate = FeedUpdate(each)
                     if feed_len != 0:
@@ -158,7 +158,7 @@ class Feed(db.Model):
                 })
             )
             response = response.json()
-            results += response["feed_updates_len"]
+            results += response["len"]
             # results += len(
             #     Feed.process_parsing(
             #         feed_id=feed_id,
