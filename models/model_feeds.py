@@ -121,9 +121,9 @@ class Feed(db.Model):
                     if feed_len != 0:
                         new_feedupdate.datetime = datetime.now()
                     db.session.add(new_feedupdate)
-                    feed.updated = datetime.now()
-                    db.session.add(feed)
                 new_items.append(each)
+            feed.updated = datetime.now()
+            db.session.add(feed)
             db.session.commit()
         else:
             new_items = feed_updates.copy()
