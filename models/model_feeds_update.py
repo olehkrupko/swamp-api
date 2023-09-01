@@ -9,8 +9,8 @@ class FeedUpdate(db.Model):
     feed_id  = db.Column(db.Integer,     db.ForeignKey("feed.id"), nullable=False)
     created  = db.Column(db.DateTime,    default=datetime.datetime.utcnow)
     # core/required
-    name     = db.Column(db.String(100), unique=False,             nullable=False)
-    href     = db.Column(db.String(300), unique=True,              nullable=False)
+    name     = db.Column(db.String(100), nullable=False)
+    href     = db.Column(db.String(300), nullable=False)
     datetime = db.Column(db.DateTime,    default=None)
 
     def __init__(self, data: dict):
