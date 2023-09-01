@@ -155,26 +155,11 @@ def feeds_file():
 @app.route('/feeds/parse', methods=['PUT'])
 def parse_feed():
     body = request.get_json()
-    feed = db.session.query(Feed).filter_by(
-        id=body.get('feed_id')
-    ).first()
 
-    feed_updates = feed.parse_href(
-        proxy  = body.get('proxy', False),
-        reduce = False,
-    )
-    if body.get('store_new', True):
-        for each in feed_updates:
-            if db.session.query(FeedUpdate).filter_by(href=each['href']).count() == 0:
-                new_feedupdate = FeedUpdate(each)
-                db.session.add(new_feedupdate)
-        db.session.commit()
+    response = Feed.process_parsing(**body)
 
     return shared.return_json(
-        response={
-            'feed_updates_len': len(feed_updates),
-            'feed_updates':         feed_updates,
-        },
+        response=response,
     )
 
 @app.route(f"{ ROUTE_PATH }/parse/runner", methods=['PUT'])
