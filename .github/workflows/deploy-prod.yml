@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'main'
+      - '35-feed-update-remove-emojis-and-hashtags'
 jobs:
   deploy_code:
     runs-on: self-hosted
