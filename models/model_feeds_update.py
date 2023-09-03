@@ -3,7 +3,7 @@ import datetime
 import emoji
 
 from __main__ import db
-from models.model_feeds import Feed
+# from models.model_feeds import Feed
 
 
 class FeedUpdate(db.Model):
@@ -60,8 +60,10 @@ class FeedUpdate(db.Model):
         name = name.replace("#", " #")  # making sure that hashtags have spaces inbetween
         name = ' '.join(name.strip().split(' '))  # avoiding extra spaces
         if not name:
-            feed_title = db.session.query(Feed).filter_by(id=feed_id).first().title
-            name = f"No name in update by { feed_title }"
+            # commenting out to not resolve circular import error
+            # feed_title = db.session.query(Feed).filter_by(id=feed_id).first().title
+            # name = f"No name in update by { feed_title }"
+            name = "No name in update by {feed_title}"
 
         self.name = name[:100]
         self.href = data.pop('href')
