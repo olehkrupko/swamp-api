@@ -356,6 +356,7 @@ class Feed(db.Model):
             self.href = "https://proxitok.pabloferreiro.es/@" + self.href.split('@')[-1] + "/rss"
             results = self.parse_href(proxy, reduce)
 
+            results = results.reverse()
             for each in results:
                 each['href'] = each['href'].replace('proxitok.pabloferreiro.es', 'tiktok.com')
 
