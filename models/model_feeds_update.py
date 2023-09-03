@@ -50,7 +50,11 @@ class FeedUpdate(db.Model):
         # #     if end != -1:
         # #         each.name = each.name[:end]
 
-        self.name = data.pop('name')[:100]
+        name = data.pop('name')
+        name = name.replace("#", " #")  # making sure that hashtags have spaces inbetween
+        name = ' '.join(name.strip().split(' '))  # avoiding extra spaces
+
+        self.name = name[:100]
         self.href = data.pop('href')
         self.datetime = data.pop('datetime')
         self.feed_id = data.pop('feed_id')
