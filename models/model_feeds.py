@@ -191,7 +191,6 @@ class Feed(db.Model):
         ####  PREPARING REQUIRED VARIABLES ####
         #######################################
         results = []
-        DEFAULT_NO_NAME = "no name"
 
         # avoiding blocks
         headers = {
@@ -497,7 +496,7 @@ class Feed(db.Model):
                 if each.get("title_detail"):
                     result_name = each["title_detail"]["value"]
                 else:
-                    result_name = DEFAULT_NO_NAME
+                    result_name = ""
 
                 # APPEND RESULT
                 results.append({

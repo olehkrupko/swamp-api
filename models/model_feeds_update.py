@@ -50,14 +50,19 @@ class FeedUpdate(db.Model):
         # #     if end != -1:
         # #         each.name = each.name[:end]
 
+        feed_id = data.pop('feed_id')
+
         name = data.pop('name')
         name = name.replace("#", " #")  # making sure that hashtags have spaces inbetween
         name = ' '.join(name.strip().split(' '))  # avoiding extra spaces
+        if not name:
+            feed_title = db.session.query(Feed).filter_by(id=feed_id).first().title
+            name = f"No name in update by { feed_title }"
 
         self.name = name[:100]
         self.href = data.pop('href')
         self.datetime = data.pop('datetime')
-        self.feed_id = data.pop('feed_id')
+        self.feed_id = feed_id
 
         if data:
             raise Exception(f"Dict {data} has extra data")
