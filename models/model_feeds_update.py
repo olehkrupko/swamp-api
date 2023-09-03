@@ -3,6 +3,7 @@ import datetime
 import emoji
 
 from __main__ import db
+from models.model_feeds import Feed
 
 
 class FeedUpdate(db.Model):
