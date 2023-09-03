@@ -1,5 +1,7 @@
 import datetime
 
+import emoji
+
 from __main__ import db
 
 
@@ -53,6 +55,7 @@ class FeedUpdate(db.Model):
         feed_id = data.pop('feed_id')
 
         name = data.pop('name')
+        name = emoji.demojize(name, delimiters=("", ""))  # transforming emojis to normal words
         name = name.replace("#", " #")  # making sure that hashtags have spaces inbetween
         name = ' '.join(name.strip().split(' '))  # avoiding extra spaces
         if not name:
