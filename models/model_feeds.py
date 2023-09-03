@@ -206,8 +206,6 @@ class Feed(db.Model):
         ####    STARTING DATA INGESTION    ####
         #######################################
 
-        if False:
-            return "NOPE"
         # # custom ранобэ.рф API import
         # if 'https://xn--80ac9aeh6f.xn--p1ai' in self.href:
         #     RANOBE_RF = 'https://xn--80ac9aeh6f.xn--p1ai'
@@ -353,7 +351,7 @@ class Feed(db.Model):
             # if not feed.parse_reduce(self.emojis, reduce):
             #     return []
 
-            self.href = "https://proxitok.pabloferreiro.es/@" + self.href.split('@')[-1] + "/rss"
+            self.href = f"https://proxitok.pabloferreiro.es/@{ self.href.split('@')[-1] }/rss"
             results = self.parse_href(proxy, reduce)
 
             results = results.reverse()
