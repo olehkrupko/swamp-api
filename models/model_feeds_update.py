@@ -68,7 +68,7 @@ class FeedUpdate(db.Model):
         self.feed_id = feed_id
 
         if data:
-            raise Exception(f"Dict {data} has extra data")
+            raise ValueError(f"Dict {data} has extra data")
 
     def as_dict(self):
         return {
