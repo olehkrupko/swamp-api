@@ -11,6 +11,7 @@ from typing import List, Dict
 
 import requests
 import sentry_sdk
+import warnings
 from bs4 import BeautifulSoup, SoupStrainer
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -357,10 +358,14 @@ class Feed(db.Model):
 
             self.href = f"https://proxitok.pabloferreiro.es/@{ self.href.split('@')[-1] }/rss"
             results = self.parse_href(proxy, reduce)
-
-            results = results.reverse()
+            
+            warnings.warn(f"---> 0 {results}")
+            
+            results.reverse()
             for each in results:
                 each['href'] = each['href'].replace('proxitok.pabloferreiro.es', 'tiktok.com')
+            
+            warnings.warn(f"---> 1 {results}")
 
         # custom RSS YouTube converter (link to feed has to be converted manually)
         elif 'https://www.youtube.com/channel/' in self.href:
