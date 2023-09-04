@@ -206,6 +206,10 @@ class Feed(db.Model):
         ####    STARTING DATA INGESTION    ####
         #######################################
 
+        # using it as first if for now
+        if False:
+            return "NOPE"
+
         # # custom ранобэ.рф API import
         # if 'https://xn--80ac9aeh6f.xn--p1ai' in self.href:
         #     RANOBE_RF = 'https://xn--80ac9aeh6f.xn--p1ai'
