@@ -351,7 +351,7 @@ class Feed(db.Model):
                 proxy = proxy,
             )
 
-            results = results.reverse()
+            results.reverse()
             for each in results:
                 each['href'] = each['href'].replace('proxitok.pabloferreiro.es', 'tiktok.com')
 
