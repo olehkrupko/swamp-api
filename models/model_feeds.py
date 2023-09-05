@@ -1,4 +1,3 @@
-
 import feedparser
 import json
 import random
@@ -307,48 +306,45 @@ class Feed(db.Model):
         #         title_split = [ x for x in title_split if x[0]!='#']
         #         each.title = ' '.join(title_split)
 
-        # custom twitter import converter
-        elif 'https://twitter.com/' in self.href:
-            # if not feed.parse_reduce(self.emojis, reduce):
-            #     return []
+        # # custom twitter import converter
+        # elif 'https://twitter.com/' in self.href:
+        #     self.href_user = self.href[:]
+        #     caching_servers = (
+        #         'https://nitter.net',
+        #         'https://nitter.42l.fr',  # +
+        #         'https://nitter.nixnet.services',  # x
+        #         'https://nitter.pussthecat.org',
+        #         'https://nitter.mastodont.cat',
+        #         'https://nitter.tedomum.net',  # xx
+        #         'https://nitter.fdn.fr',
+        #         'https://nitter.1d4.us',
+        #         'https://nitter.kavin.rocks',
+        #         'https://tweet.lambda.dance',  # xx
+        #         'https://nitter.cc',
+        #         'https://nitter.weaponizedhumiliation.com',  # x
+        #         'https://nitter.vxempire.xyz',
+        #         'https://nitter.unixfox.eu',
+        #         'https://nitter.himiko.cloud',  # x
+        #         'https://nitter.eu',
+        #         'https://nitter.ethibox.fr',   # x
+        #         'https://nitter.namazso.eu',  # +
+        #     )
+        #     # 20 = len('https://twitter.com/')
+        #     self.href = f"{ random.choice(caching_servers) }/{ self.href[20:] }/rss"
 
-            self.href_user = self.href[:]
-            caching_servers = (
-                'https://nitter.net',
-                'https://nitter.42l.fr',  # +
-                'https://nitter.nixnet.services',  # x
-                'https://nitter.pussthecat.org',
-                'https://nitter.mastodont.cat',
-                'https://nitter.tedomum.net',  # xx
-                'https://nitter.fdn.fr',
-                'https://nitter.1d4.us',
-                'https://nitter.kavin.rocks',
-                'https://tweet.lambda.dance',  # xx
-                'https://nitter.cc',
-                'https://nitter.weaponizedhumiliation.com',  # x
-                'https://nitter.vxempire.xyz',
-                'https://nitter.unixfox.eu',
-                'https://nitter.himiko.cloud',  # x
-                'https://nitter.eu',
-                'https://nitter.ethibox.fr',   # x
-                'https://nitter.namazso.eu',  # +
-            )
-            # 20 = len('https://twitter.com/')
-            self.href = f"{ random.choice(caching_servers) }/{ self.href[20:] }/rss"
+        #     try:
+        #         results = self.parse_href(proxy)
+        #     except:
+        #         return []
 
-            try:
-                results = self.parse_href(proxy, reduce)
-            except:
-                return []
-
-            base_domain = 'twitter.com'
-            for each in results:
-                each['href'] = each['href'].replace('#m', '').replace('http://', 'https://')
+        #     base_domain = 'twitter.com'
+        #     for each in results:
+        #         each['href'] = each['href'].replace('#m', '').replace('http://', 'https://')
                 
-                href_split = each['href'].split('/')
-                href_split[2] = base_domain
+        #         href_split = each['href'].split('/')
+        #         href_split[2] = base_domain
 
-                each['href'] = '/'.join(href_split)
+        #         each['href'] = '/'.join(href_split)
 
         # custom tiktok import
         elif 'https://www.tiktok.com/@' in self.href:
@@ -444,22 +440,22 @@ class Feed(db.Model):
         elif 'https://www.patreon.com/' in self.href:
             return []
 
-        # custom lightnovelpub import
-        elif 'https://www.lightnovelpub.com/' in self.href:
-            request = requests.get(self.href, headers=headers, proxies=proxyDict)
-            request = BeautifulSoup(request.text, "html.parser")
+        # # custom lightnovelpub import
+        # elif 'https://www.lightnovelpub.com/' in href:
+        #     request = requests.get(href, headers=headers, proxies=proxyDict)
+        #     request = BeautifulSoup(request.text, "html.parser")
 
-            data = request.find('ul', attrs={'class': 'chapter-list'})
-            if data is None:
-                return []
+        #     data = request.find('ul', attrs={'class': 'chapter-list'})
+        #     if data is None:
+        #         return []
             
-            for each in data.find_all('li'):
-                results.append({
-                    'name':     each.find('a')['title'],
-                    'href':     'https://www.lightnovelpub.com' + each.find('a')['href'],
-                    'datetime': datetime.strptime(each.find('time')['datetime'], '%Y-%m-%d %H:%M'),
-                    'feed_id':  self.id,
-                })
+        #     for each in data.find_all('li'):
+        #         results.append({
+        #             'name':     each.find('a')['title'],
+        #             'href':     'https://www.lightnovelpub.com' + each.find('a')['href'],
+        #             'datetime': datetime.strptime(each.find('time')['datetime'], '%Y-%m-%d %H:%M'),
+        #             'feed_id':  self.id,
+        #         })
 
         # default RSS import
         else:
