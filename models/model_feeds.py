@@ -106,7 +106,6 @@ class Feed(db.Model):
         # Processing
         feed_updates = feed.parse_href(
             proxy  = proxy,
-            reduce = False,
         )
 
         # Finishing with results
@@ -269,11 +268,6 @@ class Feed(db.Model):
 
         # # custom instagram import converter
         # elif 'https://www.instagram.com/' in self.href:
-        #     if '💎' not in self.emojis or '📮' not in self.emojis:
-        #         return []
-        #     if not feed.parse_reduce(self.emojis, reduce):
-        #         return []
-
         #     self.href_user = self.href[:]
         #     # caching server list: https://git.sr.ht/~cadence/bibliogram-docs/tree/master/docs/Instances.md
         #     caching_servers = (
@@ -290,7 +284,7 @@ class Feed(db.Model):
         #     self.href = f"{ random.choice(caching_servers) }/u/{ self.href[26:-1] }/atom.xml"
 
         #     try:
-        #         result = self.parse(proxy, reduce)
+        #         result = self.parse(proxy)
         #     except:
         #         return []
 
@@ -474,8 +468,6 @@ class Feed(db.Model):
 
         # default RSS import
         else:
-            # if not feed.parse_reduce(self.emojis, reduce):
-            #     return []
             try:
                 request = feedparser.parse(href, request_headers=headers)
             except urllib.error.URLError:
