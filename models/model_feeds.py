@@ -184,7 +184,7 @@ class Feed(db.Model):
 
         return results
 
-    def parse_href(self, href = None, proxy: bool = True):
+    def parse_href(self, href = None, proxy: bool = True, **kwargs: Dict = {}):
         #######################################
         ####  PREPARING REQUIRED VARIABLES ####
         #######################################
@@ -356,7 +356,6 @@ class Feed(db.Model):
                 each['href'] = each['href'].replace('proxitok.pabloferreiro.es', 'tiktok.com')
 
         # custom RSS YouTube converter (link to feed has to be converted manually)
-            self.href_user = self.href[:]
         elif 'https://www.youtube.com/channel/' in href:
             # 32 = len('https://www.youtube.com/channel/')
             # 7 = len('/videos')
@@ -384,7 +383,7 @@ class Feed(db.Model):
                 each['href'] = '/'.join(split)
 
         # custom RSS mintmanga converter (link to feed has to be converted manually to simplify feed object creation)
-        elif 'http://mintmanga.com/' in href and href.find('mintmanga.com/rss/manga') == -1 and href_user == None:
+        elif 'http://mintmanga.com/' in href and href.find('mintmanga.com/rss/manga') == -1 and kwargs.get('processed', False):
             # 21 = len('http://mintmanga.com/')
             name = href[21:]
             href = "feed://mintmanga.com/rss/manga?name=" + name
@@ -392,6 +391,7 @@ class Feed(db.Model):
             results = self.parse_href(
                 href = href,
                 proxy = proxy,
+                processed = True,
             )
 
             for each in results:
@@ -400,8 +400,7 @@ class Feed(db.Model):
                 each['href'] = '/'.join(split)
 
         # custom RSS deviantart converter (link to feed has to be converted manually to simplify feed object creation)
-            self.href_user = self.href[:]
-        elif 'https://www.deviantart.com/' in href:
+        elif 'https://www.deviantart.com/' in href and kwargs.get('processed', False):
             # 27 = len('https://www.deviantart.com/')
             # 9 = len('/gallery/')
             href = href[27:-9]
@@ -410,6 +409,7 @@ class Feed(db.Model):
             results = self.parse_href(
                 href = href,
                 proxy = proxy,
+                processed = True,
             )
 
         # # custom pikabu import
