@@ -184,7 +184,7 @@ class Feed(db.Model):
 
         return results
 
-    def parse_href(self, href = None, proxy: bool = True, **kwargs: Dict = {}):
+    def parse_href(self, href = None, proxy: bool = True, **kwargs: Dict):
         #######################################
         ####  PREPARING REQUIRED VARIABLES ####
         #######################################
