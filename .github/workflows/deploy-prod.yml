@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'main'
+      - '39-fix-ingestion-mutates-original-feed-objects'
 jobs:
   deploy_code:
     runs-on: self-hosted
