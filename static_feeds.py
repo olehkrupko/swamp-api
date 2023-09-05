@@ -3991,11 +3991,6 @@ feeds = ({
         'href_title': 'http://www.hentai-foundry.com/pictures/user/Fellatrix',
         'emojis': '🏮'
     }, {
-        'title': 'YelfTea',
-        'href': 'https://www.hentai-foundry.com/feed/userPictures/username/YelfTea',
-        'href_title': 'http://www.hentai-foundry.com/pictures/user/YelfTea',
-        'emojis': '🏮'
-    }, {
         'title': 'amruu',
         'href': 'https://www.hentai-foundry.com/feed/userPictures/username/amruu',
         'href_title': 'http://www.hentai-foundry.com/pictures/user/amruu',
@@ -4116,11 +4111,6 @@ feeds = ({
         'href_title': 'http://www.hentai-foundry.com/pictures/user/kajinman',
         'emojis': '💎🏮xxx'
     }, {
-        'title': 'FF69',
-        'href': 'https://www.hentai-foundry.com/feed/userPictures/username/FF69',
-        'href_title': 'http://www.hentai-foundry.com/pictures/user/FF69',
-        'emojis': '💎🏮'
-    }, {
         'title': 'kokobuttz',
         'href': 'https://www.hentai-foundry.com/feed/userPictures/username/kokobuttz',
         'href_title': 'http://www.hentai-foundry.com/pictures/user/kokobuttz',
@@ -4159,11 +4149,6 @@ feeds = ({
         'title': 'boobsgames',
         'href': 'https://www.hentai-foundry.com/feed/userPictures/username/boobsgames',
         'href_title': 'http://www.hentai-foundry.com/pictures/user/boobsgames',
-        'emojis': '🏮'
-    }, {
-        'title': 'tesomu',
-        'href': 'https://www.hentai-foundry.com/feed/userPictures/username/tesomu',
-        'href_title': 'http://www.hentai-foundry.com/pictures/user/tesomu',
         'emojis': '🏮'
     }, {
         'title': 'markydaysaid',
@@ -4416,11 +4401,6 @@ feeds = ({
         'href_title': 'http://www.hentai-foundry.com/pictures/user/kruth666',
         'emojis': '🏮'
     }, {
-        'title': 'ShinyTB',
-        'href': 'https://www.hentai-foundry.com/feed/userPictures/username/Shiny-TB',
-        'href_title': 'http://www.hentai-foundry.com/pictures/user/Shiny-TB',
-        'emojis': '💎🏮x'
-    }, {
         'title': 'X3',
         'href': 'https://www.hentai-foundry.com/feed/userPictures/username/X3',
         'href_title': 'http://www.hentai-foundry.com/pictures/user/X3',
@@ -4475,11 +4455,6 @@ feeds = ({
         'href': 'https://www.hentai-foundry.com/feed/userPictures/username/ghosthart',
         'href_title': 'http://www.hentai-foundry.com/pictures/user/ghosthart',
         'emojis': '💎🏮x'
-    }, {
-        'title': 'hessraart',
-        'href': 'https://www.hentai-foundry.com/feed/userPictures/username/hessraart',
-        'href_title': 'http://www.hentai-foundry.com/pictures/user/hessraart',
-        'emojis': '🏮'
     }, {
         'title': 'Pupuliini',
         'href': 'https://www.hentai-foundry.com/feed/userPictures/username/Pupuliini',
