@@ -185,16 +185,18 @@ class Feed(db.Model):
 
         return results
 
-    def parse_href(self, proxy: bool = True, reduce: bool = False):
+    def parse_href(self, href = None, proxy: bool = True):
         #######################################
         ####  PREPARING REQUIRED VARIABLES ####
         #######################################
         results = []
+        if href is None:
+            href = self.href
 
         # avoiding blocks
         headers = {
             # 'user-agent': feed.UserAgent_random().strip(),
-            'referer': f'https://www.{ "".join(random.choices(string.ascii_letters, k=16)) }.com/?q={ self.href }'
+            'referer': f'https://www.{ "".join(random.choices(string.ascii_letters, k=16)) }.com/?q={ href }'
         }
         proxyDict = {}
         if proxy and isinstance(proxy, str):
@@ -347,33 +349,40 @@ class Feed(db.Model):
         #         each['href'] = '/'.join(href_split)
 
         # custom tiktok import
-        elif 'https://www.tiktok.com/@' in self.href:
-            # if not feed.parse_reduce(self.emojis, reduce):
-            #     return []
-
-            self.href = f"https://proxitok.pabloferreiro.es/@{ self.href.split('@')[-1] }/rss"
-            results = self.parse_href(proxy, reduce)
+        elif 'https://www.tiktok.com/@' in href:
+            href = f"https://proxitok.pabloferreiro.es/@{ href.split('@')[-1] }/rss"
+            
+            results = self.parse_href(
+                href = href,
+                proxy = proxy,
+            )
 
             results = results.reverse()
             for each in results:
                 each['href'] = each['href'].replace('proxitok.pabloferreiro.es', 'tiktok.com')
 
         # custom RSS YouTube converter (link to feed has to be converted manually)
-        elif 'https://www.youtube.com/channel/' in self.href:
             self.href_user = self.href[:]
+        elif 'https://www.youtube.com/channel/' in href:
             # 32 = len('https://www.youtube.com/channel/')
             # 7 = len('/videos')
-            self.href = "https://www.youtube.com/feeds/videos.xml?channel_id=" + self.href[32:-7]
+            href = "https://www.youtube.com/feeds/videos.xml?channel_id=" + href[32:-7]
 
-            results = self.parse_href(proxy, reduce)
+            results = self.parse_href(
+                href = href,
+                proxy = proxy,
+            )
 
         # custom RSS readmanga converter (link to feed has to be converted manually to simplify feed object creation)
-        elif 'http://readmanga.live/' in self.href and self.href.find('/rss/') == -1:
+        elif 'http://readmanga.live/' in href and href.find('/rss/') == -1:
             # 22 = len('http://readmanga.live/')
-            name = self.href[22:]
-            self.href = "feed://readmanga.live/rss/manga?name=" + name
+            name = href[22:]
+            href = "feed://readmanga.live/rss/manga?name=" + name
 
-            results = self.parse_href(proxy, reduce)
+            results = self.parse_href(
+                href = href,
+                proxy = proxy,
+            )
 
             for each in results:
                 split = each['href'].split('/')
@@ -381,12 +390,15 @@ class Feed(db.Model):
                 each['href'] = '/'.join(split)
 
         # custom RSS mintmanga converter (link to feed has to be converted manually to simplify feed object creation)
-        elif 'http://mintmanga.com/' in self.href and self.href.find('mintmanga.com/rss/manga') == -1 and self.href_user == None:
+        elif 'http://mintmanga.com/' in href and href.find('mintmanga.com/rss/manga') == -1 and href_user == None:
             # 21 = len('http://mintmanga.com/')
-            name = self.href[21:]
-            self.href = "feed://mintmanga.com/rss/manga?name=" + name
+            name = href[21:]
+            href = "feed://mintmanga.com/rss/manga?name=" + name
 
-            results = self.parse_href(self)
+            results = self.parse_href(
+                href = href,
+                proxy = proxy,
+            )
 
             for each in results:
                 split = each['href'].split('/')
@@ -394,14 +406,17 @@ class Feed(db.Model):
                 each['href'] = '/'.join(split)
 
         # custom RSS deviantart converter (link to feed has to be converted manually to simplify feed object creation)
-        elif 'https://www.deviantart.com/' in self.href:
             self.href_user = self.href[:]
+        elif 'https://www.deviantart.com/' in href:
             # 27 = len('https://www.deviantart.com/')
             # 9 = len('/gallery/')
-            self.href = self.href[27:-9]
-            self.href = f"https://backend.deviantart.com/rss.xml?type=deviation&q=by%3A{ self.href }+sort%3Atime+meta%3Aall"
+            href = href[27:-9]
+            href = f"https://backend.deviantart.com/rss.xml?type=deviation&q=by%3A{ href }+sort%3Atime+meta%3Aall"
             
-            results = self.parse_href(proxy, reduce)
+            results = self.parse_href(
+                href = href,
+                proxy = proxy,
+            )
 
         # # custom pikabu import
         # elif 'pikabu.ru/@' in self.href:
@@ -433,11 +448,11 @@ class Feed(db.Model):
         #     #     return []
 
         # custom onlyfans import
-        elif 'https://onlyfans.com/' in self.href:
+        elif 'https://onlyfans.com/' in href:
             return []
         
         # custom patreon import
-        elif 'https://www.patreon.com/' in self.href:
+        elif 'https://www.patreon.com/' in href:
             return []
 
         # # custom lightnovelpub import
@@ -462,12 +477,12 @@ class Feed(db.Model):
             # if not feed.parse_reduce(self.emojis, reduce):
             #     return []
             try:
-                request = feedparser.parse(self.href, request_headers=headers)
+                request = feedparser.parse(href, request_headers=headers)
             except urllib.error.URLError:
                 proxyDict = urllib.request.ProxyHandler(proxyDict)
 
                 ssl._create_default_https_context = ssl._create_unverified_context
-                request = feedparser.parse(self.href, request_headers=headers, handlers=[proxyDict])
+                request = feedparser.parse(href, request_headers=headers, handlers=[proxyDict])
 
             for each in request["items"]:
                 if not each:
