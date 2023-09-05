@@ -7,3 +7,4 @@ python-dateutil==2.8.2
 requests==2.31.0
 beautifulsoup4==4.12.2
 sentry-sdk[flask]==1.29.0
+emoji==2.8.0

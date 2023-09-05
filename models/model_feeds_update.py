@@ -1,6 +1,9 @@
 import datetime
 
+import emoji
+
 from __main__ import db
+# from models.model_feeds import Feed
 
 
 class FeedUpdate(db.Model):
@@ -50,13 +53,25 @@ class FeedUpdate(db.Model):
         # #     if end != -1:
         # #         each.name = each.name[:end]
 
-        self.name = data.pop('name')[:100]
+        feed_id = data.pop('feed_id')
+
+        name = data.pop('name')
+        name = emoji.demojize(name, delimiters=(" ", " "))  # transforming emojis to normal words
+        name = name.replace("#", " #")  # making sure that hashtags have spaces inbetween
+        name = ' '.join(name.strip().split(' '))  # avoiding extra spaces
+        if not name:
+            # commenting out to not resolve circular import error
+            # feed_title = db.session.query(Feed).filter_by(id=feed_id).first().title
+            # name = f"No name in update by { feed_title }"
+            name = "No name in update by {feed_title}"
+
+        self.name = name[:100]
         self.href = data.pop('href')
         self.datetime = data.pop('datetime')
-        self.feed_id = data.pop('feed_id')
+        self.feed_id = feed_id
 
         if data:
-            raise Exception(f"Dict {data} has extra data")
+            raise ValueError(f"Dict {data} has extra data")
 
     def as_dict(self):
         return {

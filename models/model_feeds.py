@@ -191,7 +191,6 @@ class Feed(db.Model):
         ####  PREPARING REQUIRED VARIABLES ####
         #######################################
         results = []
-        DEFAULT_NO_NAME = "no name"
 
         # avoiding blocks
         headers = {
@@ -207,8 +206,10 @@ class Feed(db.Model):
         ####    STARTING DATA INGESTION    ####
         #######################################
 
+        # using it as first if for now
         if False:
             return "NOPE"
+
         # # custom ранобэ.рф API import
         # if 'https://xn--80ac9aeh6f.xn--p1ai' in self.href:
         #     RANOBE_RF = 'https://xn--80ac9aeh6f.xn--p1ai'
@@ -354,9 +355,10 @@ class Feed(db.Model):
             # if not feed.parse_reduce(self.emojis, reduce):
             #     return []
 
-            self.href = "https://proxitok.pabloferreiro.es/@" + self.href.split('@')[-1] + "/rss"
+            self.href = f"https://proxitok.pabloferreiro.es/@{ self.href.split('@')[-1] }/rss"
             results = self.parse_href(proxy, reduce)
 
+            results = results.reverse()
             for each in results:
                 each['href'] = each['href'].replace('proxitok.pabloferreiro.es', 'tiktok.com')
 
@@ -497,7 +499,7 @@ class Feed(db.Model):
                 if each.get("title_detail"):
                     result_name = each["title_detail"]["value"]
                 else:
-                    result_name = DEFAULT_NO_NAME
+                    result_name = ""
 
                 # APPEND RESULT
                 results.append({
