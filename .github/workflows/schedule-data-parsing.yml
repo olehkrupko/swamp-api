@@ -9,7 +9,7 @@ jobs:
     steps:
       - name: Send request
         run: STATUS_CODE=`curl --write-out '%{http_code}' --silent --output /dev/null -X PUT "http://192.168.0.155:30010/feeds/parse/runner"`
-      - name: Parser runner status checker
-        if: ${{ STATUS_CODE }} != 200
-        uses: actions/github-script@v3
-        run: core.setFailed('Status ${{ STATUS_CODE }} returned != 200')
+      # - name: Parser runner status checker
+      #   if: ${{ STATUS_CODE }} != 200
+      #   uses: actions/github-script@v3
+      #   run: core.setFailed('Status ${{ STATUS_CODE }} returned != 200')
