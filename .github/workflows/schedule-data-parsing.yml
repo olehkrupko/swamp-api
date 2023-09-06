@@ -3,29 +3,13 @@ run-name: ${{ github.actor }} starts scheduled data parsing
 on:
   schedule:
     - cron: '*/10 * * * *'
-  push:
-    branches:
-      - 'main'
-      - '39-fix-ingestion-mutates-original-feed-objects'
 jobs:
   data_parsing:
     runs-on: self-hosted
     steps:
-      # - name: Send request
-      #   run: curl --write-out '%{http_code}' --silent --output /dev/null -X PUT "http://192.168.0.155:30010/feeds/parse/runner"
       - name: Send request and save status code
         run: echo "status_code=`curl --write-out '%{http_code}' --silent --output /dev/null -X PUT 'http://192.168.0.155:30010/feeds/parse/runner'`" >> "$GITHUB_ENV"
       - name: Print status
         run: echo "$status_code"
       - name: Check request status
         run: if ([[ "$status_code" == 200 ]]); then exit 0; else echo "$status_code"; exit 1; fi
-      # - name: Send request
-      #   uses: actions/github-script@v6
-      #   id: status
-      #   with:
-      #     script: curl --write-out '%{http_code}' --silent --output /dev/null -X PUT "http://192.168.0.155:30010/feeds/parse/runner"
-      #     result-encoding: string
-      # - name: Parser runner status checker
-      #   if: ${{ steps.status.outputs.result }} != 200
-      #   # uses: actions/github-script@v3
-      #   run: core.setFailed('Status ${{ steps.status.outputs.result }} returned != 200')
