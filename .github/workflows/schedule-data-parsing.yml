@@ -15,11 +15,12 @@ jobs:
       #   run: curl --write-out '%{http_code}' --silent --output /dev/null -X PUT "http://192.168.0.155:30010/feeds/parse/runner"
       - name: Send request and check it
         run: |
-          const status = `curl --write-out '%{http_code}' --silent --output /dev/null -X PUT "http://192.168.0.155:30010/feeds/parse/runner"`
+          STATUS = `curl --write-out '%{http_code}' --silent --output /dev/null -X PUT "http://192.168.0.155:30010/feeds/parse/runner"`
 
-          if [[ "$status" == 200 ]]; then
+          if [[ "$STATUS" == 200 ]]; then
             exit 0
           else
+            echo "$STATUS"
             exit 1
           fi
       # - name: Send request
