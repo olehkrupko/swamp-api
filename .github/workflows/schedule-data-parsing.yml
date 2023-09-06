@@ -13,16 +13,10 @@ jobs:
     steps:
       # - name: Send request
       #   run: curl --write-out '%{http_code}' --silent --output /dev/null -X PUT "http://192.168.0.155:30010/feeds/parse/runner"
-      - name: Send request and check it
-        run: |
-          echo "status_code=`curl --write-out '%{http_code}' --silent --output /dev/null -X PUT "http://192.168.0.155:30010/feeds/parse/runner"`  >> "$GITHUB_ENV"
-
-          if [[ "$status_code" == 200 ]]; then
-            exit 0
-          else
-            echo "$status_code"
-            exit 1
-          fi
+      - name: Send request and save status code
+        run: echo "status_code=`curl --write-out '%{http_code}' --silent --output /dev/null -X PUT "http://192.168.0.155:30010/feeds/parse/runner"` >> "$GITHUB_ENV"
+      - name: Check request status
+        run: if ([[ "$status_code" == 200 ]]); then exit 0; else echo "$status_code"; exit 1; fi
       # - name: Send request
       #   uses: actions/github-script@v6
       #   id: status
