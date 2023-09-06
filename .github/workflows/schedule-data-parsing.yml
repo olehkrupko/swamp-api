@@ -11,7 +11,13 @@ jobs:
   data_parsing:
     runs-on: self-hosted
     steps:
+      - name: Send request
+        uses: actions/github-script@v6
+        id: status
+        with:
+          script: curl --write-out '%{http_code}' --silent --output /dev/null -X PUT "http://192.168.0.155:30010/feeds/parse/runner"
+          result-encoding: string
       - name: Parser runner status checker
-        if: curl --write-out '%{http_code}' --silent --output /dev/null -X PUT "http://192.168.0.155:30010/feeds/parse/runner" != 200
+        if: ${{ steps.status.outputs.result }} != 200
         # uses: actions/github-script@v3
         run: core.setFailed('Status ${{ steps.status.outputs.result }} returned != 200')
