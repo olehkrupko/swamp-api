@@ -12,6 +12,6 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Parser runner status checker
-        if: curl --write-out '%{http_code}' --silent --output /dev/null -X PUT "http://192.168.0.155:30010/feeds/parse/runner" != 200
+        if: `curl --write-out '%{http_code}' --silent --output /dev/null -X PUT "http://192.168.0.155:30010/feeds/parse/runner"` != 200
         # uses: actions/github-script@v3
         run: core.setFailed('Status ${{ steps.status.outputs.result }} returned != 200')
