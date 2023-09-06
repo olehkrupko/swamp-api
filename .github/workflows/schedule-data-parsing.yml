@@ -20,4 +20,4 @@ jobs:
       - name: Parser runner status checker
         if: ${{ steps.status.outputs.result }} != 200
         # uses: actions/github-script@v3
-        run: core.setFailed('Status ${{ STATUS_CODE }} returned != 200')
+        run: core.setFailed('Status ${{ steps.status.outputs.result }} returned != 200')
