@@ -3,6 +3,10 @@ run-name: ${{ github.actor }} starts scheduled data parsing
 on:
   schedule:
     - cron: '*/10 * * * *'
+  push:
+    branches:
+      - 'main'
+      - '39-fix-ingestion-mutates-original-feed-objects'
 jobs:
   data_parsing:
     runs-on: self-hosted
