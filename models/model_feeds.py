@@ -487,6 +487,8 @@ class Feed(db.Model):
                     result_datetime = each["published"]
                 elif "delayed" in each:
                     result_datetime = each["delayed"]
+                elif "updated" in each:
+                    result_datetime = each["updated"]
                 else:
                     print(f"result_datetime broke for { self.title }")
                 
