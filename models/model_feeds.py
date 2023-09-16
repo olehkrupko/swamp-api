@@ -147,23 +147,21 @@ class Feed(db.Model):
                 feed_todo_ids.append(feed.id)
         
         for feed_id in feed_todo_ids:
-            response = requests.put("http://localhost:30010/feeds/parse",
-                headers = {"Content-Type": "application/json"},
-                data=json.dumps({
-                    "feed_id": feed_id,
-                    "store_new": store_new,
-                    "proxy": proxy,
-                })
-            )
-            response = response.json()
-            results += response["len"]
-            # results += len(
-            #     Feed.process_parsing(
-            #         feed_id=feed_id,
-            #         store_new=store_new,
-            #         proxy=proxy,
-            #     )
+            # response = requests.put("http://localhost:30010/feeds/parse",
+            #     headers = {"Content-Type": "application/json"},
+            #     data=json.dumps({
+            #         "feed_id": feed_id,
+            #         "store_new": store_new,
+            #         "proxy": proxy,
+            #     })
             # )
+            # response = response.json()
+            # results += response["len"]
+            results += Feed.process_parsing(
+                feed_id=feed_id,
+                store_new=store_new,
+                proxy=proxy,
+            )['len']
 
         # with Executor() as executor:
         #     executor = executor.map(Feed.process_parsing, feed_todo_ids, [store_new]*len(feed_todo_ids), [proxy]*len(feed_todo_ids))
