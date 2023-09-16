@@ -87,15 +87,12 @@ class FeedUpdate(db.Model):
     # 
     # {field}        - don't skip what's mentioned there
     # {field}_ignore - skip these ones
-    def filter_skip(self):
-        feed = db.session.query(Feed).filter_by(
-            id=feed_id
-        ).first()
+    def filter_skip(self, json):
         # adding it to make code more readable
         SKIP = True
 
-        if feed.json and feed.json.get("filter", False):
-            filter = feed.json["filter"]
+        if json and json.get("filter", False):
+            filter = json["filter"]
 
             for field in ["name", "href"]:
                 if filter.get(field) and filter[field] not in getattr(self, field):
