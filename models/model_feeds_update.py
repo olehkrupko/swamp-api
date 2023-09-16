@@ -57,7 +57,8 @@ class FeedUpdate(db.Model):
 
         name = data.pop('name')
         name = emoji.demojize(name, delimiters=(" ", " "))  # transforming emojis to normal words
-        name = name.replace("#", " #")  # making sure that hashtags have spaces inbetween
+        name = name.replace("#", " ")  # removing hashtags
+        name = name.replace("_", " ")  # underscores are just weird spaces
         name = ' '.join(name.strip().split(' '))  # avoiding extra spaces
         if not name:
             # commenting out to not resolve circular import error
