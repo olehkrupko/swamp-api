@@ -119,7 +119,7 @@ class Feed(db.Model):
                     db.session.add(new_feedupdate)
                 new_items.append(each)
             feed.delayed = datetime.now() + timedelta(**{
-                self.frequency: random.randint(1, 10),
+                feed.frequency: random.randint(1, 10),
             })
             db.session.add(feed)
             db.session.commit()
