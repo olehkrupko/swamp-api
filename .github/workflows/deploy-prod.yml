@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'main'
+      - '38-fix-ingestion-filtering-not-working'
 jobs:
   deploy_code:
     runs-on: self-hosted
