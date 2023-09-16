@@ -21,11 +21,6 @@ class FeedUpdate(db.Model):
         if not isinstance(data, dict):
             raise Exception(f"__init__ data {data} has to be a dict, not {type(data)}")
 
-        # # # FILTERING: passing item cycle if filter does not match
-        # # if self.filter is not None:
-        # #     if each.name.find(self.filter) == -1 and each.href.find(self.filter) == -1:
-        # #         continue
-
         # # DATETIME fixes: fix timezone unaware
         # if each.datetime.tzinfo is not None and each.datetime.tzinfo.utcoffset(each.datetime) is not None:
         #     each_dt = localtime(each.datetime)
@@ -87,3 +82,22 @@ class FeedUpdate(db.Model):
     
     def __str__(self):
         return str(self.as_dict())
+
+    # filter is used to remove unnecessary items
+    # 
+    # {field}        - don't skip what's mentioned there
+    # {field}_ignore - skip these ones
+    def filter_skip(self):
+        # adding it to make code more readable
+        SKIP = True
+
+        if self.json and self.json.get("filter", False):
+            filter = self.json["filter"]
+
+            for field in ["name", "href"]:
+                if filter.get(field) and filter[field] not in getattr(self, field):
+                    return SKIP
+                # elif filter.get(f"{field}_ignore") and filter[f"{field}_ignore"] in getattr(self, field):
+                #     return SKIP
+
+        return not SKIP

@@ -114,6 +114,8 @@ class Feed(db.Model):
                     new_feedupdate = FeedUpdate(each)
                     if feed_len != 0:
                         new_feedupdate.datetime = datetime.now()
+                    elif new_feedupdate.filter_skip():
+                        continue
                     db.session.add(new_feedupdate)
                 new_items.append(each)
             feed.delayed = datetime.now() + timedelta(**{
