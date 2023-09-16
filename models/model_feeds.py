@@ -21,7 +21,7 @@ class Feed(db.Model):
     # technical
     id        = db.Column(db.Integer,     primary_key=True)
     created   = db.Column(db.DateTime,    default=datetime.utcnow)
-    updated   = db.Column(db.DateTime,    default=None)
+    delayed   = db.Column(db.DateTime,    default=None)
     # core/required
     title     = db.Column(db.String(100), unique=True,  nullable=False)
     href      = db.Column(db.String(200), unique=False, nullable=False)
@@ -74,13 +74,9 @@ class Feed(db.Model):
         if self.frequency == 'never':
             return False
 
-        if not self.updated:
+        if not self.delayed:
             return True
-        
-        delta = timedelta(**{
-            self.frequency: random.randint(1, 10),
-        })
-        if self.updated + delta <= datetime.now():
+        elif self.delayed <= datetime.now():
             return True
         
         return False
@@ -120,7 +116,9 @@ class Feed(db.Model):
                         new_feedupdate.datetime = datetime.now()
                     db.session.add(new_feedupdate)
                 new_items.append(each)
-            feed.updated = datetime.now()
+            feed.delayed = datetime.now() + timedelta(**{
+                self.frequency: random.randint(1, 10),
+            })
             db.session.add(feed)
             db.session.commit()
         else:
@@ -485,8 +483,8 @@ class Feed(db.Model):
                 # DATE RESULT: parsing dates
                 if "published" in each:
                     result_datetime = each["published"]
-                elif "updated" in each:
-                    result_datetime = each["updated"]
+                elif "delayed" in each:
+                    result_datetime = each["delayed"]
                 else:
                     print(f"result_datetime broke for { self.title }")
                 
