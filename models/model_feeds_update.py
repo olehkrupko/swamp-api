@@ -19,7 +19,7 @@ class Update(db.Model):
     href     = db.Column(db.String(300), nullable=False)
     datetime = db.Column(db.DateTime,    default=None)
     # metadata
-    feed_id  = db.Column(db.Integer,     db.ForeignKey("feed._id"), nullable=False)
+    feed_id  = db.Column(db.Integer,     db.ForeignKey("feed_updates.feed._id"), nullable=False)
 
     def __init__(self, data: dict):
         data = data.copy()
