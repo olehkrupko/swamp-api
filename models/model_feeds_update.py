@@ -8,7 +8,7 @@ from __main__ import db
 
 class FeedUpdate(db.Model):
     # technical
-    id       = db.Column(db.Integer,     primary_key=True)
+    _id       = db.Column(db.Integer,     primary_key=True)
     feed_id  = db.Column(db.Integer,     db.ForeignKey("feed._id"), nullable=False)
     created  = db.Column(db.DateTime,    default=datetime.datetime.utcnow)
     # core/required
@@ -57,7 +57,7 @@ class FeedUpdate(db.Model):
         name = ' '.join(name.strip().split(' '))  # avoiding extra spaces
         if not name:
             # commenting out to not resolve circular import error
-            # feed_title = db.session.query(Feed).filter_by(id=feed_id).first().title
+            # feed_title = db.session.query(Feed).filter_by(_id=feed_id).first().title
             # name = f"No name in update by { feed_title }"
             name = "No name in update by {feed_title}"
 
@@ -71,7 +71,7 @@ class FeedUpdate(db.Model):
 
     def as_dict(self):
         return {
-            'id': self.id,
+            '_id': self._id,
             'feed_id': self.feed_id,
             'created': self.created,
 
