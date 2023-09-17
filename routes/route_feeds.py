@@ -7,7 +7,7 @@ from flask_cors import cross_origin
 import routes._shared as shared
 from __main__ import app, db, FREQUENCIES
 from models.model_feeds import Feed
-from models.model_feeds_update import FeedUpdate
+from models.model_feeds_update import Update
 
 
 ROUTE_PATH = "/feeds"
@@ -57,12 +57,12 @@ def create_feed():
     db.session.refresh(feed)
 
     return shared.return_json(
-        response=int(feed.id),
+        response=int(feed._id),
     )
 
 @app.route(f"{ ROUTE_PATH }/<feed_id>", methods=['GET'])
 def read_feed(feed_id):
-    feed = db.session.query(Feed).filter_by(id=feed_id).first()
+    feed = db.session.query(Feed).filter_by(_id=feed_id).first()
 
     return shared.return_json(
         response=feed.as_dict(),
@@ -72,7 +72,7 @@ def read_feed(feed_id):
 @app.route(f"{ ROUTE_PATH }/<feed_id>", methods=['PUT', 'OPTIONS'])
 @cross_origin(headers=['Content-Type']) # Send Access-Control-Allow-Headers
 def update_feed(feed_id):
-    feed = db.session.query(Feed).filter_by(id=feed_id).first()
+    feed = db.session.query(Feed).filter_by(_id=feed_id).first()
     body = request.get_json()
 
     for key, value in body.items():
@@ -94,7 +94,7 @@ def update_feed(feed_id):
 
 @app.route(f"{ ROUTE_PATH }/<feed_id>", methods=['DELETE'])
 def delete_item(feed_id):
-    feed = db.session.query(Feed).filter_by(id=feed_id)
+    feed = db.session.query(Feed).filter_by(_id=feed_id)
 
     feed.delete()
     db.session.commit()
@@ -142,7 +142,7 @@ def feeds_file():
         db.session.commit()
         db.session.refresh(feed)
 
-        feeds_created.append(feed.id)
+        feeds_created.append(feed._id)
 
     return shared.return_json(
         response={

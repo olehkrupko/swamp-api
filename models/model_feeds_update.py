@@ -6,25 +6,25 @@ from __main__ import db
 # from models.model_feeds import Feed
 
 
-class FeedUpdate(db.Model):
+class Update(db.Model):
+    __table_args__ = {
+        "schema": "feed_updates",
+    }
+
     # technical
-    id       = db.Column(db.Integer,     primary_key=True)
-    feed_id  = db.Column(db.Integer,     db.ForeignKey("feed.id"), nullable=False)
-    created  = db.Column(db.DateTime,    default=datetime.datetime.utcnow)
+    _id      = db.Column(db.Integer,     primary_key=True)
+    _created = db.Column(db.DateTime,    default=datetime.datetime.utcnow)
     # core/required
     name     = db.Column(db.String(100), nullable=False)
     href     = db.Column(db.String(300), nullable=False)
     datetime = db.Column(db.DateTime,    default=None)
+    # metadata
+    feed_id  = db.Column(db.Integer,     db.ForeignKey("feed_updates.feed._id"), nullable=False)
 
     def __init__(self, data: dict):
         data = data.copy()
         if not isinstance(data, dict):
             raise Exception(f"__init__ data {data} has to be a dict, not {type(data)}")
-
-        # # # FILTERING: passing item cycle if filter does not match
-        # # if self.filter is not None:
-        # #     if each.name.find(self.filter) == -1 and each.href.find(self.filter) == -1:
-        # #         continue
 
         # # DATETIME fixes: fix timezone unaware
         # if each.datetime.tzinfo is not None and each.datetime.tzinfo.utcoffset(each.datetime) is not None:
@@ -57,11 +57,12 @@ class FeedUpdate(db.Model):
 
         name = data.pop('name')
         name = emoji.demojize(name, delimiters=(" ", " "))  # transforming emojis to normal words
-        name = name.replace("#", " #")  # making sure that hashtags have spaces inbetween
+        name = name.replace("#", " ")  # removing hashtags
+        name = name.replace("_", " ")  # underscores are just weird spaces
         name = ' '.join(name.strip().split(' '))  # avoiding extra spaces
         if not name:
             # commenting out to not resolve circular import error
-            # feed_title = db.session.query(Feed).filter_by(id=feed_id).first().title
+            # feed_title = db.session.query(Feed).filter_by(_id=feed_id).first().title
             # name = f"No name in update by { feed_title }"
             name = "No name in update by {feed_title}"
 
@@ -75,9 +76,9 @@ class FeedUpdate(db.Model):
 
     def as_dict(self):
         return {
-            'id': self.id,
+            '_id': self._id,
             'feed_id': self.feed_id,
-            'created': self.created,
+            '_created': self._created,
 
             'name': self.name,
             'href': self.href,
@@ -86,3 +87,22 @@ class FeedUpdate(db.Model):
     
     def __str__(self):
         return str(self.as_dict())
+
+    # filter is used to remove unnecessary items
+    # 
+    # {field}        - don't skip what's mentioned there
+    # {field}_ignore - skip these ones
+    def filter_skip(self, json):
+        # adding it to make code more readable
+        SKIP = True
+
+        if json and json.get("filter", False):
+            filter = json["filter"]
+
+            for field in ["name", "href"]:
+                if filter.get(field) and filter[field] not in getattr(self, field):
+                    return SKIP
+                # elif filter.get(f"{field}_ignore") and filter[f"{field}_ignore"] in getattr(self, field):
+                #     return SKIP
+
+        return not SKIP

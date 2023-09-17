@@ -14,14 +14,18 @@ from bs4 import BeautifulSoup, SoupStrainer
 from sqlalchemy.dialects.postgresql import JSONB
 
 from __main__ import db, FREQUENCIES
-from models.model_feeds_update import FeedUpdate
+from models.model_feeds_update import Update
 
 
 class Feed(db.Model):
+    __table_args__ = {
+        "schema": "feed_updates",
+    }
+
     # technical
-    id        = db.Column(db.Integer,     primary_key=True)
-    created   = db.Column(db.DateTime,    default=datetime.utcnow)
-    updated   = db.Column(db.DateTime,    default=None)
+    _id        = db.Column(db.Integer,     primary_key=True)
+    _created  = db.Column(db.DateTime,    default=datetime.utcnow)
+    _delayed  = db.Column(db.DateTime,    default=None)
     # core/required
     title     = db.Column(db.String(100), unique=True,  nullable=False)
     href      = db.Column(db.String(200), unique=False, nullable=False)
@@ -55,7 +59,7 @@ class Feed(db.Model):
     
     def as_dict(self) -> dict:
         return {
-            'id': self.id,
+            '_id': self._id,
 
             'title': self.title,
             'href': self.href,
@@ -74,13 +78,9 @@ class Feed(db.Model):
         if self.frequency == 'never':
             return False
 
-        if not self.updated:
+        if not self._delayed:
             return True
-        
-        delta = timedelta(**{
-            self.frequency: random.randint(1, 10),
-        })
-        if self.updated + delta <= datetime.now():
+        elif self._delayed <= datetime.now():
             return True
         
         return False
@@ -97,9 +97,9 @@ class Feed(db.Model):
         # Preparing
         new_items = []
         feed = db.session.query(Feed).filter_by(
-            id=feed_id
+            _id=feed_id
         ).first()
-        feed_len = db.session.query(FeedUpdate).filter_by(
+        feed_len = db.session.query(Update).filter_by(
             feed_id=feed_id
         ).count()
 
@@ -111,16 +111,20 @@ class Feed(db.Model):
         # Finishing with results
         if store_new:
             for each in feed_updates:
-                if db.session.query(FeedUpdate).filter_by(
+                if db.session.query(Update).filter_by(
                     feed_id=feed_id,
                     href=each['href'],
                 ).count() == 0:
-                    new_feedupdate = FeedUpdate(each)
+                    new_update = Update(each)
                     if feed_len != 0:
-                        new_feedupdate.datetime = datetime.now()
-                    db.session.add(new_feedupdate)
+                        new_update.datetime = datetime.now()
+                    elif new_update.filter_skip(json=feed.json):
+                        continue
+                    db.session.add(new_update)
                 new_items.append(each)
-            feed.updated = datetime.now()
+            feed._delayed = datetime.now() + timedelta(**{
+                feed.frequency: random.randint(1, 10),
+            })
             db.session.add(feed)
             db.session.commit()
         else:
@@ -144,26 +148,24 @@ class Feed(db.Model):
             if feed.frequency not in FREQUENCIES:
                 raise ValueError(f"Feed { feed.title }'s frequency is invalid. Feed dict: { feed.as_dict() }")
             elif force_all or feed.requires_update():
-                feed_todo_ids.append(feed.id)
+                feed_todo_ids.append(feed._id)
         
         for feed_id in feed_todo_ids:
-            response = requests.put("http://localhost:30010/feeds/parse",
-                headers = {"Content-Type": "application/json"},
-                data=json.dumps({
-                    "feed_id": feed_id,
-                    "store_new": store_new,
-                    "proxy": proxy,
-                })
-            )
-            response = response.json()
-            results += response["len"]
-            # results += len(
-            #     Feed.process_parsing(
-            #         feed_id=feed_id,
-            #         store_new=store_new,
-            #         proxy=proxy,
-            #     )
+            # response = requests.put("http://localhost:30010/feeds/parse",
+            #     headers = {"Content-Type": "application/json"},
+            #     data=json.dumps({
+            #         "feed_id": feed_id,
+            #         "store_new": store_new,
+            #         "proxy": proxy,
+            #     })
             # )
+            # response = response.json()
+            # results += response["len"]
+            results += Feed.process_parsing(
+                feed_id=feed_id,
+                store_new=store_new,
+                proxy=proxy,
+            )['len']
 
         # with Executor() as executor:
         #     executor = executor.map(Feed.process_parsing, feed_todo_ids, [store_new]*len(feed_todo_ids), [proxy]*len(feed_todo_ids))
@@ -224,7 +226,7 @@ class Feed(db.Model):
 
         #     for each in request['items']:
         #         if not each['isDonate']:  # ignoring payed chapters
-        #             result.append(FeedUpdate(
+        #             result.append(Update(
         #                 name=each["title"],
         #                 href=RANOBE_RF + each["url"],
         #                 datetime=datetime.strptime(each["publishedAt"], '%Y-%m-%d %H:%M:%S'),
@@ -428,7 +430,7 @@ class Feed(db.Model):
         #             result_datetime = each.find('time')['datetime'][:-3]+"00"
         #             result_datetime = datetime.strptime(result_datetime, '%Y-%m-%dT%H:%M:%S%z')
 
-        #             result.append(FeedUpdate(
+        #             result.append(Update(
         #                 name=each.find('h2', {'class': "story__title"}).find('a').getText(),
         #                 href=each.find('h2', {'class': "story__title"}).find('a')['href'],
         #                 datetime=result_datetime,
@@ -485,6 +487,8 @@ class Feed(db.Model):
                 # DATE RESULT: parsing dates
                 if "published" in each:
                     result_datetime = each["published"]
+                elif "delayed" in each:
+                    result_datetime = each["delayed"]
                 elif "updated" in each:
                     result_datetime = each["updated"]
                 else:
@@ -509,7 +513,7 @@ class Feed(db.Model):
                     'name':     result_name,
                     'href':     result_href,
                     'datetime': result_datetime,
-                    'feed_id':  self.id,
+                    'feed_id':  self._id,
                 })
 
         return self.parse_list(results=results)
