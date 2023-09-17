@@ -118,7 +118,7 @@ class Feed(db.Model):
                     new_update = Update(each)
                     if feed_len != 0:
                         new_update.datetime = datetime.now()
-                    elif new_update.filter_skip(json=feed.json):
+                    if new_update.filter_skip(json=feed.json):
                         continue
                     db.session.add(new_update)
                 new_items.append(each)
