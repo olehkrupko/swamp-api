@@ -21,7 +21,7 @@ class Feed(db.Model):
     # technical
     id        = db.Column(db.Integer,     primary_key=True)
     created   = db.Column(db.DateTime,    default=datetime.utcnow)
-    delayed   = db.Column(db.DateTime,    default=None)
+    _delayed  = db.Column(db.DateTime,    default=None)
     # core/required
     title     = db.Column(db.String(100), unique=True,  nullable=False)
     href      = db.Column(db.String(200), unique=False, nullable=False)
@@ -74,9 +74,9 @@ class Feed(db.Model):
         if self.frequency == 'never':
             return False
 
-        if not self.delayed:
+        if not self._delayed:
             return True
-        elif self.delayed <= datetime.now():
+        elif self._delayed <= datetime.now():
             return True
         
         return False
@@ -118,7 +118,7 @@ class Feed(db.Model):
                         continue
                     db.session.add(new_feedupdate)
                 new_items.append(each)
-            feed.delayed = datetime.now() + timedelta(**{
+            feed._delayed = datetime.now() + timedelta(**{
                 feed.frequency: random.randint(1, 10),
             })
             db.session.add(feed)
