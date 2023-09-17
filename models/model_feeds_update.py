@@ -10,7 +10,7 @@ class FeedUpdate(db.Model):
     # technical
     _id       = db.Column(db.Integer,     primary_key=True)
     feed_id  = db.Column(db.Integer,     db.ForeignKey("feed._id"), nullable=False)
-    created  = db.Column(db.DateTime,    default=datetime.datetime.utcnow)
+    _created = db.Column(db.DateTime,    default=datetime.datetime.utcnow)
     # core/required
     name     = db.Column(db.String(100), nullable=False)
     href     = db.Column(db.String(300), nullable=False)
@@ -73,7 +73,7 @@ class FeedUpdate(db.Model):
         return {
             '_id': self._id,
             'feed_id': self.feed_id,
-            'created': self.created,
+            '_created': self._created,
 
             'name': self.name,
             'href': self.href,
