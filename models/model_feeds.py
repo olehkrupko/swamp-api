@@ -45,16 +45,7 @@ class Feed(db.Model):
         self.href = data.pop('href')
         self.href_user = data.pop('href_user')
 
-        private = data.pop('private')
-        if isinstance(private, bool):
-            self.private = private
-        elif private == 'true':
-            self.private = True
-        elif private == 'false':
-            self.private = False
-        else:
-            raise ValueError(f"Value {private} is not appropriate for Feed.private")
-
+        self.private = data.pop('private')
         frequency = data.pop('frequency')
         if frequency in FREQUENCIES:
             self.frequency = frequency
