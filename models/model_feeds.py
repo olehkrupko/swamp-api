@@ -19,7 +19,7 @@ from models.model_feeds_update import FeedUpdate
 
 class Feed(db.Model):
     # technical
-    id        = db.Column(db.Integer,     primary_key=True)
+    _id        = db.Column(db.Integer,     primary_key=True)
     _created  = db.Column(db.DateTime,    default=datetime.utcnow)
     _delayed  = db.Column(db.DateTime,    default=None)
     # core/required
@@ -55,7 +55,7 @@ class Feed(db.Model):
     
     def as_dict(self) -> dict:
         return {
-            'id': self.id,
+            '_id': self._id,
 
             'title': self.title,
             'href': self.href,
@@ -93,7 +93,7 @@ class Feed(db.Model):
         # Preparing
         new_items = []
         feed = db.session.query(Feed).filter_by(
-            id=feed_id
+            _id=feed_id
         ).first()
         feed_len = db.session.query(FeedUpdate).filter_by(
             feed_id=feed_id
@@ -144,7 +144,7 @@ class Feed(db.Model):
             if feed.frequency not in FREQUENCIES:
                 raise ValueError(f"Feed { feed.title }'s frequency is invalid. Feed dict: { feed.as_dict() }")
             elif force_all or feed.requires_update():
-                feed_todo_ids.append(feed.id)
+                feed_todo_ids.append(feed._id)
         
         for feed_id in feed_todo_ids:
             # response = requests.put("http://localhost:30010/feeds/parse",
@@ -509,7 +509,7 @@ class Feed(db.Model):
                     'name':     result_name,
                     'href':     result_href,
                     'datetime': result_datetime,
-                    'feed_id':  self.id,
+                    'feed_id':  self._id,
                 })
 
         return self.parse_list(results=results)

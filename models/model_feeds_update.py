@@ -9,7 +9,7 @@ from __main__ import db
 class FeedUpdate(db.Model):
     # technical
     id       = db.Column(db.Integer,     primary_key=True)
-    feed_id  = db.Column(db.Integer,     db.ForeignKey("feed.id"), nullable=False)
+    feed_id  = db.Column(db.Integer,     db.ForeignKey("feed._id"), nullable=False)
     created  = db.Column(db.DateTime,    default=datetime.datetime.utcnow)
     # core/required
     name     = db.Column(db.String(100), nullable=False)
