@@ -6,7 +6,7 @@ from __main__ import db
 # from models.model_feeds import Feed
 
 
-class FeedUpdate(db.Model):
+class Update(db.Model):
     # technical
     _id      = db.Column(db.Integer,     primary_key=True)
     _created = db.Column(db.DateTime,    default=datetime.datetime.utcnow)

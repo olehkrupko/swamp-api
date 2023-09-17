@@ -6,7 +6,7 @@ from flask_cors import cross_origin
 import routes._shared as shared
 from __main__ import app, db
 from models.model_feeds import Feed
-from models.model_feeds_update import FeedUpdate
+from models.model_feeds_update import Update
 
 
 ROUTE_PATH = "/feed-updates"
@@ -21,9 +21,9 @@ def list_feed_updates():
         limit = 140
 
     updates = [
-        x.as_dict() for x in db.session.query(FeedUpdate)
+        x.as_dict() for x in db.session.query(Update)
             .filter_by(**kwargs)
-            .order_by(FeedUpdate.datetime.desc())
+            .order_by(Update.datetime.desc())
             .limit(limit)
             .all()
     ]

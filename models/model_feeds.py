@@ -14,7 +14,7 @@ from bs4 import BeautifulSoup, SoupStrainer
 from sqlalchemy.dialects.postgresql import JSONB
 
 from __main__ import db, FREQUENCIES
-from models.model_feeds_update import FeedUpdate
+from models.model_feeds_update import Update
 
 
 class Feed(db.Model):
@@ -95,7 +95,7 @@ class Feed(db.Model):
         feed = db.session.query(Feed).filter_by(
             _id=feed_id
         ).first()
-        feed_len = db.session.query(FeedUpdate).filter_by(
+        feed_len = db.session.query(Update).filter_by(
             feed_id=feed_id
         ).count()
 
@@ -107,16 +107,16 @@ class Feed(db.Model):
         # Finishing with results
         if store_new:
             for each in feed_updates:
-                if db.session.query(FeedUpdate).filter_by(
+                if db.session.query(Update).filter_by(
                     feed_id=feed_id,
                     href=each['href'],
                 ).count() == 0:
-                    new_feedupdate = FeedUpdate(each)
+                    new_update = Update(each)
                     if feed_len != 0:
-                        new_feedupdate.datetime = datetime.now()
-                    elif new_feedupdate.filter_skip(json=feed.json):
+                        new_update.datetime = datetime.now()
+                    elif new_update.filter_skip(json=feed.json):
                         continue
-                    db.session.add(new_feedupdate)
+                    db.session.add(new_update)
                 new_items.append(each)
             feed._delayed = datetime.now() + timedelta(**{
                 feed.frequency: random.randint(1, 10),
@@ -222,7 +222,7 @@ class Feed(db.Model):
 
         #     for each in request['items']:
         #         if not each['isDonate']:  # ignoring payed chapters
-        #             result.append(FeedUpdate(
+        #             result.append(Update(
         #                 name=each["title"],
         #                 href=RANOBE_RF + each["url"],
         #                 datetime=datetime.strptime(each["publishedAt"], '%Y-%m-%d %H:%M:%S'),
@@ -426,7 +426,7 @@ class Feed(db.Model):
         #             result_datetime = each.find('time')['datetime'][:-3]+"00"
         #             result_datetime = datetime.strptime(result_datetime, '%Y-%m-%dT%H:%M:%S%z')
 
-        #             result.append(FeedUpdate(
+        #             result.append(Update(
         #                 name=each.find('h2', {'class': "story__title"}).find('a').getText(),
         #                 href=each.find('h2', {'class': "story__title"}).find('a')['href'],
         #                 datetime=result_datetime,
