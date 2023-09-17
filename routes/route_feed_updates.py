@@ -28,7 +28,7 @@ def list_feed_updates():
             .all()
     ]
     for each in updates:
-        each['feed_data'] = db.session.query(Feed).filter_by(id=each['feed_id']).first().as_dict()
+        each['feed_data'] = db.session.query(Feed).filter_by(_id=each['feed_id']).first().as_dict()
 
     return shared.return_json(
         response=updates,
