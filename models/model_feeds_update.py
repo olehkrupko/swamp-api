@@ -7,6 +7,10 @@ from __main__ import db
 
 
 class Update(db.Model):
+    __table_args__ = {
+        "schema": "feed_updates",
+    }
+
     # technical
     _id      = db.Column(db.Integer,     primary_key=True)
     _created = db.Column(db.DateTime,    default=datetime.datetime.utcnow)

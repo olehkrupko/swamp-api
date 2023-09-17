@@ -18,6 +18,10 @@ from models.model_feeds_update import Update
 
 
 class Feed(db.Model):
+    __table_args__ = {
+        "schema": "feed_updates",
+    }
+
     # technical
     _id        = db.Column(db.Integer,     primary_key=True)
     _created  = db.Column(db.DateTime,    default=datetime.utcnow)
