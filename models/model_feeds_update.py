@@ -8,13 +8,14 @@ from __main__ import db
 
 class FeedUpdate(db.Model):
     # technical
-    _id       = db.Column(db.Integer,     primary_key=True)
-    feed_id  = db.Column(db.Integer,     db.ForeignKey("feed._id"), nullable=False)
+    _id      = db.Column(db.Integer,     primary_key=True)
     _created = db.Column(db.DateTime,    default=datetime.datetime.utcnow)
     # core/required
     name     = db.Column(db.String(100), nullable=False)
     href     = db.Column(db.String(300), nullable=False)
     datetime = db.Column(db.DateTime,    default=None)
+    # metadata
+    feed_id  = db.Column(db.Integer,     db.ForeignKey("feed._id"), nullable=False)
 
     def __init__(self, data: dict):
         data = data.copy()
