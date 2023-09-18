@@ -163,6 +163,27 @@ def feeds_file():
 #         response=response,
 #     )
 
+@shared.data_is_json
+@app.route(f"{ ROUTE_PATH }/parse/href", methods=['GET'])
+def parse_href():
+    body = request.args
+    href = body['href']
+
+    feed = Feed({
+        'title': 'temp',
+        'href': href,
+        'href_user': 'href',
+        'private': True,
+        'frequency': 'never',
+        'notes': 'temp feed to parse random URLs. Not to be saved',
+        'json': {},
+    })
+    response = feed.parse_href()
+
+    return shared.return_json(
+        response=response,
+    )
+
 @app.route(f"{ ROUTE_PATH }/parse/runner", methods=['PUT'])
 def parse_runner():
     result = Feed.process_parsing_multi()
