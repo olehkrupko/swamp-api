@@ -116,10 +116,10 @@ class Feed(db.Model):
                     href=each['href'],
                 ).count() == 0:
                     new_update = Update(each)
-                    if feed_len != 0:
-                        new_update.datetime = datetime.now()
                     if new_update.filter_skip(json=feed.json):
                         continue
+                    if feed_len != 0:
+                        new_update.datetime = datetime.now()
                     db.session.add(new_update)
                 new_items.append(each)
             feed._delayed = datetime.now() + timedelta(**{
