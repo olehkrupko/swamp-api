@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'main'
+      - '56-increase-parsing-frequency'
 jobs:
   deploy_code:
     runs-on: self-hosted
