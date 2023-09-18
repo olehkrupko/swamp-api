@@ -97,10 +97,10 @@ class Feed(db.Model):
         # Preparing
         new_items = []
         feed = db.session.query(Feed).filter_by(
-            _id=feed_id
+            _id=feed_id,
         ).first()
         feed_len = db.session.query(Update).filter_by(
-            feed_id=feed_id
+            feed_id=feed_id,
         ).count()
 
         # Processing
