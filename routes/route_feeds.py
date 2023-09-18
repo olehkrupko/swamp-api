@@ -151,16 +151,17 @@ def feeds_file():
         },
     )
 
-@shared.data_is_json
-@app.route('/feeds/parse', methods=['PUT'])
-def parse_feed():
-    body = request.get_json()
+# disabling until feature is used once again
+# @shared.data_is_json
+# @app.route('/feeds/parse', methods=['PUT'])
+# def parse_feed():
+#     body = request.get_json()
 
-    response = Feed.process_parsing(**body)
+#     response = Feed.process_parsing(**body)
 
-    return shared.return_json(
-        response=response,
-    )
+#     return shared.return_json(
+#         response=response,
+#     )
 
 @app.route(f"{ ROUTE_PATH }/parse/runner", methods=['PUT'])
 def parse_runner():
