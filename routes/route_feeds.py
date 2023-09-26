@@ -57,7 +57,7 @@ def create_feed():
     db.session.refresh(feed)
 
     return shared.return_json(
-        response=int(feed._id),
+        response=feed.as_dict(),
     )
 
 @app.route(f"{ ROUTE_PATH }/<feed_id>", methods=['GET'])
@@ -165,7 +165,7 @@ def feeds_file():
 
 @shared.data_is_json
 @app.route(f"{ ROUTE_PATH }/parse/href", methods=['GET'])
-def parse_href():
+def test_parse_href():
     body = request.args
     href = body['href']
 
