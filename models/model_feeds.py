@@ -484,7 +484,11 @@ class Feed(db.Model):
                 if not each:
                     raise DeprecationWarning(f"Data returned by {'active' if self.requires_update() else 'disabled'} feed {self} is empty, skipping iteration")
                     continue
-                result_href = each["links"][0]["href"]
+                try:
+                    result_href = each["links"][0]["href"]
+                except KeyError:
+                    # raise SyntaxWarning(f"Data returned by feed {self} is milling URL, skipping item")
+                    continue
 
                 # DATE RESULT: parsing dates
                 if "published" in each:
