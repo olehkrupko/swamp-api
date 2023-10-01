@@ -4,6 +4,7 @@ import random
 import ssl
 import string
 import urllib
+import warnings
 from datetime import datetime, timedelta
 from dateutil import parser, tz  # adding custom timezones
 from dateutil.relativedelta import relativedelta
@@ -487,7 +488,7 @@ class Feed(db.Model):
                 try:
                     result_href = each["links"][0]["href"]
                 except KeyError:
-                    # raise SyntaxWarning(f"Data returned by feed {self} is milling URL, skipping item")
+                    warnings.warn(f"Data returned by feed {self} is missing URL, skipping item", SyntaxWarning)
                     continue
 
                 # DATE RESULT: parsing dates
