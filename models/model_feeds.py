@@ -1,5 +1,6 @@
 import feedparser
 import json
+import os
 import random
 import ssl
 import string
@@ -8,6 +9,7 @@ from datetime import datetime, timedelta
 from dateutil import parser, tz  # adding custom timezones
 from typing import List, Dict
 
+import pika
 import requests
 import sentry_sdk
 from bs4 import BeautifulSoup, SoupStrainer
@@ -151,16 +153,6 @@ class Feed(db.Model):
                 feed_todo_ids.append(feed._id)
         
         for feed_id in feed_todo_ids:
-            # response = requests.put("http://localhost:30010/feeds/parse",
-            #     headers = {"Content-Type": "application/json"},
-            #     data=json.dumps({
-            #         "feed_id": feed_id,
-            #         "store_new": store_new,
-            #         "proxy": proxy,
-            #     })
-            # )
-            # response = response.json()
-            # results += response["len"]
             results += Feed.process_parsing(
                 feed_id=feed_id,
                 store_new=store_new,
@@ -185,6 +177,25 @@ class Feed(db.Model):
         #             total_items += result['amount']
 
         return results
+    
+    @staticmethod
+    def process_parsing_multi_queue(force_all=False, store_new=True, proxy=False):
+        feed_list = db.session.query(Feed).all()
+        random.shuffle(feed_list)
+        feed_list = filter(lambda x: x.requires_update(), feed_list)
+
+        for feed in feed_list:
+            params = pika.URLParameters(os.environ['RABBITMQ_CONNECTION_STRING'])
+            connection = pika.BlockingConnection(params)
+            channel = connection.channel()
+
+            channel.basic_publish(
+                exchange='swamp',
+                routing_key='feed-parser',
+                body=json.dumps(
+                    feed.as_dict()
+                ),
+            )
 
     def parse_href(self, href = None, proxy: bool = True, **kwargs: Dict):
         #######################################
