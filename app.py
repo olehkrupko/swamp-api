@@ -48,6 +48,9 @@ CORS(app)
 import routes.route_feeds
 import routes.route_feed_updates
 
+# queue threads
+import queues.parser
+
 # run app
 if __name__ == '__main__':
     app.run('0.0.0.0', port=30010, debug=True)
