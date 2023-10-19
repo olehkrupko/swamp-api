@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - 'main'
-      - '70-fix-months-is-an-invalid-keyword-argument-for-__new__'
 jobs:
   deploy_code:
     runs-on: self-hosted
