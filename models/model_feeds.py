@@ -192,7 +192,7 @@ class Feed(db.Model):
 
             channel.basic_publish(
                 exchange='swamp',
-                routing_key='feed-parser',
+                routing_key='feed.parser',
                 body=json.dumps(
                     feed.as_dict()
                 ),
@@ -497,6 +497,7 @@ class Feed(db.Model):
                 try:
                     result_href = each["links"][0]["href"]
                 except KeyError:
+                    # TODO: send to sentry
                     warnings.warn(f"Data returned by feed {self} is missing URL, skipping item", SyntaxWarning)
                     continue
 

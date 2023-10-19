@@ -1,40 +1,18 @@
 import json
-import os
-import sys
-from threading import Thread
+import time
 
-import pika
+from rabbitmq_pika_flask import ExchangeType
 
+from __main__ import rabbit
 from models.model_feeds import Feed
 
 
-params = pika.URLParameters(os.environ['RABBITMQ_CONNECTION_STRING'])
-connection = pika.BlockingConnection(params)
-channel = connection.channel()
-
-
-def callback(ch, method, properties, body):
-    print('Received in Flask microservice')
-    feed = json.loads(body)
-    print(feed)
+@rabbit.queue(routing_key='feed.parser', exchange_type=ExchangeType.DIRECT)
+def feed_parser(routing_key, body):
+    print(f"Received in Flask microservice body { body }")
 
     Feed.process_parsing(
-        feed_id=feed['_id'],
+        feed_id=body['_id'],
         store_new=True,
     )
-
-
-channel.basic_consume(
-    queue='swamp.q.feed-parser',
-    on_message_callback=callback,
-    auto_ack=True,
-)
-
-
-print('Started Consuming')
-
-# channel.start_consuming()
-thread = Thread(target = channel.start_consuming)
-thread.start()
-
-# channel.close()
+    print('Feed parsing completed')
