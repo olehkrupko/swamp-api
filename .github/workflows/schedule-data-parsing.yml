@@ -1,8 +1,10 @@
 name: schedule-data-parsing
 run-name: ${{ github.actor }} starts scheduled data parsing
 on:
-  schedule:
-    - cron: '*/20 * * * *'
+  push:
+    branches:
+      - 'main'
+      - '20-rabbitmq-feed-parsing'
 jobs:
   data_parsing:
     runs-on: self-hosted
