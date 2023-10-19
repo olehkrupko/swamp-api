@@ -11,7 +11,6 @@ from dateutil.relativedelta import relativedelta
 from typing import List, Dict
 
 import requests
-# import sentry_sdk
 from bs4 import BeautifulSoup, SoupStrainer
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -124,7 +123,6 @@ class Feed(db.Model):
                         new_update.datetime = datetime.now()
                     db.session.add(new_update)
                 new_items.append(each)
-            # feed._delayed = datetime.now() + timedelta(**{
             feed._delayed = datetime.now() + relativedelta(**{
                 feed.frequency: random.randint(1, 10),
             })
