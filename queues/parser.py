@@ -19,7 +19,7 @@ def callback(ch, method, properties, body):
     print(feed)
 
     Feed.process_parsing(
-        feed_id=feed._id,
+        feed_id=feed['_id'],
         store_new=True,
     )
 
