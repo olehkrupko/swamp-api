@@ -5,13 +5,14 @@ import random
 import ssl
 import string
 import urllib
+import warnings
 from datetime import datetime, timedelta
 from dateutil import parser, tz  # adding custom timezones
+from dateutil.relativedelta import relativedelta
 from typing import List, Dict
 
 import pika
 import requests
-import sentry_sdk
 from bs4 import BeautifulSoup, SoupStrainer
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -124,7 +125,7 @@ class Feed(db.Model):
                         new_update.datetime = datetime.now()
                     db.session.add(new_update)
                 new_items.append(each)
-            feed._delayed = datetime.now() + timedelta(**{
+            feed._delayed = datetime.now() + relativedelta(**{
                 feed.frequency: random.randint(1, 10),
             })
             db.session.add(feed)
@@ -493,7 +494,11 @@ class Feed(db.Model):
                 if not each:
                     raise DeprecationWarning(f"Data returned by {'active' if self.requires_update() else 'disabled'} feed {self} is empty, skipping iteration")
                     continue
-                result_href = each["links"][0]["href"]
+                try:
+                    result_href = each["links"][0]["href"]
+                except KeyError:
+                    warnings.warn(f"Data returned by feed {self} is missing URL, skipping item", SyntaxWarning)
+                    continue
 
                 # DATE RESULT: parsing dates
                 if "published" in each:
