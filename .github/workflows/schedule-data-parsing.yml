@@ -8,7 +8,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Send request and save status code
-        run: echo "status_code=`curl --write-out '%{http_code}' --silent --output /dev/null -X PUT 'http://192.168.0.155:30010/feeds/parse/runner'`" >> "$GITHUB_ENV"
+        run: echo "status_code=`curl --write-out '%{http_code}' --silent --output /dev/null -X PUT 'http://192.168.0.155:30010/feeds/parse/queue'`" >> "$GITHUB_ENV"
       - name: Print status
         run: echo "$status_code"
       - name: Check request status
