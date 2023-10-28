@@ -17,7 +17,7 @@ class Update(db.Model):
     _id      = db.Column(db.Integer,     primary_key=True)
     _created = db.Column(db.DateTime,    default=datetime.datetime.utcnow)
     # core/required
-    name     = db.Column(db.String(100), nullable=False)
+    name     = db.Column(db.String(140), nullable=False)
     href     = db.Column(db.String(300), nullable=False)
     datetime = db.Column(db.DateTime,    default=None)
     # metadata
@@ -68,7 +68,7 @@ class Update(db.Model):
             # name = f"No name in update by { feed_title }"
             name = "No name in update by {feed_title}"
 
-        self.name = name[:100]
+        self.name = name[:140]
         self.href = data.pop('href')
         self.datetime = data.pop('datetime')
         self.feed_id = feed_id
