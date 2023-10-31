@@ -1,11 +1,8 @@
 name: schedule-healthcheck
 run-name: Scheduled healthcheck
 on:
-  push:
-    branches:
-      - '85-testing-healthcheck'
-#   schedule:
-#     - cron: '* * * * *'
+  schedule:
+    - cron: '*/15 * * * *'
 jobs:
   data_parsing:
     runs-on: self-hosted
