@@ -1,8 +1,8 @@
-name: schedule-healthcheck
+name: scheduled-healthcheck
 run-name: Scheduled healthcheck
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '*/20 * * * *'
 jobs:
   data_parsing:
     runs-on: self-hosted

@@ -1,5 +1,5 @@
-name: deploy-prod
-run-name: ${{ github.actor }} deploys on push to ${{ github.ref_name }}
+name: push-prod
+run-name: Push update to PROD from ${{ github.ref_name }}
 on:
   push:
     branches:

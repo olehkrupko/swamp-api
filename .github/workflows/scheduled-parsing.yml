@@ -1,5 +1,5 @@
-name: schedule-data-parsing
-run-name: ${{ github.actor }} starts scheduled data parsing
+name: scheduled-parsing
+run-name: Scheduled parsing initiated by adding feeds to queue
 on:
   schedule:
     - cron: '*/20 * * * *'
