@@ -61,6 +61,9 @@ CORS(app)
 import routes.route_feeds
 import routes.route_feed_updates
 
+# # telegram bot functions
+# import queues.courier
+
 # queue threads
 import queues.parser
 
