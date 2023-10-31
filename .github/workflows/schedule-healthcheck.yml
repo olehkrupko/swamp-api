@@ -8,7 +8,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Send request and save response
-        run: echo "is_healthy=`curl --silent -X GET 'http://127.0.0.1:30010/healthcheck/'`" >> "$GITHUB_ENV"
+        run: echo "is_healthy=`curl --silent GET 'http://127.0.0.1:30010/healthcheck/'`" >> "$GITHUB_ENV"
       - name: Print status
         run: echo "$is_healthy"
       - name: Check health status
