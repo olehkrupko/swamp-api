@@ -498,8 +498,9 @@ class Feed(db.Model):
                 try:
                     result_href = each["links"][0]["href"]
                 except KeyError:
-                    # TODO: send to sentry
-                    warnings.warn(f"Data returned by feed {self} is missing URL, skipping item", SyntaxWarning)
+                    capture_message(
+                        f"Data missing URL, skipping item {self=} {each=}"
+                    )
                     continue
 
                 # DATE RESULT: parsing dates
