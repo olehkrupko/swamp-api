@@ -10,13 +10,8 @@ jobs:
   data_parsing:
     runs-on: self-hosted
     steps:
-      - name: Check the deployed service URL
-        uses: jtalk/url-health-check-action@v3
-        with:
-          # Check the following URLs one by one sequentially
-          url: http://127.0.0.1:30010/healthcheck/
       - name: Send request and save response
-        run: echo "is_healthy=`curl --silent GET 'http://127.0.0.1:30010/healthcheck/'`" >> "$GITHUB_ENV"
+        run: echo "is_healthy=`curl --silent GET 'http://192.168.0.155:30010/healthcheck/'`" >> "$GITHUB_ENV"
       - name: Print status
         run: echo "$is_healthy"
       - name: Check health status
