@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'main'
+      - '94-testing-flake8'
 jobs:
   deploy_code:
     runs-on: self-hosted
