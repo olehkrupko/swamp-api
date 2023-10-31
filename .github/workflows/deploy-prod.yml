@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - 'main'
-      - '20-rabbitmq-feed-parsing'
 jobs:
   deploy_code:
     runs-on: self-hosted
