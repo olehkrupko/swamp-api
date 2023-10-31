@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+import os
 
 import emoji
 import telegram
@@ -111,6 +112,6 @@ class Update(db.Model):
 
     def send_telegram(self):
         async def _send(msg, chat_id=os.environ.get('TELEGRAM_BOT_DMS')):
-            await telegram.Bot(os.environ.get('TELEGRAM_BOT_TOKEN')).sendMessage(chat_id=chat, text=msg, parse_mode='markdown')
+            await telegram.Bot(os.environ.get('TELEGRAM_BOT_TOKEN')).sendMessage(chat_id=chat_id, text=msg, parse_mode='markdown')
 
         asyncio.run(_send(f"[{self.name}]({self.href})"))
