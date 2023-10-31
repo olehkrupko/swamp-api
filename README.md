@@ -1,3 +1,5 @@
+[![schedule-healthcheck](https://github.com/olehkrupko/swamp-api/actions/workflows/schedule-healthcheck.yml/badge.svg)](https://github.com/olehkrupko/swamp-api/actions/workflows/schedule-healthcheck.yml)
+
 # swamp-api
 It's backend API for swamp projects
 
