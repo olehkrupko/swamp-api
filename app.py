@@ -12,7 +12,7 @@ from rabbitmq_pika_flask.ExchangeParams import ExchangeParams
 from sentry_sdk.integrations.flask import FlaskIntegration
 
 sentry_sdk.init(
-    dsn="https://95b26ff2b8915f5d08177554fd94de37@o4505676526583808.ingest.sentry.io/4505676561317888",
+    dsn=os.environ.get('SENTRY_SDK_DSN'),
     integrations=[
         FlaskIntegration(),
     ],
@@ -27,9 +27,7 @@ sentry_sdk.init(
 sys.dont_write_bytecode = True  # avoid writing __pycache__ and .pyc
 app = Flask(__name__)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
-# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://krupko_space:IGNOMINY-envisage-godly@192.168.0.155:54327/krupko_space'
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://krupko_space:sterhedsg45whes@192.168.0.158:54321/krupko_space'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DB_URI')
 FREQUENCIES = (
     'minutes',
     'hours',
