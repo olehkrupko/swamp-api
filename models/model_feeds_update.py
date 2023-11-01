@@ -95,12 +95,15 @@ class Update(db.Model):
     def filter_skip(self, json):
         # adding it to make code more readable
         SKIP = True
+        SUPPORTED_FIELDS = ["name", "href"]
 
-        if json and json.get("filter", False):
-            filter = json["filter"]
+        if "filter" not in json:
+            return not SKIP
 
-            for field in ["name", "href"]:
-                if filter.get(field) and filter[field] not in getattr(self, field):
+        for filter_name, filter_value in json["filter"].items():
+            if filter_name in SUPPORTED_FIELDS:
+                # check for blacklisting using href_ignore there as well
+                if filter_value not in getattr(self, filter_name):
                     return SKIP
 
         return not SKIP
