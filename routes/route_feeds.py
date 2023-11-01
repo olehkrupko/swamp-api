@@ -84,6 +84,12 @@ def update_feed(feed_id):
                 status=400,
             )
     
+    if 'frequency' in body.items():
+        # regenerate _delayed:
+        feed._delayed = datetime.now() + relativedelta(**{
+            feed.frequency: random.randint(1, 10),
+        })
+
     db.session.add(feed)
     db.session.commit()
 
