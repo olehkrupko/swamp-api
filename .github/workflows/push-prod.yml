@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-  test-lint-errors:
+  lint-flake8-errors:
     runs-on: self-hosted
     steps:
     - uses: actions/checkout@v2
@@ -28,7 +28,7 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         # flake8 . --count --statistics
-  test-lint-full:
+  lint-flake8-full:
     runs-on: self-hosted
     steps:
     - uses: actions/checkout@v2
