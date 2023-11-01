@@ -81,6 +81,8 @@ def update_feed(feed_id):
     body = request.get_json()
 
     for key, value in body.items():
+        if key[0] == '_':
+            raise ValueError(f"{key=} is read-only")
         if hasattr(feed, key):
             setattr(feed, key, value)
         else:
