@@ -20,15 +20,22 @@ def list_feed_updates():
     else:
         limit = 140
 
+    feeds = [x.as_dict() for x in db.session.query(Feed).filter_by(**kwargs)]
+    feed_ids = [x['_id'] for x in feeds]
+
     updates = [
-        x.as_dict() for x in db.session.query(Update)
-            .filter_by(**kwargs)
-            .order_by(Update.datetime.desc())
-            .limit(limit)
-            .all()
+        x.as_dict() for x in
+        db.session.query(Update).filter(
+            Update.feed_id.in_(feed_ids)
+        ).order_by(
+            Update.datetime.desc()
+        ).limit(limit).all()
     ]
     for each in updates:
-        each['feed_data'] = db.session.query(Feed).filter_by(_id=each['feed_id']).first().as_dict()
+        for x in feeds:
+            if x._id == each['feed_id']:
+                each['feed_data'] = x.as_dict()
+                break
 
     return shared.return_json(
         response=updates,
