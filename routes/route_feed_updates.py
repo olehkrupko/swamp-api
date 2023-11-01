@@ -1,7 +1,4 @@
-import json
-
 from flask import request
-from flask_cors import cross_origin
 
 import routes._shared as shared
 from __main__ import app, db
@@ -15,10 +12,9 @@ ROUTE_PATH = "/feed-updates"
 @app.route(f"{ ROUTE_PATH }/", methods=['GET'])
 def list_feed_updates():
     kwargs = request.args
+    limit = 140
     if "limit" in kwargs:
         limit = kwargs.pop(limit)
-    else:
-        limit = 140
 
     feeds = db.session.query(Feed).filter_by(**kwargs)
 

@@ -5,15 +5,14 @@ import random
 import ssl
 import string
 import urllib
-import warnings
-from datetime import datetime, timedelta
+from datetime import datetime
 from dateutil import parser, tz  # adding custom timezones
 from dateutil.relativedelta import relativedelta
 from typing import List, Dict
 
 import pika
-import requests
-from bs4 import BeautifulSoup, SoupStrainer
+# import requests
+# from bs4 import BeautifulSoup, SoupStrainer
 from sentry_sdk import capture_message
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -27,23 +26,55 @@ class Feed(db.Model):
     }
 
     # technical
-    _id        = db.Column(db.Integer,     primary_key=True)
-    _created  = db.Column(db.DateTime,    default=datetime.utcnow)
-    _delayed  = db.Column(db.DateTime,    default=None)
+    _id = db.Column(
+        db.Integer,
+        primary_key=True,
+    )
+    _created = db.Column(
+        db.DateTime,
+        default=datetime.utcnow,
+    )
+    _delayed = db.Column(
+        db.DateTime,
+        default=None,
+    )
     # core/required
-    title     = db.Column(db.String(100), unique=True,  nullable=False)
-    href      = db.Column(db.String(200), unique=False, nullable=False)
-    href_user = db.Column(db.String(200), unique=False, nullable=True)
+    title = db.Column(
+        db.String(100),
+        unique=True,
+        nullable=False,
+    )
+    href = db.Column(
+        db.String(200),
+        unique=False,
+        nullable=False,
+    )
+    href_user = db.Column(
+        db.String(200),
+        unique=False,
+        nullable=True,
+    )
     # metadata
-    private   = db.Column(db.Boolean,     default=False  )
-    frequency = db.Column(db.String(20),  default='weeks')
-    notes     = db.Column(db.String(200), default='',   nullable=True, unique=False)
-    json      = db.Column(JSONB)
+    private = db.Column(
+        db.Boolean,
+        default=False,
+    )
+    frequency = db.Column(
+        db.String(20),
+        default='weeks',
+    )
+    notes = db.Column(
+        db.String(200),
+        default='',
+        nullable=True,
+        unique=False,
+    )
+    json = db.Column(JSONB)
 
     def __init__(self, data: dict):
         data = data.copy()
         if not isinstance(data, dict):
-            raise Exception(f"__init__ data {data} has to be a dict, not {type(data)}")
+            raise Exception(f"{type(data)} {data=} has to be a dict")
 
         self.title = data.pop('title')
         self.href = data.pop('href')
@@ -60,7 +91,7 @@ class Feed(db.Model):
 
         if data:
             raise Exception(f"Dict {data} has extra data")
-    
+
     def as_dict(self) -> dict:
         return {
             '_id': self._id,
@@ -77,7 +108,7 @@ class Feed(db.Model):
 
     def __str__(self):
         return str(self.as_dict())
-    
+
     def requires_update(self):
         if self.frequency == 'never':
             return False
@@ -86,16 +117,16 @@ class Feed(db.Model):
             return True
         elif self._delayed <= datetime.now():
             return True
-        
+
         return False
 
-    ####################################################
-    ####          FEED PARSING LOGIC BELOW          ####
-    ####################################################
+    ##########################
+    # FEED PARSING LOGIC BELOW
+    ##########################
 
     def parse_list(self, results: List[Dict]):
         return results
-    
+
     @staticmethod
     def process_parsing(feed_id, store_new=True, proxy=False):
         # Preparing
@@ -109,7 +140,7 @@ class Feed(db.Model):
 
         # Processing
         feed_updates = feed.parse_href(
-            proxy  = proxy,
+            proxy=proxy,
         )
 
         # Finishing with results
@@ -134,14 +165,14 @@ class Feed(db.Model):
             db.session.commit()
         else:
             new_items = feed_updates.copy()
-        
+
         # Return data
         return {
             "len":  len(new_items),
             "items":    new_items,
             "feed":     feed,
         }
-    
+
     @staticmethod
     def process_parsing_multi(force_all=False, store_new=True, proxy=False):
         results = 0
@@ -151,10 +182,12 @@ class Feed(db.Model):
 
         for feed in feed_list:
             if feed.frequency not in FREQUENCIES:
-                raise ValueError(f"Feed { feed.title }'s frequency is invalid. Feed dict: { feed.as_dict() }")
+                raise ValueError(
+                    f"Invalid {feed.frequency=}, {feed.as_dict()=}"
+                )
             elif force_all or feed.requires_update():
                 feed_todo_ids.append(feed._id)
-        
+
         for feed_id in feed_todo_ids:
             results += Feed.process_parsing(
                 feed_id=feed_id,
@@ -163,32 +196,40 @@ class Feed(db.Model):
             )['len']
 
         # with Executor() as executor:
-        #     executor = executor.map(Feed.process_parsing, feed_todo_ids, [store_new]*len(feed_todo_ids), [proxy]*len(feed_todo_ids))
+        #     executor = executor.map(
+        #         Feed.process_parsing,
+        #         feed_todo_ids,
+        #         [store_new]*len(feed_todo_ids),
+        #         [proxy]*len(feed_todo_ids),
+        #     )
         #     if options['logBar']:
         #         executor = tqdm(executor, total=len(parse_feeds))
 
         #     for result in executor:
         #         print(result['len'])
-        #         if options['logEach'] or (options["logEmpty"] and result['amount_total'] == 0):
+        #         if options['logEach'] or (options["logEmpty"] and
+        # result['amount_total'] == 0):
         #             Command.print_feed(
-        #                 title=result['title'], 
-        #                 amount=result['amount'], 
+        #                 title=result['title'],
+        #                 amount=result['amount'],
         #                 time=result['time']
         #             )
-                
+
         #         if options['log']:
         #             total_items += result['amount']
 
         return results
-    
+
     @staticmethod
-    def process_parsing_multi_queue(force_all=False, store_new=True, proxy=False):
+    def process_parsing_queue(force_all=False, store_new=True, proxy=False):
         feed_list = db.session.query(Feed).all()
         random.shuffle(feed_list)
         feed_list = filter(lambda x: x.requires_update(), feed_list)
 
         for feed in feed_list:
-            params = pika.URLParameters(os.environ['RABBITMQ_CONNECTION_STRING'])
+            params = pika.URLParameters(
+                os.environ['RABBITMQ_CONNECTION_STRING']
+            )
             connection = pika.BlockingConnection(params)
             channel = connection.channel()
 
@@ -200,27 +241,29 @@ class Feed(db.Model):
                 ),
             )
 
-    def parse_href(self, href = None, proxy: bool = True, **kwargs: Dict):
-        #######################################
-        ####  PREPARING REQUIRED VARIABLES ####
-        #######################################
+    def parse_href(self, href=None, proxy: bool = True, **kwargs: Dict):
+        ###############################
+        #  PREPARING REQUIRED VARIABLES
+        ###############################
+
         results = []
         if href is None:
             href = self.href
 
         # avoiding blocks
+        referer_domain = "".join(random.choices(string.ascii_letters, k=16))
         headers = {
             # 'user-agent': feed.UserAgent_random().strip(),
-            'referer': f'https://www.{ "".join(random.choices(string.ascii_letters, k=16)) }.com/?q={ href }'
+            'referer': f'https://www.{ referer_domain }.com/?q={ href }'
         }
         proxyDict = {}
         if proxy and isinstance(proxy, str):
-            proxyDict["http"]  = "http://"  + proxy
+            proxyDict["http"] = "http://" + proxy
             proxyDict["https"] = "https://" + proxy
 
-        #######################################
-        ####    STARTING DATA INGESTION    ####
-        #######################################
+        #########################
+        # STARTING DATA INGESTION
+        #########################
 
         # using it as first if for now
         if False:
@@ -250,7 +293,8 @@ class Feed(db.Model):
         #         'https://nitter.namazso.eu',  # +
         #     )
         #     # 20 = len('https://twitter.com/')
-        #     self.href = f"{ random.choice(caching_servers) }/{ self.href[20:] }/rss"
+        #     server = random.choice(caching_servers)
+        #     self.href = f"{ server }/{ self.href[20:] }/rss"
 
         #     try:
         #         results = self.parse_href(proxy)
@@ -259,8 +303,9 @@ class Feed(db.Model):
 
         #     base_domain = 'twitter.com'
         #     for each in results:
-        #         each['href'] = each['href'].replace('#m', '').replace('http://', 'https://')
-                
+        #         each['href'] = each['href'].replace('#m', '')
+        #         each['href'] = each['href'].replace('http://', 'https://')
+
         #         href_split = each['href'].split('/')
         #         href_split[2] = base_domain
 
@@ -268,37 +313,41 @@ class Feed(db.Model):
 
         # custom tiktok import
         elif 'https://www.tiktok.com/@' in href:
-            href = f"https://proxitok.pabloferreiro.es/@{ href.split('@')[-1] }/rss"
-            
+            href_base = "https://proxitok.pabloferreiro.es"
+            href = f"{href_base}/@{ href.split('@')[-1] }/rss"
+
             results = self.parse_href(
-                href = href,
-                proxy = proxy,
+                href=href,
+                proxy=proxy,
             )
 
             results.reverse()
             for each in results:
-                each['href'] = each['href'].replace('proxitok.pabloferreiro.es', 'tiktok.com')
+                each['href'] = each['href'].replace(
+                    'proxitok.pabloferreiro.es', 'tiktok.com'
+                )
 
-        # custom RSS YouTube converter (link to feed has to be converted manually)
+        # custom RSS YouTube converter
         elif 'https://www.youtube.com/channel/' in href:
             # 32 = len('https://www.youtube.com/channel/')
             # 7 = len('/videos')
-            href = "https://www.youtube.com/feeds/videos.xml?channel_id=" + href[32:-7]
+            href_base = "https://www.youtube.com/feeds/videos.xml"
+            href = f"{href_base}?channel_id={href[32:-7]}"
 
             results = self.parse_href(
-                href = href,
-                proxy = proxy,
+                href=href,
+                proxy=proxy,
             )
 
-        # custom RSS readmanga converter (link to feed has to be converted manually to simplify feed object creation)
+        # custom RSS readmanga converter
         elif 'http://readmanga.live/' in href and href.find('/rss/') == -1:
             # 22 = len('http://readmanga.live/')
             name = href[22:]
             href = "feed://readmanga.live/rss/manga?name=" + name
 
             results = self.parse_href(
-                href = href,
-                proxy = proxy,
+                href=href,
+                proxy=proxy,
             )
 
             for each in results:
@@ -306,16 +355,18 @@ class Feed(db.Model):
                 split[-3] = name
                 each['href'] = '/'.join(split)
 
-        # custom RSS mintmanga converter (link to feed has to be converted manually to simplify feed object creation)
-        elif 'http://mintmanga.com/' in href and href.find('mintmanga.com/rss/manga') == -1 and kwargs.get('processed', False):
+        # custom RSS mintmanga converter
+        elif 'mintmanga.com' in href and \
+                'mintmanga.com/rss/manga' not in href and \
+                not kwargs.get('processed'):
             # 21 = len('http://mintmanga.com/')
             name = href[21:]
             href = "feed://mintmanga.com/rss/manga?name=" + name
 
             results = self.parse_href(
-                href = href,
-                proxy = proxy,
-                processed = True,
+                href=href,
+                proxy=proxy,
+                processed=True,
             )
 
             for each in results:
@@ -323,25 +374,28 @@ class Feed(db.Model):
                 split[-3] = name
                 each['href'] = '/'.join(split)
 
-        # custom RSS deviantart converter (link to feed has to be converted manually to simplify feed object creation)
-        elif 'https://www.deviantart.com/' in href and kwargs.get('processed', False):
+        # custom RSS deviantart converter
+        elif 'deviantart.com' in href and not kwargs.get('processed'):
             # 27 = len('https://www.deviantart.com/')
             # 9 = len('/gallery/')
             href = href[27:-9]
-            href = f"https://backend.deviantart.com/rss.xml?type=deviation&q=by%3A{ href }+sort%3Atime+meta%3Aall"
-            
+            href_base = "https://backend.deviantart.com/rss.xml?type=deviation"
+            href = f"{href_base}&q=by%3A{ href }+sort%3Atime+meta%3Aall"
+
             results = self.parse_href(
-                href = href,
-                proxy = proxy,
-                processed = True,
+                href=href,
+                proxy=proxy,
+                processed=True,
             )
 
         # custom onlyfans import
-        elif 'https://onlyfans.com/' in href:
+        elif 'onlyfans.com' in href:
+            # TODO
             return []
-        
+
         # custom patreon import
-        elif 'https://www.patreon.com/' in href:
+        elif 'patreon.com' in href:
+            # TODO
             return []
 
         # # custom lightnovelpub import
@@ -352,12 +406,14 @@ class Feed(db.Model):
         #     data = request.find('ul', attrs={'class': 'chapter-list'})
         #     if data is None:
         #         return []
-            
+
         #     for each in data.find_all('li'):
         #         results.append({
         #             'name':     each.find('a')['title'],
-        #             'href':     'https://www.lightnovelpub.com' + each.find('a')['href'],
-        #             'datetime': datetime.strptime(each.find('time')['datetime'], '%Y-%m-%d %H:%M'),
+        #             'href':     'https://www.lightnovelpub.com' \
+        #                   + each.find('a')['href'],
+        #             'datetime': datetime.strptime(
+        #    each.find('time')['datetime'], '%Y-%m-%d %H:%M'),
         #             'feed_id':  self.id,
         #         })
 
@@ -368,8 +424,14 @@ class Feed(db.Model):
             except urllib.error.URLError:
                 proxyDict = urllib.request.ProxyHandler(proxyDict)
 
-                ssl._create_default_https_context = ssl._create_unverified_context
-                request = feedparser.parse(href, request_headers=headers, handlers=[proxyDict])
+                ssl._create_default_https_context = getattr(
+                    ssl, "_create_unverified_context"
+                )
+                request = feedparser.parse(
+                    href,
+                    request_headers=headers,
+                    handlers=[proxyDict],
+                )
 
             for each in request["items"]:
                 if not each:
@@ -394,15 +456,20 @@ class Feed(db.Model):
                     result_datetime = each["updated"]
                 else:
                     print(f"result_datetime broke for { self.title }")
-                
+
                 tzinfos = {
                     'PDT': tz.gettz("America/Los_Angeles"),
                     'PST': tz.gettz("America/Juneau"),
                 }
                 if result_datetime.isdigit():
-                    result_datetime = datetime.utcfromtimestamp(int(result_datetime))
+                    result_datetime = datetime.utcfromtimestamp(
+                        int(result_datetime)
+                    )
                 elif not isinstance(result_datetime, datetime):
-                    result_datetime = parser.parse(result_datetime, tzinfos=tzinfos)
+                    result_datetime = parser.parse(
+                        result_datetime,
+                        tzinfos=tzinfos,
+                    )
 
                 if each.get("title_detail"):
                     result_name = each["title_detail"]["value"]

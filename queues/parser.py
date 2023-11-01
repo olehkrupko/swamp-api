@@ -1,6 +1,3 @@
-import json
-import time
-
 from rabbitmq_pika_flask import ExchangeType
 
 from __main__ import rabbit

@@ -18,6 +18,7 @@ def data_is_json(func):
 
     return inner
 
+
 def return_json(response, status=200):
     return Response(
         response=json.dumps(

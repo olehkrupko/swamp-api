@@ -14,41 +14,66 @@ class Update(db.Model):
         "schema": "feed_updates",
     }
 
-    # technical
-    _id      = db.Column(db.Integer,     primary_key=True)
-    _created = db.Column(db.DateTime,    default=datetime.datetime.utcnow)
-    # core/required
-    name     = db.Column(db.String(140), nullable=False)
-    href     = db.Column(db.String(300), nullable=False)
-    datetime = db.Column(db.DateTime,    default=None)
-    # metadata
-    feed_id  = db.Column(db.Integer,     db.ForeignKey("feed_updates.feed._id"), nullable=False)
+    # TECHNICAL
+    _id = db.Column(
+        db.Integer,
+        primary_key=True,
+    )
+    _created = db.Column(
+        db.DateTime,
+        default=datetime.datetime.utcnow,
+    )
+
+    # CORE / REQUIRED
+    name = db.Column(
+        db.String(140),
+        nullable=False,
+    )
+    href = db.Column(
+        db.String(300),
+        nullable=False,
+    )
+    datetime = db.Column(
+        db.DateTime,
+        default=None,
+    )
+
+    # METADATA
+    feed_id = db.Column(
+        db.Integer,
+        db.ForeignKey("feed_updates.feed._id"),
+        nullable=False,
+    )
 
     def __init__(self, data: dict):
         data = data.copy()
         if not isinstance(data, dict):
-            raise Exception(f"__init__ data {data} has to be a dict, not {type(data)}")
-
-        feed_id = data.pop('feed_id')
+            raise Exception(f"{type(data)} {data=} has to be a dict")
 
         name = data.pop('name')
-        name = emoji.demojize(name, delimiters=(" ", " "))  # transforming emojis to normal words
+        # transforming emojis to normal words:
+        name = emoji.demojize(name, delimiters=(" ", " "))
         name = name.replace("#", " ")  # removing hashtags
         name = name.replace("_", " ")  # underscores are just weird spaces
         name = ' '.join(name.strip().split(' '))  # avoiding extra spaces
         if not name:
             # commenting out to not resolve circular import error
-            # feed_title = db.session.query(Feed).filter_by(_id=feed_id).first().title
+            # feed_title = db.session.query(Feed).filter_by(
+            #     _id=feed_id
+            # ).first().title
             # name = f"No name in update by { feed_title }"
             name = "No name in update by {feed_title}"
 
+        datetime = data.pop('datetime')
+        # possible issues with timezone unaware?
+
         self.name = name[:140]
         self.href = data.pop('href')
-        self.datetime = data.pop('datetime')
-        self.feed_id = feed_id
+        self.datetime = datetime
+        self.feed_id = data.pop('feed_id')
 
         if data:
-            raise ValueError(f"Dict {data} has extra data")
+            raise ValueError(f"Dict {data=} has extra data")
 
     def as_dict(self):
         return {
@@ -60,12 +85,11 @@ class Update(db.Model):
             'href': self.href,
             'datetime': self.datetime,
         }
-    
+
     def __str__(self):
         return str(self.as_dict())
 
     # filter is used to remove unnecessary items
-    # 
     # {field}        - don't skip what's mentioned there
     # {field}_ignore - skip these ones
     def filter_skip(self, json):
@@ -78,13 +102,17 @@ class Update(db.Model):
             for field in ["name", "href"]:
                 if filter.get(field) and filter[field] not in getattr(self, field):
                     return SKIP
-                # elif filter.get(f"{field}_ignore") and filter[f"{field}_ignore"] in getattr(self, field):
-                #     return SKIP
 
         return not SKIP
 
     def send_telegram(self):
         async def _send(msg, chat_id=os.environ.get('TELEGRAM_BOT_DMS')):
-            await telegram.Bot(os.environ.get('TELEGRAM_BOT_TOKEN')).sendMessage(chat_id=chat_id, text=msg, parse_mode='markdown')
+            await telegram.Bot(
+                os.environ.get('TELEGRAM_BOT_TOKEN')
+            ).sendMessage(
+                chat_id=chat_id,
+                text=msg,
+                parse_mode='markdown',
+            )
 
         asyncio.run(_send(f"[{self.name}]({self.href})"))

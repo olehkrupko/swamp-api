@@ -2,7 +2,7 @@ import json
 import os
 import sys
 
-from flask import Flask, request, jsonify
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
@@ -47,11 +47,12 @@ with app.app_context():
 
 app.config['MQ_URL'] = os.environ['RABBITMQ_CONNECTION_STRING']
 app.config['MQ_EXCHANGE'] = 'swamp'
-rabbit = RabbitMQ(app,
+rabbit = RabbitMQ(
+    app,
     body_parser=json.loads,
     msg_parser=json.dumps,
     queue_prefix="swamp.q",
-    exchange_params=ExchangeParams(durable=True)
+    exchange_params=ExchangeParams(durable=True),
 )
 
 # routes

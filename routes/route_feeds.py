@@ -1,16 +1,17 @@
-import json
-
 import random
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+
 from flask import request
 from flask_cors import cross_origin
 
 import routes._shared as shared
 from __main__ import app, db, FREQUENCIES
 from models.model_feeds import Feed
-from models.model_feeds_update import Update
 
 
 ROUTE_PATH = "/feeds"
+
 
 def frequency_validate(val):
     return val in FREQUENCIES
@@ -22,20 +23,22 @@ def feeds_frequencies():
         response=FREQUENCIES,
     )
 
+
 @app.route(f"{ ROUTE_PATH }/", methods=['GET'])
-@cross_origin(headers=['Content-Type']) # Send Access-Control-Allow-Headers
+@cross_origin(headers=['Content-Type'])  # Send Access-Control-Allow-Headers
 def list_feeds():
     feeds = db.session.query(Feed).all()
-    
+
     feeds = [feed.as_dict() for feed in feeds]
 
     return shared.return_json(
         response=feeds,
     )
 
+
 @shared.data_is_json
 @app.route(f"{ ROUTE_PATH }/", methods=['PUT', 'OPTIONS'])
-@cross_origin(headers=['Content-Type']) # Send Access-Control-Allow-Headers
+@cross_origin(headers=['Content-Type'])  # Send Access-Control-Allow-Headers
 def create_feed():
     body = request.get_json()
 
@@ -49,7 +52,7 @@ def create_feed():
             response="Invalid frequency",
             status=400,
         )
-    
+
     feed = Feed(body)
 
     db.session.add(feed)
@@ -60,6 +63,7 @@ def create_feed():
         response=feed.as_dict(),
     )
 
+
 @app.route(f"{ ROUTE_PATH }/<feed_id>", methods=['GET'])
 def read_feed(feed_id):
     feed = db.session.query(Feed).filter_by(_id=feed_id).first()
@@ -68,9 +72,10 @@ def read_feed(feed_id):
         response=feed.as_dict(),
     )
 
+
 @shared.data_is_json
 @app.route(f"{ ROUTE_PATH }/<feed_id>", methods=['PUT', 'OPTIONS'])
-@cross_origin(headers=['Content-Type']) # Send Access-Control-Allow-Headers
+@cross_origin(headers=['Content-Type'])  # Send Access-Control-Allow-Headers
 def update_feed(feed_id):
     feed = db.session.query(Feed).filter_by(_id=feed_id).first()
     body = request.get_json()
@@ -83,7 +88,7 @@ def update_feed(feed_id):
                 response=f"Data field {key} does not exist in DB",
                 status=400,
             )
-    
+
     if 'frequency' in body.items():
         # regenerate _delayed:
         feed._delayed = datetime.now() + relativedelta(**{
@@ -108,6 +113,7 @@ def delete_item(feed_id):
     return app.response_class(
         response="Feed deleted",
     )
+
 
 @app.route(f"{ ROUTE_PATH }/parse/file", methods=['GET'])
 def feeds_file():
@@ -157,6 +163,7 @@ def feeds_file():
         },
     )
 
+
 # disabling until feature is used once again
 # @shared.data_is_json
 # @app.route('/feeds/parse', methods=['PUT'])
@@ -168,6 +175,7 @@ def feeds_file():
 #     return shared.return_json(
 #         response=response,
 #     )
+
 
 @shared.data_is_json
 @app.route(f"{ ROUTE_PATH }/parse/href", methods=['GET'])
@@ -190,6 +198,7 @@ def test_parse_href():
         response=response,
     )
 
+
 @app.route(f"{ ROUTE_PATH }/parse/runner", methods=['PUT'])
 def parse_runner():
     result = Feed.process_parsing_multi()
@@ -198,9 +207,10 @@ def parse_runner():
         response=result,
     )
 
+
 @app.route(f"{ ROUTE_PATH }/parse/queue", methods=['PUT'])
 def parse_queue():
-    Feed.process_parsing_multi_queue()
+    Feed.process_parsing_queue()
 
     return shared.return_json(
         response="DONE",
