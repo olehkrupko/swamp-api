@@ -29,33 +29,6 @@ class Update(db.Model):
         if not isinstance(data, dict):
             raise Exception(f"__init__ data {data} has to be a dict, not {type(data)}")
 
-        # # DATETIME fixes: fix timezone unaware
-        # if each.datetime.tzinfo is not None and each.datetime.tzinfo.utcoffset(each.datetime) is not None:
-        #     each_dt = localtime(each.datetime)
-        #     each.datetime = datetime(
-        #         each_dt.year,
-        #         each_dt.month,
-        #         each_dt.day,
-        #         each_dt.hour,
-        #         each_dt.minute,
-        #         each_dt.second
-        #     )
-
-        # # NAME fixes
-        # each.name = ' '.join(each.name.split())
-        # each.name = each.name.strip()
-        # # # extra symbols
-        # # if each.title == 'Shadman':
-        # #     each.name = each.name[:each.name.find('(')-1]
-        # # elif each.title == 'Apple' and each.name[-len('Apple'):] == 'Apple':
-        # #     # - symbol can be a variety of different symbols
-        # #     # 8 = len(' - Apple')
-        # #     each.name = each.name[:-8]
-        # # elif each.title == 'LastWeekTonight':
-        # #     end = each.name.find(': Last Week Tonight with John Oliver (HBO)')
-        # #     if end != -1:
-        # #         each.name = each.name[:end]
-
         feed_id = data.pop('feed_id')
 
         name = data.pop('name')
