@@ -32,7 +32,6 @@ def list_feed_updates():
         for update in updates:
             if feed._id == update['feed_id']:
                 update['feed_data'] = feed.as_dict()
-                break
 
     return shared.return_json(
         response=updates,
