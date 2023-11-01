@@ -225,98 +225,6 @@ class Feed(db.Model):
         if False:
             return "NOPE"
 
-        # # custom ранобэ.рф API import
-        # if 'https://xn--80ac9aeh6f.xn--p1ai' in self.href:
-        #     RANOBE_RF = 'https://xn--80ac9aeh6f.xn--p1ai'
-        #     slug = self.href[31:-1]
-
-        #     request = f"{ RANOBE_RF }/v3/books/view?slug={ slug }"
-        #     request = requests.get(request).json()  # (request, headers=headers, proxies=proxyDict)
-        #     id = request['id']
-            
-        #     request = f"{ RANOBE_RF }/v3/chapters?filter[bookId]={ id }"
-        #     request = requests.get(request).json()  # (request, headers=headers, proxies=proxyDict)
-
-        #     for each in request['items']:
-        #         if not each['isDonate']:  # ignoring payed chapters
-        #             result.append(Update(
-        #                 name=each["title"],
-        #                 href=RANOBE_RF + each["url"],
-        #                 datetime=datetime.strptime(each["publishedAt"], '%Y-%m-%d %H:%M:%S'),
-        #                 title=self.title))
-
-        # # custom instagram import ( OLD, use in really rare cases )
-        # elif 'https://www.instagram.com/' in self.href:
-        #     try:
-        #         request = requests.get(self.href, headers=headers, proxies=proxyDict)
-        #         request = BeautifulSoup(request.text, "html.parser")
-
-        #         for each in request.find_all('script'):
-        #             print('>>>>', each)
-        #             data = 'window._sharedData = '
-        #             if str(each).find(data) != -1:
-        #                 # preparing JSON
-        #                 data = str(each).find(data) + len(data)  # data start position
-        #                 data = str(each)[data:-10]  # -1 is for removing ; in the end
-        #                 data = json.loads(data)
-
-        #                 # selecting data from JSON
-        #                 data = data['entry_data']['ProfilePage'][0]['graphql']
-        #                 data = data['user']['edge_owner_to_timeline_media']['edges']
-
-        #                 # parsing data from JSON
-        #                 for each in data:
-        #                     # avoiding errors caused by empty titles
-        #                     try:
-        #                         result_name = each['node']['edge_media_to_caption']['edges'][0]['node']['text']
-        #                     except IndexError:
-        #                         result_name = 'no title'
-
-        #                     results.insert(0, {
-        #                         'name':     result_name,
-        #                         'href':     "https://www.instragram.com/p/"+each['node']['shortcode']+"/",
-        #                         'datetime': datetime.fromtimestamp(each['node']['taken_at_timestamp']),
-        #                         'feed_id':  self.id,
-        #                     })
-        #     except (KeyError, requests.exceptions.ProxyError, requests.exceptions.SSLError):
-        #         return []
-
-        # # custom instagram import converter
-        # elif 'https://www.instagram.com/' in self.href:
-        #     self.href_user = self.href[:]
-        #     # caching server list: https://git.sr.ht/~cadence/bibliogram-docs/tree/master/docs/Instances.md
-        #     caching_servers = (
-        #         'https://bibliogram.snopyta.org',
-        #         'https://bibliogram.nixnet.services',  # x
-        #         'https://bg.endl.site',
-        #         'https://bibliogram.pixelfed.uno',
-        #         'https://bibliogram.ethibox.fr',
-        #         'https://ig.funami.tech',
-        #         'https://bibliogram.hamster.dance',  # x
-        #     )
-        #     # 26 = len('https://www.instagram.com/')
-        #     # 1 = len('/')
-        #     self.href = f"{ random.choice(caching_servers) }/u/{ self.href[26:-1] }/atom.xml"
-
-        #     try:
-        #         result = self.parse(proxy)
-        #     except:
-        #         return []
-
-        #     base_domain = 'instagram.com'
-        #     for each in result:
-        #         # href: replace parser's domain name
-        #         each.href = each.href.replace('http://', 'https://')
-        #         href_split = each.href.split('/')
-        #         href_split[2] = base_domain
-        #         each.href = '/'.join(href_split) + '/'
-
-        #         # title: remove hashtags
-        #         each.title = each.title.replace('#', ' #')
-        #         title_split = each.title.split(' ')
-        #         title_split = [ x for x in title_split if x[0]!='#']
-        #         each.title = ' '.join(title_split)
-
         # # custom twitter import converter
         # elif 'https://twitter.com/' in self.href:
         #     self.href_user = self.href[:]
@@ -426,35 +334,6 @@ class Feed(db.Model):
                 proxy = proxy,
                 processed = True,
             )
-
-        # # custom pikabu import
-        # elif 'pikabu.ru/@' in self.href:
-        #     # try:
-        #     strainer = SoupStrainer('div', attrs={'class': 'stories-feed__container'})
-
-        #     try:
-        #         request = requests.get(self.href, headers=headers, proxies=proxyDict)
-        #     except requests.exceptions.SSLError:
-        #         return []
-        #     request = BeautifulSoup(request.text, "html.parser", parse_only=strainer)
-
-        #     for each in request.find_all('article'):
-        #         try:
-        #             result_datetime = each.find('time')['datetime'][:-3]+"00"
-        #             result_datetime = datetime.strptime(result_datetime, '%Y-%m-%dT%H:%M:%S%z')
-
-        #             result.append(Update(
-        #                 name=each.find('h2', {'class': "story__title"}).find('a').getText(),
-        #                 href=each.find('h2', {'class': "story__title"}).find('a')['href'],
-        #                 datetime=result_datetime,
-        #                 title=self.title))
-
-        #         except (TypeError, AttributeError) as err:
-        #             # advertisement, passing as no need to save it
-        #             pass
-        #     # except (requests.exceptions.ConnectionError, requests.exceptions.SSLError) as err:
-        #     #     # failed connection, hope it works from time to time
-        #     #     return []
 
         # custom onlyfans import
         elif 'https://onlyfans.com/' in href:
