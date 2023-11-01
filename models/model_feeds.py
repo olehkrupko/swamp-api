@@ -14,6 +14,7 @@ from typing import List, Dict
 import pika
 import requests
 from bs4 import BeautifulSoup, SoupStrainer
+from sentry_sdk import capture_message
 from sqlalchemy.dialects.postgresql import JSONB
 
 from __main__ import db, FREQUENCIES
@@ -372,7 +373,9 @@ class Feed(db.Model):
 
             for each in request["items"]:
                 if not each:
-                    raise DeprecationWarning(f"Data returned by {'active' if self.requires_update() else 'disabled'} feed {self} is empty, skipping iteration")
+                    status = 'Lagging' if self.requires_update() else 'Updated'
+                    message = f"{status} feed {self=} is empty, skipping"
+                    capture_message(message)
                     continue
                 try:
                     result_href = each["links"][0]["href"]
