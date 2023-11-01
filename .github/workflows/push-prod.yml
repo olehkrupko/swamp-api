@@ -5,8 +5,48 @@ on:
     branches:
       - 'main'
 jobs:
-  deploy_code:
+  deploy:
     runs-on: self-hosted
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          path: ${{github.job}}
+  lint-flake8-errors:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          path: ${{github.job}}
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.11
+      - name: Install dependencies for testing
+        run: |
+          if [ -f requirements-test.txt ]; then pip install -r requirements-test.txt; fi
+      - name: Lint with flake8
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+  lint-flake8-full:
+    runs-on: self-hosted
+    needs: lint-flake8-errors
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          path: ${{github.job}}
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.11
+      - name: Install dependencies for testing
+        run: |
+          if [ -f requirements-test.txt ]; then pip install -r requirements-test.txt; fi
+      - name: Lint with flake8
+        run: |
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          flake8 . --count --statistics \
+            --exclude static_feeds.py

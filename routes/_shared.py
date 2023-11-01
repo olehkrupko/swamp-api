@@ -1,12 +1,12 @@
 import json
 
-from __main__ import app, db, FREQUENCIES
+from flask import Response, request
 
 
 def data_is_json(func):
     def inner(*args, **kwargs):
         if not request.is_json:
-            return app.response_class(
+            return Response(
                 response=json.dumps({
                     "response": "Data is not JSON"
                 }),
@@ -18,8 +18,9 @@ def data_is_json(func):
 
     return inner
 
+
 def return_json(response, status=200):
-    return app.response_class(
+    return Response(
         response=json.dumps(
             obj=response,
             indent=4,
