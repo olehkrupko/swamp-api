@@ -28,10 +28,10 @@ def list_feed_updates():
             Update.datetime.desc()
         ).limit(limit).all()
     ]
-    for each in updates:
-        for x in feeds:
-            if x._id == each['feed_id']:
-                each['feed_data'] = x.as_dict()
+    for feed in feeds:
+        for update in updates:
+            if feed._id == update['feed_id']:
+                update['feed_data'] = feed.as_dict()
                 break
 
     return shared.return_json(
