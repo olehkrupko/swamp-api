@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+        with:
+          path: lint-flake8-errors
       - name: Set up Python 3.11
         uses: actions/setup-python@v2
         with:
@@ -33,6 +35,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+        with:
+          path: lint-flake8-full
       - name: Set up Python 3.11
         uses: actions/setup-python@v2
         with:
