@@ -46,7 +46,7 @@ with app.app_context():
 
 
 app.config["MQ_URL"] = os.environ["RABBITMQ_CONNECTION_STRING"]
-app.config["MQ_EXCHANGE"] = "swamp"
+app.config["MQ_EXCHANGE"] = 'swamp'
 rabbit = RabbitMQ(
     app,
     body_parser=json.loads,
