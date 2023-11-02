@@ -52,3 +52,19 @@ jobs:
           flake8 . --count --statistics \
             --max-line-length=100 \
             --exclude static_feeds.py
+  lint-black:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          path: ${{github.job}}
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.11
+      - name: Install black
+        run: pip install black==23.10.1
+      - name: Lint with flake8
+        run: |
+          black --verify .
