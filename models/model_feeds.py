@@ -11,13 +11,14 @@ from dateutil.relativedelta import relativedelta
 from typing import List, Dict
 
 import pika
-# import requests
-# from bs4 import BeautifulSoup, SoupStrainer
 from sentry_sdk import capture_message
 from sqlalchemy.dialects.postgresql import JSONB
 
 from __main__ import db, FREQUENCIES
 from models.model_feeds_update import Update
+
+# import requests
+# from bs4 import BeautifulSoup, SoupStrainer
 
 
 class Feed(db.Model):
