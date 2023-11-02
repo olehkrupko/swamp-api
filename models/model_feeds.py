@@ -62,11 +62,11 @@ class Feed(db.Model):
     )
     frequency = db.Column(
         db.String(20),
-        default='weeks',
+        default="weeks",
     )
     notes = db.Column(
         db.String(200),
-        default='',
+        default="",
         nullable=True,
         unique=False,
     )
@@ -77,41 +77,39 @@ class Feed(db.Model):
         if not isinstance(data, dict):
             raise Exception(f"{type(data)} {data=} has to be a dict")
 
-        self.title = data.pop('title')
-        self.href = data.pop('href')
-        self.href_user = data.pop('href_user')
+        self.title = data.pop("title")
+        self.href = data.pop("href")
+        self.href_user = data.pop("href_user")
 
-        self.private = data.pop('private')
-        frequency = data.pop('frequency')
+        self.private = data.pop("private")
+        frequency = data.pop("frequency")
         if frequency in FREQUENCIES:
             self.frequency = frequency
         else:
             raise Exception(f"Frequency {frequency} is not in {FREQUENCIES}")
-        self.notes = data.pop('notes')
-        self.json = data.pop('json')
+        self.notes = data.pop("notes")
+        self.json = data.pop("json")
 
         if data:
             raise Exception(f"Dict {data} has extra data")
 
     def as_dict(self) -> dict:
         return {
-            '_id': self._id,
-
-            'title': self.title,
-            'href': self.href,
-            'href_user': self.href_user,
-
-            'private': self.private,
-            'frequency': self.frequency,
-            'notes': self.notes,
-            'json': self.json,
+            "_id": self._id,
+            "title": self.title,
+            "href": self.href,
+            "href_user": self.href_user,
+            "private": self.private,
+            "frequency": self.frequency,
+            "notes": self.notes,
+            "json": self.json,
         }
 
     def __str__(self):
         return str(self.as_dict())
 
     def requires_update(self):
-        if self.frequency == 'never':
+        if self.frequency == "never":
             return False
 
         if not self._delayed:
@@ -132,12 +130,20 @@ class Feed(db.Model):
     def process_parsing(feed_id, store_new=True, proxy=False):
         # Preparing
         new_items = []
-        feed = db.session.query(Feed).filter_by(
-            _id=feed_id,
-        ).first()
-        feed_len = db.session.query(Update).filter_by(
-            feed_id=feed_id,
-        ).count()
+        feed = (
+            db.session.query(Feed)
+            .filter_by(
+                _id=feed_id,
+            )
+            .first()
+        )
+        feed_len = (
+            db.session.query(Update)
+            .filter_by(
+                feed_id=feed_id,
+            )
+            .count()
+        )
 
         # Processing
         feed_updates = feed.parse_href(
@@ -147,10 +153,15 @@ class Feed(db.Model):
         # Finishing with results
         if store_new:
             for each in feed_updates:
-                if db.session.query(Update).filter_by(
-                    feed_id=feed_id,
-                    href=each['href'],
-                ).count() == 0:
+                if (
+                    db.session.query(Update)
+                    .filter_by(
+                        feed_id=feed_id,
+                        href=each["href"],
+                    )
+                    .count()
+                    == 0
+                ):
                     new_update = Update(each)
                     if new_update.filter_skip(json=feed.json):
                         continue
@@ -159,9 +170,11 @@ class Feed(db.Model):
                         new_update.send_telegram()
                     db.session.add(new_update)
                 new_items.append(each)
-            feed._delayed = datetime.now() + relativedelta(**{
-                feed.frequency: random.randint(1, 10),
-            })
+            feed._delayed = datetime.now() + relativedelta(
+                **{
+                    feed.frequency: random.randint(1, 10),
+                }
+            )
             db.session.add(feed)
             db.session.commit()
         else:
@@ -169,9 +182,9 @@ class Feed(db.Model):
 
         # Return data
         return {
-            "len":  len(new_items),
-            "items":    new_items,
-            "feed":     feed,
+            "len": len(new_items),
+            "items": new_items,
+            "feed": feed,
         }
 
     @staticmethod
@@ -183,9 +196,7 @@ class Feed(db.Model):
 
         for feed in feed_list:
             if feed.frequency not in FREQUENCIES:
-                raise ValueError(
-                    f"Invalid {feed.frequency=}, {feed.as_dict()=}"
-                )
+                raise ValueError(f"Invalid {feed.frequency=}, {feed.as_dict()=}")
             elif force_all or feed.requires_update():
                 feed_todo_ids.append(feed._id)
 
@@ -194,7 +205,7 @@ class Feed(db.Model):
                 feed_id=feed_id,
                 store_new=store_new,
                 proxy=proxy,
-            )['len']
+            )["len"]
 
         # with Executor() as executor:
         #     executor = executor.map(
@@ -228,18 +239,14 @@ class Feed(db.Model):
         feed_list = filter(lambda x: x.requires_update(), feed_list)
 
         for feed in feed_list:
-            params = pika.URLParameters(
-                os.environ['RABBITMQ_CONNECTION_STRING']
-            )
+            params = pika.URLParameters(os.environ["RABBITMQ_CONNECTION_STRING"])
             connection = pika.BlockingConnection(params)
             channel = connection.channel()
 
             channel.basic_publish(
-                exchange='swamp',
-                routing_key='feed.parser',
-                body=json.dumps(
-                    feed.as_dict()
-                ),
+                exchange="swamp",
+                routing_key="feed.parser",
+                body=json.dumps(feed.as_dict()),
             )
 
     def parse_href(self, href=None, proxy: bool = True, **kwargs: Dict):
@@ -255,7 +262,7 @@ class Feed(db.Model):
         referer_domain = "".join(random.choices(string.ascii_letters, k=16))
         headers = {
             # 'user-agent': feed.UserAgent_random().strip(),
-            'referer': f'https://www.{ referer_domain }.com/?q={ href }'
+            "referer": f"https://www.{ referer_domain }.com/?q={ href }"
         }
         proxyDict = {}
         if proxy and isinstance(proxy, str):
@@ -313,7 +320,7 @@ class Feed(db.Model):
         #         each['href'] = '/'.join(href_split)
 
         # custom tiktok import
-        elif 'https://www.tiktok.com/@' in href:
+        elif "https://www.tiktok.com/@" in href:
             href_base = "https://proxitok.pabloferreiro.es"
             href = f"{href_base}/@{ href.split('@')[-1] }/rss"
 
@@ -324,12 +331,12 @@ class Feed(db.Model):
 
             results.reverse()
             for each in results:
-                each['href'] = each['href'].replace(
-                    'proxitok.pabloferreiro.es', 'tiktok.com'
+                each["href"] = each["href"].replace(
+                    "proxitok.pabloferreiro.es", "tiktok.com"
                 )
 
         # custom RSS YouTube converter
-        elif 'https://www.youtube.com/channel/' in href:
+        elif "https://www.youtube.com/channel/" in href:
             # 32 = len('https://www.youtube.com/channel/')
             # 7 = len('/videos')
             href_base = "https://www.youtube.com/feeds/videos.xml"
@@ -341,7 +348,7 @@ class Feed(db.Model):
             )
 
         # custom RSS readmanga converter
-        elif 'http://readmanga.live/' in href and href.find('/rss/') == -1:
+        elif "http://readmanga.live/" in href and href.find("/rss/") == -1:
             # 22 = len('http://readmanga.live/')
             name = href[22:]
             href = "feed://readmanga.live/rss/manga?name=" + name
@@ -352,14 +359,16 @@ class Feed(db.Model):
             )
 
             for each in results:
-                split = each['href'].split('/')
+                split = each["href"].split("/")
                 split[-3] = name
-                each['href'] = '/'.join(split)
+                each["href"] = "/".join(split)
 
         # custom RSS mintmanga converter
-        elif 'mintmanga.com' in href and \
-                'mintmanga.com/rss/manga' not in href and \
-                not kwargs.get('processed'):
+        elif (
+            "mintmanga.com" in href
+            and "mintmanga.com/rss/manga" not in href
+            and not kwargs.get("processed")
+        ):
             # 21 = len('http://mintmanga.com/')
             name = href[21:]
             href = "feed://mintmanga.com/rss/manga?name=" + name
@@ -371,12 +380,12 @@ class Feed(db.Model):
             )
 
             for each in results:
-                split = each['href'].split('/')
+                split = each["href"].split("/")
                 split[-3] = name
-                each['href'] = '/'.join(split)
+                each["href"] = "/".join(split)
 
         # custom RSS deviantart converter
-        elif 'deviantart.com' in href and not kwargs.get('processed'):
+        elif "deviantart.com" in href and not kwargs.get("processed"):
             # 27 = len('https://www.deviantart.com/')
             # 9 = len('/gallery/')
             href = href[27:-9]
@@ -390,12 +399,12 @@ class Feed(db.Model):
             )
 
         # custom onlyfans import
-        elif 'onlyfans.com' in href:
+        elif "onlyfans.com" in href:
             # TODO
             return []
 
         # custom patreon import
-        elif 'patreon.com' in href:
+        elif "patreon.com" in href:
             # TODO
             return []
 
@@ -436,16 +445,14 @@ class Feed(db.Model):
 
             for each in request["items"]:
                 if not each:
-                    status = 'Lagging' if self.requires_update() else 'Updated'
+                    status = "Lagging" if self.requires_update() else "Updated"
                     message = f"{status} feed {self=} is empty, skipping"
                     capture_message(message)
                     continue
                 try:
                     result_href = each["links"][0]["href"]
                 except KeyError:
-                    capture_message(
-                        f"Data missing URL, skipping item {self=} {each=}"
-                    )
+                    capture_message(f"Data missing URL, skipping item {self=} {each=}")
                     continue
 
                 # DATE RESULT: parsing dates
@@ -459,13 +466,11 @@ class Feed(db.Model):
                     print(f"result_datetime broke for { self.title }")
 
                 tzinfos = {
-                    'PDT': tz.gettz("America/Los_Angeles"),
-                    'PST': tz.gettz("America/Juneau"),
+                    "PDT": tz.gettz("America/Los_Angeles"),
+                    "PST": tz.gettz("America/Juneau"),
                 }
                 if result_datetime.isdigit():
-                    result_datetime = datetime.utcfromtimestamp(
-                        int(result_datetime)
-                    )
+                    result_datetime = datetime.utcfromtimestamp(int(result_datetime))
                 elif not isinstance(result_datetime, datetime):
                     result_datetime = parser.parse(
                         result_datetime,
@@ -478,11 +483,13 @@ class Feed(db.Model):
                     result_name = ""
 
                 # APPEND RESULT
-                results.append({
-                    'name':     result_name,
-                    'href':     result_href,
-                    'datetime': result_datetime,
-                    'feed_id':  self._id,
-                })
+                results.append(
+                    {
+                        "name": result_name,
+                        "href": result_href,
+                        "datetime": result_datetime,
+                        "feed_id": self._id,
+                    }
+                )
 
         return self.parse_list(results=results)

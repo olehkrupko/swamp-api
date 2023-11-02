@@ -7,11 +7,9 @@ def data_is_json(func):
     def inner(*args, **kwargs):
         if not request.is_json:
             return Response(
-                response=json.dumps(
-                    "Data is not JSON"
-                ),
+                response=json.dumps("Data is not JSON"),
                 status=400,
-                mimetype='application/json'
+                mimetype="application/json",
             )
 
         func(*args, **kwargs)
@@ -28,5 +26,5 @@ def return_json(response, status=200):
             default=str,
         ),
         status=status,
-        mimetype='application/json'
+        mimetype="application/json",
     )

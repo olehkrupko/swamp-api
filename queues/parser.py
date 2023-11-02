@@ -4,9 +4,9 @@ from __main__ import rabbit
 from models.model_feeds import Feed
 
 
-@rabbit.queue(routing_key='feed.parser', exchange_type=ExchangeType.DIRECT)
+@rabbit.queue(routing_key="feed.parser", exchange_type=ExchangeType.DIRECT)
 def feed_parser(routing_key, body):
     Feed.process_parsing(
-        feed_id=body['_id'],
+        feed_id=body["_id"],
         store_new=True,
     )
