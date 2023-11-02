@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'main'
+      - '87-testing-black'
 jobs:
   deploy:
     runs-on: self-hosted
