@@ -67,4 +67,4 @@ jobs:
         run: pip install black==23.10.1
       - name: Lint with flake8
         run: |
-          black --diff --verify .
+          black --diff --check .
