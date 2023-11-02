@@ -6,7 +6,6 @@ import emoji
 import telegram
 
 from __main__ import db
-# from models.model_feeds import Feed
 
 
 class Update(db.Model):
