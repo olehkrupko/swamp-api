@@ -277,6 +277,22 @@ class Feed(db.Model):
         if False:
             return "NOPE"
 
+        # rss-bridge instagram import converter
+        elif 'instagram.com' in href and not kwargs.get("processed"):
+            RSS_BRIDGE_URL = "http://192.168.0.155:31000"
+            RSS_BRIDGE_ARGS = "action=display&bridge=InstagramBridge&context=Username&media_type=all"
+
+            timeout = 24*60*60  # 24 hours
+            username = self.href[26:-1]
+
+            href = f"{RSS_BRIDGE_URL}/?{RSS_BRIDGE_ARGS}&u={username}&_cache_timeout={timeout}&format=Atom"
+
+            results = self.parse_href(
+                href=href,
+                proxy=proxy,
+                processed=True,
+            )
+
         # # custom twitter import converter
         # elif 'https://twitter.com/' in self.href:
         #     self.href_user = self.href[:]
