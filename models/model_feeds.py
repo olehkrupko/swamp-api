@@ -292,6 +292,9 @@ class Feed(db.Model):
                 proxy=proxy,
                 processed=True,
             )
+            # safeguard against failed attempts
+            if len(results) == 1 and "Bridge returned error 401" in results[0]['name']:
+                results = []
 
         # # custom twitter import converter
         # elif 'https://twitter.com/' in self.href:
