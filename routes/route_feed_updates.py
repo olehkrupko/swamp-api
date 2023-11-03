@@ -11,10 +11,10 @@ ROUTE_PATH = "/feed-updates"
 
 @app.route(f"{ ROUTE_PATH }/", methods=["GET"])
 def list_feed_updates():
-    kwargs = request.args
+    kwargs = dict(request.args)
     limit = 140
     if "limit" in kwargs:
-        limit = kwargs.pop(limit)
+        limit = kwargs.pop("limit")
 
     feeds = db.session.query(Feed).filter_by(**kwargs)
 
