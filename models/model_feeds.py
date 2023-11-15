@@ -283,7 +283,7 @@ class Feed(db.Model):
             RSS_BRIDGE_ARGS = "action=display&bridge=InstagramBridge&context=Username&media_type=all"
 
             timeout = 24*60*60  # 24 hours
-            username = self.href[26:-1]
+            username = href[26:-1]
 
             href = f"{RSS_BRIDGE_URL}/?{RSS_BRIDGE_ARGS}&u={username}&_cache_timeout={timeout}&format=Atom"
 
