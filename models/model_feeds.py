@@ -235,8 +235,9 @@ class Feed(db.Model):
     @staticmethod
     def process_parsing_queue(force_all=False, store_new=True, proxy=False):
         feed_list = db.session.query(Feed).all()
+        if not force_all:
+            feed_list = filter(lambda x: x.requires_update(), feed_list)
         random.shuffle(feed_list)
-        feed_list = filter(lambda x: x.requires_update(), feed_list)
 
         for feed in feed_list:
             params = pika.URLParameters(os.environ["RABBITMQ_CONNECTION_STRING"])
