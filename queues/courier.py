@@ -12,11 +12,15 @@ async def bot_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 def bot_builder():
-    app = Application.builder().token(
-        os.environ.get('TELEGRAM_BOT_TOKEN')
-    ).read_timeout(30).write_timeout(30).build()
+    app = (
+        Application.builder()
+        .token(os.environ.get("TELEGRAM_BOT_TOKEN"))
+        .read_timeout(30)
+        .write_timeout(30)
+        .build()
+    )
 
-    app.add_handler(CommandHandler('start', bot_start))
+    app.add_handler(CommandHandler("start", bot_start))
 
     app.run_polling()
     app.idle()

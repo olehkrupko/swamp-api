@@ -6,7 +6,6 @@ import emoji
 import telegram
 
 from __main__ import db
-# from models.model_feeds import Feed
 
 
 class Update(db.Model):
@@ -50,12 +49,12 @@ class Update(db.Model):
         if not isinstance(data, dict):
             raise Exception(f"{type(data)} {data=} has to be a dict")
 
-        name = data.pop('name')
+        name = data.pop("name")
         # transforming emojis to normal words:
         name = emoji.demojize(name, delimiters=(" ", " "))
         name = name.replace("#", " ")  # removing hashtags
         name = name.replace("_", " ")  # underscores are just weird spaces
-        name = ' '.join(name.strip().split(' '))  # avoiding extra spaces
+        name = " ".join(name.strip().split(" "))  # avoiding extra spaces
         if not name:
             # commenting out to not resolve circular import error
             # feed_title = db.session.query(Feed).filter_by(
@@ -64,26 +63,25 @@ class Update(db.Model):
             # name = f"No name in update by { feed_title }"
             name = "No name in update by {feed_title}"
 
-        datetime = data.pop('datetime')
+        datetime = data.pop("datetime")
         # possible issues with timezone unaware?
 
         self.name = name[:140]
-        self.href = data.pop('href')
+        self.href = data.pop("href")
         self.datetime = datetime
-        self.feed_id = data.pop('feed_id')
+        self.feed_id = data.pop("feed_id")
 
         if data:
             raise ValueError(f"Dict {data=} has extra data")
 
     def as_dict(self):
         return {
-            '_id': self._id,
-            'feed_id': self.feed_id,
-            '_created': self._created,
-
-            'name': self.name,
-            'href': self.href,
-            'datetime': self.datetime,
+            "_id": self._id,
+            "feed_id": self.feed_id,
+            "_created": self._created,
+            "name": self.name,
+            "href": self.href,
+            "datetime": self.datetime,
         }
 
     def __str__(self):
@@ -109,13 +107,11 @@ class Update(db.Model):
         return not SKIP
 
     def send_telegram(self):
-        async def _send(msg, chat_id=os.environ.get('TELEGRAM_BOT_DMS')):
-            await telegram.Bot(
-                os.environ.get('TELEGRAM_BOT_TOKEN')
-            ).sendMessage(
+        async def _send(msg, chat_id=os.environ.get("TELEGRAM_BOT_DMS")):
+            await telegram.Bot(os.environ.get("TELEGRAM_BOT_TOKEN")).sendMessage(
                 chat_id=chat_id,
                 text=msg,
-                parse_mode='markdown',
+                parse_mode="markdown",
             )
 
         asyncio.run(_send(f"[{self.name}]({self.href})"))
