@@ -29,10 +29,11 @@ def feeds_frequencies():
 def list_feeds():
     feeds = db.session.query(Feed).all()
 
-    feeds = [feed.as_dict() for feed in feeds]
+    if request.args.get('requires_update').lower() in ['true', 'yes', '1']:
+        feeds = filter(lambda x: x.requires_update(), feeds)
 
     return shared.return_json(
-        response=feeds,
+        response=[feed.as_dict() for feed in feeds],
     )
 
 
