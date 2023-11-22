@@ -132,7 +132,7 @@ class Feed(db.Model):
         feed_len = (
             db.session.query(Update)
             .filter_by(
-                feed_id=feed_id,
+                feed_id=self.feed_id,
             )
             .count()
         )
