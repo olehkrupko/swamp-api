@@ -128,6 +128,7 @@ class Feed(db.Model):
 
     def ingest_updates(self, updates):
         new_items = []
+        updates = updates.sort(key=lambda x: x.datetime, reverse=False)
 
         for each in updates:
             if (
