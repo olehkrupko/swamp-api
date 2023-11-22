@@ -129,6 +129,14 @@ class Feed(db.Model):
     def ingest_updates(self, updates):
         new_items = []
 
+        feed_len = (
+            db.session.query(Update)
+            .filter_by(
+                feed_id=feed_id,
+            )
+            .count()
+        )
+
         for each in updates.sort(key=lambda x: x.datetime, reverse=False):
             if (
                 db.session.query(Update)
@@ -168,13 +176,6 @@ class Feed(db.Model):
                 _id=feed_id,
             )
             .first()
-        )
-        feed_len = (
-            db.session.query(Update)
-            .filter_by(
-                feed_id=feed_id,
-            )
-            .count()
         )
 
         # Processing
