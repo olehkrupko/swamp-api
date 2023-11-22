@@ -17,7 +17,7 @@ def frequency_validate(val):
     return val in FREQUENCIES
 
 
-@app.route(f"{ ROUTE_PATH }/frequencies", methods=["GET"])
+@app.route(f"{ ROUTE_PATH }/frequencies/", methods=["GET"])
 def feeds_frequencies():
     return shared.return_json(
         response=FREQUENCIES,
@@ -27,12 +27,20 @@ def feeds_frequencies():
 @app.route(f"{ ROUTE_PATH }/", methods=["GET"])
 @cross_origin(headers=["Content-Type"])  # Send Access-Control-Allow-Headers
 def list_feeds():
+    POSITIVE = ["true", "yes", "1"]
+
     feeds = db.session.query(Feed).all()
 
-    feeds = [feed.as_dict() for feed in feeds]
+    requires_update = request.args.get("requires_update")
+    if requires_update and requires_update.lower() in POSITIVE:
+        feeds = filter(lambda x: x.requires_update(), feeds)
+
+    active = request.args.get("active")
+    if active and active.lower() in POSITIVE:
+        feeds = filter(lambda x: x.frequency != "never", feeds)
 
     return shared.return_json(
-        response=feeds,
+        response=[feed.as_dict() for feed in feeds],
     )
 
 
@@ -64,7 +72,7 @@ def create_feed():
     )
 
 
-@app.route(f"{ ROUTE_PATH }/<feed_id>", methods=["GET"])
+@app.route(f"{ ROUTE_PATH }/<feed_id>/", methods=["GET"])
 def read_feed(feed_id):
     feed = db.session.query(Feed).filter_by(_id=feed_id).first()
 
@@ -74,7 +82,7 @@ def read_feed(feed_id):
 
 
 @shared.data_is_json
-@app.route(f"{ ROUTE_PATH }/<feed_id>", methods=["PUT", "OPTIONS"])
+@app.route(f"{ ROUTE_PATH }/<feed_id>/", methods=["PUT", "OPTIONS"])
 @cross_origin(headers=["Content-Type"])  # Send Access-Control-Allow-Headers
 def update_feed(feed_id):
     feed = db.session.query(Feed).filter_by(_id=feed_id).first()
@@ -107,7 +115,21 @@ def update_feed(feed_id):
     )
 
 
-@app.route(f"{ ROUTE_PATH }/<feed_id>", methods=["DELETE"])
+@shared.data_is_json
+@app.route(f"{ ROUTE_PATH }/<feed_id>/", methods=["POST"])
+@cross_origin(headers=["Content-Type"])  # Send Access-Control-Allow-Headers
+def push_feed_updates(feed_id):
+    feed = db.session.query(Feed).filter_by(_id=feed_id).first()
+    items = request.get_json()
+
+    new_updates = feed.ingest_updates(items)
+
+    return shared.return_json(
+        response=new_updates,
+    )
+
+
+@app.route(f"{ ROUTE_PATH }/<feed_id>/", methods=["DELETE"])
 def delete_item(feed_id):
     feed = db.session.query(Feed).filter_by(_id=feed_id)
 
@@ -119,7 +141,7 @@ def delete_item(feed_id):
     )
 
 
-@app.route(f"{ ROUTE_PATH }/parse/file", methods=["GET"])
+@app.route(f"{ ROUTE_PATH }/parse/file/", methods=["GET"])
 def feeds_file():
     from static_feeds import feeds
 
@@ -168,21 +190,8 @@ def feeds_file():
     )
 
 
-# disabling until feature is used once again
-# @shared.data_is_json
-# @app.route('/feeds/parse', methods=['PUT'])
-# def parse_feed():
-#     body = request.get_json()
-
-#     response = Feed.process_parsing(**body)
-
-#     return shared.return_json(
-#         response=response,
-#     )
-
-
 @shared.data_is_json
-@app.route(f"{ ROUTE_PATH }/parse/href", methods=["GET"])
+@app.route(f"{ ROUTE_PATH }/parse/href/", methods=["GET"])
 def test_parse_href():
     body = request.args
     href = body["href"]
@@ -205,7 +214,7 @@ def test_parse_href():
     )
 
 
-@app.route(f"{ ROUTE_PATH }/parse/runner", methods=["PUT"])
+@app.route(f"{ ROUTE_PATH }/parse/runner/", methods=["PUT"])
 def parse_runner():
     result = Feed.process_parsing_multi()
 
@@ -214,7 +223,7 @@ def parse_runner():
     )
 
 
-@app.route(f"{ ROUTE_PATH }/parse/queue", methods=["PUT"])
+@app.route(f"{ ROUTE_PATH }/parse/queue/", methods=["PUT"])
 def parse_queue():
     Feed.process_parsing_queue()
 
