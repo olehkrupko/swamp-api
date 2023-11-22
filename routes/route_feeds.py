@@ -28,12 +28,17 @@ def feeds_frequencies():
 @app.route(f"{ ROUTE_PATH }/", methods=["GET"])
 @cross_origin(headers=["Content-Type"])  # Send Access-Control-Allow-Headers
 def list_feeds():
+    POSITIVE = ["true", "yes", "1"]
+
     feeds = db.session.query(Feed).all()
 
-    if request.args.get('requires_update') and request.args['requires_update'].lower() in ['true', 'yes', '1']:
+    requires_update = request.args.get("requires_update")
+    if requires_update and requires_update.lower() in POSITIVE:
         feeds = filter(lambda x: x.requires_update(), feeds)
-    if request.args.get('active') and request.args['active'].lower() in ['true', 'yes', '1']:
-        feeds = filter(lambda x: x.frequency != 'never', feeds)
+
+    active = request.args.get("active")
+    if active and active.lower() in POSITIVE:
+        feeds = filter(lambda x: x.frequency != "never", feeds)
 
     return shared.return_json(
         response=[feed.as_dict() for feed in feeds],
