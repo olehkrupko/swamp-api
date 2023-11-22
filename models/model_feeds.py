@@ -126,10 +126,42 @@ class Feed(db.Model):
     def parse_list(self, results: List[Dict]):
         return results
 
+    def ingest_updates(self, updates):
+        new_items = []
+
+        for each in updates:
+            if (
+                db.session.query(Update)
+                .filter_by(
+                    feed_id=self.feed_id,
+                    href=each["href"],
+                )
+                .count()
+                == 0
+            ):
+                new_update = Update(each)
+                if new_update.filter_skip(json=self.json):
+                    continue
+                if feed_len != 0:
+                    new_update.datetime = datetime.now()
+                    new_update.send_telegram()
+                db.session.add(new_update)
+            new_items.append(each)
+
+        self._delayed = datetime.now() + relativedelta(
+            **{
+                self.frequency: random.randint(1, 10),
+            }
+        )
+
+        db.session.add(self)
+        db.session.commit()
+
+        return new_items
+
     @staticmethod
     def process_parsing(feed_id, store_new=True, proxy=False):
         # Preparing
-        new_items = []
         feed = (
             db.session.query(Feed)
             .filter_by(
@@ -151,32 +183,9 @@ class Feed(db.Model):
         )
 
         # Finishing with results
+        new_items = []
         if store_new:
-            for each in feed_updates:
-                if (
-                    db.session.query(Update)
-                    .filter_by(
-                        feed_id=feed_id,
-                        href=each["href"],
-                    )
-                    .count()
-                    == 0
-                ):
-                    new_update = Update(each)
-                    if new_update.filter_skip(json=feed.json):
-                        continue
-                    if feed_len != 0:
-                        new_update.datetime = datetime.now()
-                        new_update.send_telegram()
-                    db.session.add(new_update)
-                new_items.append(each)
-            feed._delayed = datetime.now() + relativedelta(
-                **{
-                    feed.frequency: random.randint(1, 10),
-                }
-            )
-            db.session.add(feed)
-            db.session.commit()
+            new_items = feed.ingest_updates(feed_updates)
         else:
             new_items = feed_updates.copy()
 
