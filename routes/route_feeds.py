@@ -31,7 +31,7 @@ def list_feeds():
 
     if request.args.get('requires_update') and request.args['requires_update'].lower() in ['true', 'yes', '1']:
         feeds = filter(lambda x: x.requires_update(), feeds)
-    if request.args.get('not_never') and request.args['not_never'].lower() in ['true', 'yes', '1']:
+    if request.args.get('active') and request.args['active'].lower() in ['true', 'yes', '1']:
         feeds = filter(lambda x: x.frequency != 'never', feeds)
 
     return shared.return_json(
