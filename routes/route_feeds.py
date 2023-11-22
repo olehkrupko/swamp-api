@@ -8,7 +8,6 @@ from flask_cors import cross_origin
 import routes._shared as shared
 from __main__ import app, db, FREQUENCIES
 from models.model_feeds import Feed
-from models.model_feeds_update import Update
 
 
 ROUTE_PATH = "/feeds"

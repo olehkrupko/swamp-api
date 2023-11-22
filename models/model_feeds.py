@@ -1,17 +1,12 @@
-import feedparser
 import json
 import os
 import random
-import ssl
-import string
-import urllib
 from datetime import datetime
-from dateutil import parser, tz  # adding custom timezones
 from dateutil.relativedelta import relativedelta
 from typing import List, Dict
 
 import pika
-from sentry_sdk import capture_message
+import requests
 from sqlalchemy.dialects.postgresql import JSONB
 
 from __main__ import db, FREQUENCIES
