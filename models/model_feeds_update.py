@@ -64,6 +64,8 @@ class Update(db.Model):
             name = "No name in update by {feed_title}"
 
         datetime = data.pop("datetime")
+        if isinstance(datetime, str):
+            datetime = datetime.datetime.fromisoformat(datetime)
         # possible issues with timezone unaware?
 
         self.name = name[:140]
