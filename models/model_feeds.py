@@ -122,21 +122,22 @@ class Feed(db.Model):
         return results
 
     def ingest_updates(self, updates):
-        new_items = []
+        updates.sort(key=lambda x: x["datetime"], reverse=False)
 
         feed_len = (
             db.session.query(Update)
             .filter_by(
-                feed_id=self.feed_id,
+                feed_id=self._id,
             )
             .count()
         )
 
-        for each in updates.sort(key=lambda x: x.datetime, reverse=False):
+        new_items = []
+        for each in updates:
             if (
                 db.session.query(Update)
                 .filter_by(
-                    feed_id=self.feed_id,
+                    feed_id=self._id,
                     href=each["href"],
                 )
                 .count()
