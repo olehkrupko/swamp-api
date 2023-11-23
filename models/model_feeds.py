@@ -123,6 +123,8 @@ class Feed(db.Model):
 
     def ingest_updates(self, updates):
         updates.sort(key=lambda x: x["datetime"], reverse=False)
+        for each in updates:
+            each['feed_id'] = self._id
 
         feed_len = (
             db.session.query(Update)
