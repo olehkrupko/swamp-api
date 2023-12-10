@@ -126,7 +126,7 @@ class Feed(db.Model):
         for each in updates:
             each['feed_id'] = self._id
 
-        feed_data = (
+        feed_data = list(
             db.session.query(Update)
             .filter_by(
                 feed_id=self._id,
