@@ -2,7 +2,7 @@ name: scheduled-healthcheck
 run-name: Scheduled healthcheck
 on:
   schedule:
-    - cron: '*/20 * * * *'
+    - cron: '* * */20 * *'
 jobs:
   data_parsing:
     runs-on: self-hosted
