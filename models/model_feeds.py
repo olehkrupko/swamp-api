@@ -136,18 +136,18 @@ class Feed(db.Model):
 
         new_items = []
         for each in updates:
-            print(">>>>", bool(filter(
+            print(">>>>", bool(list(filter(
                 lambda x: (x.href == each["href"]),
                 feed_data,
-            )))
-            print("->>>", len(filter(
+            ))))
+            print("->>>", len(list(filter(
                 lambda x: (x.href == each["href"]),
                 feed_data,
-            )))
-            if filter(
+            ))))
+            if list(filter(
                 lambda x: (x.href == each["href"]),
                 feed_data,
-            ):
+            )):
                 new_update = Update(each)
                 if new_update.filter_skip(json=self.json):
                     continue
