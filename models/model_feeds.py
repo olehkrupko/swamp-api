@@ -126,24 +126,19 @@ class Feed(db.Model):
         for each in updates:
             each['feed_id'] = self._id
 
-        feed_len = (
+        feed_data = (
             db.session.query(Update)
             .filter_by(
                 feed_id=self._id,
             )
-            .count()
         )
+        feed_len = len(feed_data)
 
         new_items = []
         for each in updates:
-            if (
-                db.session.query(Update)
-                .filter_by(
-                    feed_id=self._id,
-                    href=each["href"],
-                )
-                .count()
-                == 0
+            if filter(
+                lambda x: (x.href == each["href"]),
+                feed_data,
             ):
                 new_update = Update(each)
                 if new_update.filter_skip(json=self.json):
