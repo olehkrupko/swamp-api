@@ -144,7 +144,7 @@ class Feed(db.Model):
                 lambda x: (x.href == each["href"]),
                 feed_data,
             ))))
-            if list(filter(
+            if not list(filter(
                 lambda x: (x.href == each["href"]),
                 feed_data,
             )):
