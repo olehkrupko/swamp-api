@@ -136,14 +136,7 @@ class Feed(db.Model):
 
         new_items = []
         for each in updates:
-            print(">>>>", bool(list(filter(
-                lambda x: (x.href == each["href"]),
-                feed_data,
-            ))))
-            print("->>>", len(list(filter(
-                lambda x: (x.href == each["href"]),
-                feed_data,
-            ))))
+            # checking if href is present in DB
             if not list(filter(
                 lambda x: (x.href == each["href"]),
                 feed_data,
