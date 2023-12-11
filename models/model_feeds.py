@@ -148,6 +148,7 @@ class Feed(db.Model):
                     new_update.datetime = datetime.now()
                     new_update.send_telegram()
                 db.session.add(new_update)
+                db.session.commit()
             new_items.append(each)
 
         self._delayed = datetime.now() + relativedelta(
