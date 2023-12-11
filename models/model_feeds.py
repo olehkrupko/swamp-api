@@ -150,11 +150,14 @@ class Feed(db.Model):
                 db.session.add(new_update)
             new_items.append(each)
 
-        self._delayed = datetime.now() + relativedelta(
-            **{
-                self.frequency: random.randint(1, 10),
-            }
+        td_0_arr = {
+            self.frequency: random.randint(1, 10),
+        }
+        td_1_delta = relativedelta(
+            **td_0_arr,
         )
+        self._delayed = datetime.now() + td_1_delta
+        td_2_res = self.as_dict()
 
         db.session.add(self)
         db.session.commit()
