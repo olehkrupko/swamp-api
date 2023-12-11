@@ -92,7 +92,7 @@ class Update(db.Model):
     # filter is used to remove unnecessary items
     # {field}        - don't skip what's mentioned there
     # {field}_ignore - skip these ones
-    def filter_skip(self, json = {}):
+    def filter_skip(self, json):
         # adding it to make code more readable
         SKIP = True
         SUPPORTED_FIELDS = ["name", "href"]
