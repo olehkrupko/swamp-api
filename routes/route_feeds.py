@@ -192,6 +192,7 @@ def feeds_file():
 
 @shared.data_is_json
 @app.route(f"{ ROUTE_PATH }/parse/href/", methods=["GET"])
+@cross_origin(headers=["Content-Type"])  # Send Access-Control-Allow-Headers
 def test_parse_href():
     body = request.args
     href = body["href"]

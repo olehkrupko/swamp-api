@@ -256,9 +256,9 @@ class Feed(db.Model):
 
     def parse_href(self, href=None, proxy: bool = True, **kwargs: Dict):
         if href is None:
-            href = self.href_base
+            href = self.href
 
-        # results = requests.get(f"{ os.environ['PARSER_URL'] }/parse")
-        results = requests.get(f"{ os.environ['PARSER_URL'] }/parse/async")
+        # results = requests.get(f"{ os.environ['PARSER_URL'] }/parse/?href={href}")
+        results = requests.get(f"{ os.environ['PARSER_URL'] }/parse/async/?href={href}")
 
-        return self.parse_list(results=results)
+        return self.parse_list(results=results.json())
