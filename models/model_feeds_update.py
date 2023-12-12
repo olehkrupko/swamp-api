@@ -70,7 +70,7 @@ class Update(db.Model):
 
         self.name = name[:140]
         self.href = data.pop("href")
-        self.datetime = datetime
+        self.datetime = datetime_event
         self.feed_id = data.pop("feed_id")
 
         if data:
