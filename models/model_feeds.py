@@ -145,7 +145,7 @@ class Feed(db.Model):
                 if new_update.filter_skip(json=self.json):
                     continue
                 if feed_len != 0:
-                    new_update.datetime = datetime.now()
+                    new_update.datetime = datetime.datetime.now()
                     new_update.send_telegram()
                 db.session.add(new_update)
                 db.session.commit()
