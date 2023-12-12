@@ -147,9 +147,7 @@ class Feed(db.Model):
                 if feed_len != 0:
                     new_update.datetime = datetime.now()
                     new_update.send_telegram()
-                x = new_update.as_dict()
                 db.session.add(new_update)
-                db.session.commit()
             new_items.append(each)
 
         self._delayed = datetime.now() + relativedelta(
