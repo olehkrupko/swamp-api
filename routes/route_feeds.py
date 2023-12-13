@@ -224,10 +224,10 @@ def parse_runner():
     )
 
 
-@app.route(f"{ ROUTE_PATH }/parse/queue/", methods=["PUT"])
-def parse_queue():
-    Feed.process_parsing_queue()
+# @app.route(f"{ ROUTE_PATH }/parse/queue/", methods=["PUT"])
+# def parse_queue():
+#     Feed.process_parsing_queue()
 
-    return shared.return_json(
-        response="DONE",
-    )
+#     return shared.return_json(
+#         response="DONE",
+#     )

@@ -236,23 +236,23 @@ class Feed(db.Model):
 
         return results
 
-    @staticmethod
-    def process_parsing_queue(force_all=False, proxy=False):
-        feed_list = db.session.query(Feed).all()
-        if not force_all:
-            feed_list = filter(lambda x: x.requires_update(), feed_list)
-        random.shuffle(feed_list)
+    # @staticmethod
+    # def process_parsing_queue(force_all=False, proxy=False):
+    #     feed_list = db.session.query(Feed).all()
+    #     if not force_all:
+    #         feed_list = filter(lambda x: x.requires_update(), feed_list)
+    #     random.shuffle(feed_list)
 
-        for feed in feed_list:
-            params = pika.URLParameters(os.environ["RABBITMQ_CONNECTION_STRING"])
-            connection = pika.BlockingConnection(params)
-            channel = connection.channel()
+    #     for feed in feed_list:
+    #         params = pika.URLParameters(os.environ["RABBITMQ_CONNECTION_STRING"])
+    #         connection = pika.BlockingConnection(params)
+    #         channel = connection.channel()
 
-            channel.basic_publish(
-                exchange="swamp",
-                routing_key="feed.parser",
-                body=json.dumps(feed.as_dict()),
-            )
+    #         channel.basic_publish(
+    #             exchange="swamp",
+    #             routing_key="feed.parser",
+    #             body=json.dumps(feed.as_dict()),
+    #         )
 
     def parse_href(self, href=None, proxy: bool = True, **kwargs: Dict):
         if href is None:
