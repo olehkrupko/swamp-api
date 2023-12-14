@@ -27,4 +27,4 @@ def queue_feed_push(routing_key, body):
     new_updates = feed.ingest_updates(
         body["updates"]
     )
-    print(f"Feed { feed['title'] }, saved { len(new_updates) } updates to DB")
+    print(f"Feed { feed.title }, saved { len(new_updates) } updates to DB")
