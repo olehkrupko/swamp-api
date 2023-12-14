@@ -115,18 +115,18 @@ def update_feed(feed_id):
     )
 
 
-# @shared.data_is_json
-# @app.route(f"{ ROUTE_PATH }/<feed_id>/", methods=["POST"])
-# @cross_origin(headers=["Content-Type"])  # Send Access-Control-Allow-Headers
-# def push_feed_updates(feed_id):
-#     feed = db.session.query(Feed).filter_by(_id=feed_id).first()
-#     items = request.get_json()
+@shared.data_is_json
+@app.route(f"{ ROUTE_PATH }/<feed_id>/", methods=["POST"])
+@cross_origin(headers=["Content-Type"])  # Send Access-Control-Allow-Headers
+def push_feed_updates(feed_id):
+    feed = db.session.query(Feed).filter_by(_id=feed_id).first()
+    items = request.get_json()
 
-#     new_updates = feed.ingest_updates(items)
+    new_updates = feed.ingest_updates(items)
 
-#     return shared.return_json(
-#         response=new_updates,
-#     )
+    return shared.return_json(
+        response=new_updates,
+    )
 
 
 @app.route(f"{ ROUTE_PATH }/<feed_id>/", methods=["DELETE"])
