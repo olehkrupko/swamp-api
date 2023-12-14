@@ -1,6 +1,6 @@
 from rabbitmq_pika_flask import ExchangeType
 
-from __main__ import rabbit
+from __main__ import db, rabbit
 from models.model_feeds import Feed
 
 
