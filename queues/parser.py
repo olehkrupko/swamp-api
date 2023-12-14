@@ -12,6 +12,8 @@ from models.model_feeds import Feed
 #     )
 
 
+# one parallel queue for data constistency
+# if more required — add asyncio Semaphore on stage of saving to DB
 @rabbit.queue(routing_key="feed.push", exchange_type=ExchangeType.DIRECT)
 def queue_feed_push(routing_key, body):
     feed = (
@@ -25,4 +27,4 @@ def queue_feed_push(routing_key, body):
     new_updates = feed.ingest_updates(
         body["updates"]
     )
-    print(f"---> { len(new_updates) }")
+    print("Feed { feed['title'] }, saved { len(new_updates) } updates to DB")
