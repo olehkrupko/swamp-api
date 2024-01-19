@@ -125,6 +125,8 @@ class Feed(db.Model):
         updates.sort(key=lambda x: x["datetime"], reverse=False)
         for each in updates:
             each['feed_id'] = self._id
+        if "limit" in self.json and isinstance(self.json["limit"], int):
+            updates = updates[:self.json["limit"]]
 
         feed_data = list(
             db.session.query(Update)
