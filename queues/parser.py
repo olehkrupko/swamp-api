@@ -1,8 +1,8 @@
 # from rabbitmq_pika_flask import ExchangeType
 
 # from __main__ import db, rabbit
-from __main__ import db
-from models.model_feeds import Feed
+# from __main__ import db
+# from models.model_feeds import Feed
 
 
 # @rabbit.queue(routing_key="feed.parser", exchange_type=ExchangeType.DIRECT)

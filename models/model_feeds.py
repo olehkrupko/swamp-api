@@ -1,11 +1,10 @@
-import json
 import os
 import random
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from typing import List, Dict
 
-import pika
+# import pika
 import requests
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -124,13 +123,12 @@ class Feed(db.Model):
     def ingest_updates(self, updates):
         updates.sort(key=lambda x: x["datetime"], reverse=False)
         for each in updates:
-            each['feed_id'] = self._id
+            each["feed_id"] = self._id
         if "limit" in self.json and isinstance(self.json["limit"], int):
             updates = updates[:self.json["limit"]]
 
         feed_data = list(
-            db.session.query(Update)
-            .filter_by(
+            db.session.query(Update).filter_by(
                 feed_id=self._id,
             )
         )
@@ -139,10 +137,12 @@ class Feed(db.Model):
         new_items = []
         for each in updates:
             # checking if href is present in DB
-            if not list(filter(
-                lambda x: (x.href == each["href"]),
-                feed_data,
-            )):
+            if not list(
+                filter(
+                    lambda x: (x.href == each["href"]),
+                    feed_data,
+                )
+            ):
                 new_update = Update(each)
                 if new_update.filter_skip(json=self.json):
                     continue

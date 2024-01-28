@@ -118,5 +118,18 @@ class Update(db.Model):
                 # parse_mode="markdown",
             )
 
+        message = (
+            [
+                self.name,
+                self.href,
+                f"http://192.168.0.155:30011/feeds/{self.feed_id}/edit",
+            ]
+            .join("\n\n")
+        )
+
         # asyncio.run(_send(f"[{self.name}]({self.href})"))
-        asyncio.run(_send(f"{self.name} \n\n {self.href} \n\n http://192.168.0.155:30011/feeds/{self.feed_id}/edit"))
+        asyncio.run(
+            _send(
+                message,
+            )
+        )

@@ -7,9 +7,11 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
 import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
+
 # from rabbitmq_pika_flask import RabbitMQ
 # from rabbitmq_pika_flask.ExchangeParams import ExchangeParams
-from sentry_sdk.integrations.flask import FlaskIntegration
+
 
 sentry_sdk.init(
     dsn=os.environ.get("SENTRY_SDK_DSN"),
