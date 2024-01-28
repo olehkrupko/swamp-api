@@ -102,8 +102,10 @@ class Update(db.Model):
 
         for filter_name, filter_value in json["filter"].items():
             if filter_name in SUPPORTED_FIELDS:
-                # check for blacklisting using href_ignore there as well
                 if filter_value not in getattr(self, filter_name):
+                    return SKIP
+            if "_ignore" in filter_name and filter_name.strip("_ignore") in SUPPORTED_FIELDS:
+                if filter_value in getattr(self, filter_name.strip("_ignore")):
                     return SKIP
 
         return not SKIP
