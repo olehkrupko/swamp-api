@@ -104,7 +104,10 @@ class Update(db.Model):
             if filter_name in SUPPORTED_FIELDS:
                 if filter_value not in getattr(self, filter_name):
                     return SKIP
-            if "_ignore" in filter_name and filter_name.strip("_ignore") in SUPPORTED_FIELDS:
+            if (
+                "_ignore" in filter_name
+                and filter_name.strip("_ignore") in SUPPORTED_FIELDS
+            ):
                 if filter_value in getattr(self, filter_name.strip("_ignore")):
                     return SKIP
 
@@ -118,14 +121,11 @@ class Update(db.Model):
                 # parse_mode="markdown",
             )
 
-        message = (
-            [
-                self.name,
-                self.href,
-                f"http://192.168.0.155:30011/feeds/{self.feed_id}/edit",
-            ]
-            .join("\n\n")
-        )
+        message = [
+            self.name,
+            self.href,
+            f"http://192.168.0.155:30011/feeds/{self.feed_id}/edit",
+        ].join("\n\n")
 
         # asyncio.run(_send(f"[{self.name}]({self.href})"))
         asyncio.run(

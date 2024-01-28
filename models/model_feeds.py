@@ -125,7 +125,7 @@ class Feed(db.Model):
         for each in updates:
             each["feed_id"] = self._id
         if "limit" in self.json and isinstance(self.json["limit"], int):
-            updates = updates[:self.json["limit"]]
+            updates = updates[: self.json["limit"]]
 
         feed_data = list(
             db.session.query(Update).filter_by(
