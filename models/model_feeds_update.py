@@ -101,15 +101,22 @@ class Update(db.Model):
             return not SKIP
 
         for filter_name, filter_value in json["filter"].items():
-            if filter_name in SUPPORTED_FIELDS:
-                if filter_value not in getattr(self, filter_name):
-                    return SKIP
-            if (
-                "_ignore" in filter_name
-                and filter_name.strip("_ignore") in SUPPORTED_FIELDS
-            ):
-                if filter_value in getattr(self, filter_name.strip("_ignore")):
-                    return SKIP
+            if isinstance(filter_value, str):
+                filter_value = [filter_value]
+
+            if not isinstance(filter_value, list):
+                raise TypeError("Filter value is expected to be STR or LIST")
+
+            for each_value in filter_value:
+                if filter_name in SUPPORTED_FIELDS:
+                    if each_value not in getattr(self, filter_name):
+                        return SKIP
+                if (
+                    "_ignore" in filter_name
+                    and filter_name.strip("_ignore") in SUPPORTED_FIELDS
+                ):
+                    if each_value in getattr(self, filter_name.strip("_ignore")):
+                        return SKIP
 
         return not SKIP
 
