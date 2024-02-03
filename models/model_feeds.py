@@ -121,7 +121,7 @@ class Feed(db.Model):
         return results
 
     def ingest_updates(self, updates):
-        updates.sort(key=lambda x: x["datetime"], reverse=False)
+        updates.sort(key=lambda x: x["datetime"], reverse=True)
         for each in updates:
             each["feed_id"] = self._id
         if "limit" in self.json and isinstance(self.json["limit"], int):
