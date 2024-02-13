@@ -6,7 +6,7 @@ from models.model_feeds import Feed
 from models.model_feeds_update import Update
 
 
-ROUTE_PATH = "/feed-updates"
+ROUTE_PATH = "/updates"
 
 
 @app.route(f"{ ROUTE_PATH }/", methods=["GET"])
