@@ -90,6 +90,8 @@ class Feed(db.Model):
     def as_dict(self) -> dict:
         return {
             "_id": self._id,
+            "_created": self._created,
+            "_delayed": self._delayed,
             "title": self.title,
             "href": self.href,
             "href_user": self.href_user,
