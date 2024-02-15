@@ -137,8 +137,10 @@ def delete_item(feed_id):
     feed.delete()
     db.session.commit()
 
-    return app.response_class(
-        response="Feed deleted",
+    return shared.return_json(
+        response={
+            "success": True,
+        },
     )
 
 
