@@ -55,6 +55,6 @@ jobs:
           python-version: 3.11
       - name: Install black
         run: pip install black==23.10.1
-      - name: Lint with flake8
+      - name: Lint with black
         run: |
           black --diff --check lint-black
