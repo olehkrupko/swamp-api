@@ -140,7 +140,6 @@ class Update(db.Model):
             f"[EDIT](http://192.168.0.155:30011/feeds/{self.feed_id}/edit)"
         )
 
-        # asyncio.run(_send(f"[{self.name}]({self.href})"))
         asyncio.run(
             _send(
                 message,

@@ -211,7 +211,7 @@ def test_parse_href():
             "json": {},
         }
     )
-    
+
     response = [
         Update(
             {

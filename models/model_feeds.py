@@ -4,7 +4,6 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from typing import List, Dict
 
-# import pika
 import requests
 from sqlalchemy.dialects.postgresql import JSONB
 
