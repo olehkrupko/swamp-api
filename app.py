@@ -44,7 +44,6 @@ with app.app_context():
 
 # routes
 CORS(app)
-import routes.route_healthcheck
 import routes.route_feeds
 import routes.route_updates
 
