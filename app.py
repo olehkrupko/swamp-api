@@ -46,7 +46,7 @@ with app.app_context():
 CORS(app)
 import routes.route_healthcheck
 import routes.route_feeds
-import routes.route_feed_updates
+import routes.route_updates
 
 # # telegram bot functions
 # import queues.courier

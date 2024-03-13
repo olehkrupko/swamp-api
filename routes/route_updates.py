@@ -3,14 +3,14 @@ from flask import request
 import routes._shared as shared
 from __main__ import app, db
 from models.model_feeds import Feed
-from models.model_feeds_update import Update
+from models.model_updates import Update
 
 
 ROUTE_PATH = "/updates"
 
 
 @app.route(f"{ ROUTE_PATH }/", methods=["GET"])
-def list_feed_updates():
+def list_updates():
     kwargs = dict(request.args)
     limit = 140
     if "limit" in kwargs:

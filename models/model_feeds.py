@@ -8,7 +8,7 @@ import requests
 from sqlalchemy.dialects.postgresql import JSONB
 
 from __main__ import db, FREQUENCIES
-from models.model_feeds_update import Update
+from models.model_updates import Update
 
 # import requests
 # from bs4 import BeautifulSoup, SoupStrainer
@@ -176,16 +176,16 @@ class Feed(db.Model):
         )
 
         # Processing
-        feed_updates = feed.parse_href(
+        updates = feed.parse_href(
             proxy=proxy,
         )
 
         # Finishing with results
         new_items = []
         if store_new:
-            new_items = feed.ingest_updates(feed_updates)
+            new_items = feed.ingest_updates(updates)
         else:
-            new_items = feed_updates.copy()
+            new_items = updates.copy()
 
         # Return data
         return {

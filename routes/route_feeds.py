@@ -8,7 +8,7 @@ from flask_cors import cross_origin
 import routes._shared as shared
 from __main__ import app, db, FREQUENCIES
 from models.model_feeds import Feed
-from models.model_feeds_update import Update
+from models.model_updates import Update
 
 
 ROUTE_PATH = "/feeds"
@@ -119,7 +119,7 @@ def update_feed(feed_id):
 @shared.data_is_json
 @app.route(f"{ ROUTE_PATH }/<feed_id>/", methods=["POST"])
 @cross_origin(headers=["Content-Type"])  # Send Access-Control-Allow-Headers
-def push_feed_updates(feed_id):
+def push_updates(feed_id):
     feed = db.session.query(Feed).filter_by(_id=feed_id).first()
     items = request.get_json()
 
