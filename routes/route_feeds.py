@@ -225,21 +225,3 @@ def test_parse_href():
     return shared.return_json(
         response=response,
     )
-
-
-# @app.route(f"{ ROUTE_PATH }/parse/runner/", methods=["PUT"])
-# def parse_runner():
-#     result = Feed.process_parsing_multi()
-
-#     return shared.return_json(
-#         response=result,
-#     )
-
-
-# @app.route(f"{ ROUTE_PATH }/parse/queue/", methods=["PUT"])
-# def parse_queue():
-#     Feed.process_parsing_queue()
-
-#     return shared.return_json(
-#         response="DONE",
-#     )
