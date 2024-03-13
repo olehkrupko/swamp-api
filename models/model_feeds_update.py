@@ -1,6 +1,7 @@
 import asyncio
 import datetime
 import os
+from zoneinfo import ZoneInfo
 
 import emoji
 import telegram
@@ -66,7 +67,12 @@ class Update(db.Model):
         datetime_event = data.pop("datetime")
         if isinstance(datetime_event, str):
             datetime_event = datetime.datetime.fromisoformat(datetime_event)
-        # possible issues with timezone unaware?
+        if datetime_event.tzinfo:
+            # if tzinfo present — convert to current one
+            datetime_event = datetime_event.astimezone(ZoneInfo(os.environ.get("TIMEZONE_LOCAL")))
+        else:
+            # if no tzinfo — replace it current one
+            datetime_event = datetime_event.replace(tzinfo=os.environ.get("TIMEZONE_LOCAL"))
 
         self.name = name[:140]
         self.href = data.pop("href")
