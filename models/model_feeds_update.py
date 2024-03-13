@@ -131,15 +131,13 @@ class Update(db.Model):
             await telegram.Bot(os.environ.get("TELEGRAM_BOT_TOKEN")).sendMessage(
                 chat_id=chat_id,
                 text=msg,
-                # parse_mode="markdown",
+                parse_mode="markdown",
             )
 
-        message = "\n\n".join(
-            [
-                self.name,
-                self.href,
-                f"http://192.168.0.155:30011/feeds/{self.feed_id}/edit",
-            ]
+        message = (
+            f"{self.name}\n\n"
+            f"[OPEN]({self.href})"
+            f"[EDIT](http://192.168.0.155:30011/feeds/{self.feed_id}/edit)"
         )
 
         # asyncio.run(_send(f"[{self.name}]({self.href})"))
