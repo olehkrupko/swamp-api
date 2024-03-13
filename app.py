@@ -9,9 +9,6 @@ from flask_cors import CORS
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 
-# from rabbitmq_pika_flask import RabbitMQ
-# from rabbitmq_pika_flask.ExchangeParams import ExchangeParams
-
 
 sentry_sdk.init(
     dsn=os.environ.get("SENTRY_SDK_DSN"),
@@ -45,17 +42,6 @@ import models.model_feeds
 
 with app.app_context():
     db.create_all()
-
-
-# app.config["MQ_URL"] = os.environ["RABBITMQ_CONNECTION_STRING"]
-# app.config["MQ_EXCHANGE"] = "swamp"
-# rabbit = RabbitMQ(
-#     app,
-#     body_parser=json.loads,
-#     msg_parser=json.dumps,
-#     queue_prefix="swamp.q",
-#     exchange_params=ExchangeParams(durable=True),
-# )
 
 # routes
 CORS(app)
