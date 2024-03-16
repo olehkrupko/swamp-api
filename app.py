@@ -29,9 +29,6 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SQLALCHEMY_DB_URI")
 db.init_app(app)
 
-# database
-import models.model_feeds
-
 with app.app_context():
     db.create_all()
 
