@@ -75,7 +75,7 @@ class Update(db.Model):
         else:
             # if no tzinfo — replace it current one
             datetime_event = datetime_event.replace(
-                tzinfo=os.environ.get("TIMEZONE_LOCAL")
+                tzinfo=ZoneInfo(os.environ.get("TIMEZONE_LOCAL"))
             )
 
         self.name = name[:140]
