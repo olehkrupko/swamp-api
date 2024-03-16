@@ -8,15 +8,11 @@ from flask_cors import cross_origin
 import routes._shared as shared
 from config.db import db
 from models.model_feeds import Feed
-from models.model_frequencies import FREQUENCIES
+from models.model_frequencies import FREQUENCIES, frequency_validate
 from models.model_updates import Update
 
 
 router = Blueprint('feeds', __name__, url_prefix='/feeds')
-
-
-def frequency_validate(val):
-    return val in FREQUENCIES
 
 
 @router.route("/frequencies/", methods=["GET"])
