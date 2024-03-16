@@ -12,7 +12,7 @@ from models.model_frequencies import FREQUENCIES, frequency_validate
 from models.model_updates import Update
 
 
-router = Blueprint('feeds', __name__, url_prefix='/feeds')
+router = Blueprint("feeds", __name__, url_prefix="/feeds")
 
 
 @router.route("/frequencies/", methods=["GET"])

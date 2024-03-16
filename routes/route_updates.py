@@ -1,16 +1,15 @@
-from flask import request
+from flask import request, Blueprint
 
 import routes._shared as shared
-from __main__ import app
 from config.db import db
 from models.model_feeds import Feed
 from models.model_updates import Update
 
 
-ROUTE_PATH = "/updates"
+router = Blueprint("updates", __name__, url_prefix="/updates")
 
 
-@app.route(f"{ ROUTE_PATH }/", methods=["GET"])
+@router.route("/", methods=["GET"])
 def list_updates():
     kwargs = dict(request.args)
     limit = 140

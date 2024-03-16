@@ -7,6 +7,7 @@ from flask import Flask
 from flask_cors import CORS
 
 from routes import route_feeds
+from routes import route_updates
 from config.db import db
 
 
@@ -37,7 +38,7 @@ with app.app_context():
 # routes
 CORS(app)
 app.register_blueprint(route_feeds.router)
-import routes.route_updates
+app.register_blueprint(route_updates.router)
 
 # # telegram bot functions
 # import queues.courier
