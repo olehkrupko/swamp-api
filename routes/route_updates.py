@@ -1,7 +1,8 @@
 from flask import request
 
 import routes._shared as shared
-from __main__ import app, db
+from __main__ import app
+from config.db import db
 from models.model_feeds import Feed
 from models.model_updates import Update
 

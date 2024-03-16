@@ -2,11 +2,11 @@ import os
 import sys
 
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
+from config.db import db
 
 
 sentry_sdk.init(
@@ -34,9 +34,9 @@ FREQUENCIES = (
     "years",
     "never",
 )
+db.init_app(app)
 
 # database
-db = SQLAlchemy(app)
 import models.model_feeds
 
 with app.app_context():

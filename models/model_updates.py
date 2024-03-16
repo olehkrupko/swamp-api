@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 import emoji
 import telegram
 
-from __main__ import db
+from config.db import db
 
 
 class Update(db.Model):

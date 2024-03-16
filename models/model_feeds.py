@@ -7,7 +7,8 @@ from typing import List, Dict
 import requests
 from sqlalchemy.dialects.postgresql import JSONB
 
-from __main__ import db, FREQUENCIES
+from __main__ import FREQUENCIES
+from config.db import db
 from models.model_updates import Update
 
 # import requests
