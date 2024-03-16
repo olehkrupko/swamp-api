@@ -1,4 +1,5 @@
 [![push-lint: black & flake8](https://github.com/olehkrupko/swamp-api/actions/workflows/push-lint.yml/badge.svg)](https://github.com/olehkrupko/swamp-api/actions/workflows/push-lint.yml)
+[![push-deploy](https://github.com/olehkrupko/swamp-api/actions/workflows/push-deploy.yml/badge.svg)](https://github.com/olehkrupko/swamp-api/actions/workflows/push-deploy.yml)
 
 # swamp-api
 It's backend API for swamp projects
