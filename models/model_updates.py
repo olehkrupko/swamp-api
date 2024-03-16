@@ -1,11 +1,12 @@
 import asyncio
 import datetime
 import os
+from zoneinfo import ZoneInfo
 
 import emoji
 import telegram
 
-from __main__ import db
+from config.db import db
 
 
 class Update(db.Model):
@@ -63,12 +64,23 @@ class Update(db.Model):
             # name = f"No name in update by { feed_title }"
             name = "No name in update by {feed_title}"
 
-        datetime = data.pop("datetime")
-        # possible issues with timezone unaware?
+        datetime_event = data.pop("datetime")
+        if isinstance(datetime_event, str):
+            datetime_event = datetime.datetime.fromisoformat(datetime_event)
+        if datetime_event.tzinfo:
+            # if tzinfo present — convert to current one
+            datetime_event = datetime_event.astimezone(
+                ZoneInfo(os.environ.get("TIMEZONE_LOCAL"))
+            )
+        else:
+            # if no tzinfo — replace it current one
+            datetime_event = datetime_event.replace(
+                tzinfo=ZoneInfo(os.environ.get("TIMEZONE_LOCAL"))
+            )
 
         self.name = name[:140]
         self.href = data.pop("href")
-        self.datetime = datetime
+        self.datetime = datetime_event
         self.feed_id = data.pop("feed_id")
 
         if data:
@@ -99,10 +111,22 @@ class Update(db.Model):
             return not SKIP
 
         for filter_name, filter_value in json["filter"].items():
-            if filter_name in SUPPORTED_FIELDS:
-                # check for blacklisting using href_ignore there as well
-                if filter_value not in getattr(self, filter_name):
-                    return SKIP
+            if isinstance(filter_value, str):
+                filter_value = [filter_value]
+
+            if not isinstance(filter_value, list):
+                raise TypeError("Filter value is expected to be STR or LIST")
+
+            for each_value in filter_value:
+                if filter_name in SUPPORTED_FIELDS:
+                    if each_value not in getattr(self, filter_name):
+                        return SKIP
+                if (
+                    "_ignore" in filter_name
+                    and filter_name.strip("_ignore") in SUPPORTED_FIELDS
+                ):
+                    if each_value in getattr(self, filter_name.strip("_ignore")):
+                        return SKIP
 
         return not SKIP
 
@@ -114,4 +138,15 @@ class Update(db.Model):
                 parse_mode="markdown",
             )
 
-        asyncio.run(_send(f"[{self.name}]({self.href})"))
+        message = (
+            f"{telegram.helpers.escape_markdown(self.name)}\n\n"
+            f"`[`[OPEN]({self.href})]"
+            " - "
+            f"`[`[EDIT](http://192.168.0.155:30011/feeds/{self.feed_id}/edit)]"
+        )
+
+        asyncio.run(
+            _send(
+                message,
+            )
+        )

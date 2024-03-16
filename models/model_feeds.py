@@ -1,16 +1,15 @@
-import json
 import os
 import random
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from typing import List, Dict
 
-import pika
 import requests
 from sqlalchemy.dialects.postgresql import JSONB
 
-from __main__ import db, FREQUENCIES
-from models.model_feeds_update import Update
+from config.db import db
+from models.model_frequencies import FREQUENCIES
+from models.model_updates import Update
 
 # import requests
 # from bs4 import BeautifulSoup, SoupStrainer
@@ -91,6 +90,8 @@ class Feed(db.Model):
     def as_dict(self) -> dict:
         return {
             "_id": self._id,
+            "_created": self._created,
+            "_delayed": self._delayed,
             "title": self.title,
             "href": self.href,
             "href_user": self.href_user,
@@ -122,25 +123,27 @@ class Feed(db.Model):
         return results
 
     def ingest_updates(self, updates):
-        new_items = []
+        updates.sort(key=lambda x: x["datetime"], reverse=False)
+        for each in updates:
+            each["feed_id"] = self._id
+        if "limit" in self.json and isinstance(self.json["limit"], int):
+            updates = updates[: self.json["limit"]]
 
-        feed_len = (
-            db.session.query(Update)
-            .filter_by(
-                feed_id=self.feed_id,
+        feed_data = list(
+            db.session.query(Update).filter_by(
+                feed_id=self._id,
             )
-            .count()
         )
+        feed_len = len(feed_data)
 
-        for each in updates.sort(key=lambda x: x.datetime, reverse=False):
-            if (
-                db.session.query(Update)
-                .filter_by(
-                    feed_id=self.feed_id,
-                    href=each["href"],
+        new_items = []
+        for each in updates:
+            # checking if href is present in DB
+            if not list(
+                filter(
+                    lambda x: (x.href == each["href"]),
+                    feed_data,
                 )
-                .count()
-                == 0
             ):
                 new_update = Update(each)
                 if new_update.filter_skip(json=self.json):
@@ -149,7 +152,7 @@ class Feed(db.Model):
                     new_update.datetime = datetime.now()
                     new_update.send_telegram()
                 db.session.add(new_update)
-            new_items.append(each)
+                new_items.append(new_update.as_dict())
 
         self._delayed = datetime.now() + relativedelta(
             **{
@@ -174,16 +177,16 @@ class Feed(db.Model):
         )
 
         # Processing
-        feed_updates = feed.parse_href(
+        updates = feed.parse_href(
             proxy=proxy,
         )
 
         # Finishing with results
         new_items = []
         if store_new:
-            new_items = feed.ingest_updates(feed_updates)
+            new_items = feed.ingest_updates(updates)
         else:
-            new_items = feed_updates.copy()
+            new_items = updates.copy()
 
         # Return data
         return {
@@ -237,29 +240,11 @@ class Feed(db.Model):
 
         return results
 
-    @staticmethod
-    def process_parsing_queue(force_all=False, proxy=False):
-        feed_list = db.session.query(Feed).all()
-        if not force_all:
-            feed_list = filter(lambda x: x.requires_update(), feed_list)
-        random.shuffle(feed_list)
-
-        for feed in feed_list:
-            params = pika.URLParameters(os.environ["RABBITMQ_CONNECTION_STRING"])
-            connection = pika.BlockingConnection(params)
-            channel = connection.channel()
-
-            channel.basic_publish(
-                exchange="swamp",
-                routing_key="feed.parser",
-                body=json.dumps(feed.as_dict()),
-            )
-
     def parse_href(self, href=None, proxy: bool = True, **kwargs: Dict):
         if href is None:
-            href = self.href_base
+            href = self.href
 
-        # results = requests.get(f"{ os.environ['PARSER_URL'] }/parse")
-        results = requests.get(f"{ os.environ['PARSER_URL'] }/parse/async")
+        # results = requests.get(f"{ os.environ['PARSER_URL'] }/parse/?href={href}")
+        results = requests.get(f"{ os.environ['PARSER_URL'] }/parse/async/?href={href}")
 
-        return self.parse_list(results=results)
+        return self.parse_list(results=results.json())

@@ -1,15 +1,16 @@
-import json
 import os
 import sys
 
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
-import sentry_sdk
-from rabbitmq_pika_flask import RabbitMQ
-from rabbitmq_pika_flask.ExchangeParams import ExchangeParams
-from sentry_sdk.integrations.flask import FlaskIntegration
+from routes import route_feeds
+from routes import route_updates
+from routes import route_frequencies
+from config.db import db
+
 
 sentry_sdk.init(
     dsn=os.environ.get("SENTRY_SDK_DSN"),
@@ -27,46 +28,20 @@ sys.dont_write_bytecode = True  # avoid writing __pycache__ and .pyc
 app = Flask(__name__)
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SQLALCHEMY_DB_URI")
-FREQUENCIES = (
-    "minutes",
-    "hours",
-    "days",
-    "weeks",
-    "months",
-    "years",
-    "never",
-)
-
-# database
-db = SQLAlchemy(app)
-import models.model_feeds
+db.init_app(app)
 
 with app.app_context():
     db.create_all()
 
-
-app.config["MQ_URL"] = os.environ["RABBITMQ_CONNECTION_STRING"]
-app.config["MQ_EXCHANGE"] = "swamp"
-rabbit = RabbitMQ(
-    app,
-    body_parser=json.loads,
-    msg_parser=json.dumps,
-    queue_prefix="swamp.q",
-    exchange_params=ExchangeParams(durable=True),
-)
-
 # routes
 CORS(app)
-import routes.route_healthcheck
-import routes.route_feeds
-import routes.route_feed_updates
+app.register_blueprint(route_feeds.router)
+app.register_blueprint(route_frequencies.router)
+app.register_blueprint(route_updates.router)
 
 # # telegram bot functions
 # import queues.courier
 
-# queue threads
-import queues.parser
-
 # run app
 if __name__ == "__main__":
-    app.run("0.0.0.0", port=30010, threaded=True, debug=True)
+    app.run("0.0.0.0", port=30010, threaded=False, debug=True)

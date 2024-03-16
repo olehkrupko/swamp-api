@@ -1,69 +1,60 @@
-name: push-prod
-run-name: Push update to PROD from ${{ github.ref_name }}
-on:
-  push:
-    branches:
-      - 'main'
+name: push-lint
+run-name: Lint push to ${{ github.ref_name }}
+on: push
 jobs:
-  deploy:
+  flake8-errors:
     runs-on: self-hosted
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          path: ${{github.job}}
-  lint-flake8-errors:
-    runs-on: self-hosted
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           path: ${{github.job}}
       - name: Set up Python 3.11
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: 3.11
-      # - name: Install dependencies for testing
-      #   run: |
-      #     if [ -f requirements-test.txt ]; then pip install -r requirements-test.txt; fi
       - name: Install flake8
         run: pip install flake8==6.1.0
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-  lint-flake8-full:
+          flake8 flake8-errors \
+            --count \
+            --select=E9,F63,F7,F82 \
+            --show-source --statistics
+  flake8-full:
     runs-on: self-hosted
-    needs: lint-flake8-errors
+    needs: flake8-errors
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           path: ${{github.job}}
       - name: Set up Python 3.11
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: 3.11
       - name: Install flake8
         run: pip install flake8==6.1.0
       - name: Lint with flake8
         run: |
-          flake8 . --count --statistics \
+          flake8 flake8-full \
+            --count --statistics \
             --max-line-length=100 \
             --exclude static_feeds.py
-  lint-black:
+  black:
     runs-on: self-hosted
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           path: ${{github.job}}
       - name: Set up Python 3.11
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: 3.11
       - name: Install black
         run: pip install black==23.10.1
-      - name: Lint with flake8
+      - name: Lint with black
         run: |
-          black --diff --check .
+          black --diff --check black

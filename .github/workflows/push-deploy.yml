@@ -1,0 +1,14 @@
+name: push-deploy
+run-name: Deploy update from ${{ github.ref_name }}
+on:
+  push:
+    branches:
+      - 'main'
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          path: ${{github.job}}
