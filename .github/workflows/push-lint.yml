@@ -10,7 +10,7 @@ jobs:
         with:
           path: ${{github.job}}
       - name: Set up Python 3.11
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: 3.11
       - name: Install flake8
@@ -27,7 +27,7 @@ jobs:
     needs: lint-flake8-errors
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           path: ${{github.job}}
       - name: Set up Python 3.11
@@ -46,7 +46,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           path: ${{github.job}}
       - name: Set up Python 3.11
