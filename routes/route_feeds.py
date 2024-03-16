@@ -15,13 +15,6 @@ from models.model_updates import Update
 router = Blueprint("feeds", __name__, url_prefix="/feeds")
 
 
-@router.route("/frequencies/", methods=["GET"])
-def feeds_frequencies():
-    return shared.return_json(
-        response=FREQUENCIES,
-    )
-
-
 @router.route("/", methods=["GET"])
 @cross_origin(headers=["Content-Type"])  # Send Access-Control-Allow-Headers
 def list_feeds():
