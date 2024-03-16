@@ -2,32 +2,31 @@ import random
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
-from flask import request
+from flask import request, Blueprint
 from flask_cors import cross_origin
 
 import routes._shared as shared
-from __main__ import app
 from config.db import db
 from models.model_feeds import Feed
 from models.model_frequencies import FREQUENCIES
 from models.model_updates import Update
 
 
-ROUTE_PATH = "/feeds"
+router = Blueprint('feeds', __name__, url_prefix='/feeds')
 
 
 def frequency_validate(val):
     return val in FREQUENCIES
 
 
-@app.route(f"{ ROUTE_PATH }/frequencies/", methods=["GET"])
+@router.route("/frequencies/", methods=["GET"])
 def feeds_frequencies():
     return shared.return_json(
         response=FREQUENCIES,
     )
 
 
-@app.route(f"{ ROUTE_PATH }/", methods=["GET"])
+@router.route("/", methods=["GET"])
 @cross_origin(headers=["Content-Type"])  # Send Access-Control-Allow-Headers
 def list_feeds():
     POSITIVE = ["true", "yes", "1"]
@@ -48,7 +47,7 @@ def list_feeds():
 
 
 @shared.data_is_json
-@app.route(f"{ ROUTE_PATH }/", methods=["PUT", "OPTIONS"])
+@router.route("/", methods=["PUT", "OPTIONS"])
 @cross_origin(headers=["Content-Type"])  # Send Access-Control-Allow-Headers
 def create_feed():
     body = request.get_json()
@@ -75,7 +74,7 @@ def create_feed():
     )
 
 
-@app.route(f"{ ROUTE_PATH }/<feed_id>/", methods=["GET"])
+@router.route("/<feed_id>/", methods=["GET"])
 def read_feed(feed_id):
     feed = db.session.query(Feed).filter_by(_id=feed_id).first()
 
@@ -85,7 +84,7 @@ def read_feed(feed_id):
 
 
 @shared.data_is_json
-@app.route(f"{ ROUTE_PATH }/<feed_id>/", methods=["PUT", "OPTIONS"])
+@router.route("/<feed_id>/", methods=["PUT", "OPTIONS"])
 @cross_origin(headers=["Content-Type"])  # Send Access-Control-Allow-Headers
 def update_feed(feed_id):
     feed = db.session.query(Feed).filter_by(_id=feed_id).first()
@@ -119,7 +118,7 @@ def update_feed(feed_id):
 
 
 @shared.data_is_json
-@app.route(f"{ ROUTE_PATH }/<feed_id>/", methods=["POST"])
+@router.route("/<feed_id>/", methods=["POST"])
 @cross_origin(headers=["Content-Type"])  # Send Access-Control-Allow-Headers
 def push_updates(feed_id):
     feed = db.session.query(Feed).filter_by(_id=feed_id).first()
@@ -132,7 +131,7 @@ def push_updates(feed_id):
     )
 
 
-@app.route(f"{ ROUTE_PATH }/<feed_id>/", methods=["DELETE"])
+@router.route("/<feed_id>/", methods=["DELETE"])
 def delete_item(feed_id):
     feed = db.session.query(Feed).filter_by(_id=feed_id)
 
@@ -146,7 +145,7 @@ def delete_item(feed_id):
     )
 
 
-@app.route(f"{ ROUTE_PATH }/parse/file/", methods=["GET"])
+@router.route("/parse/file/", methods=["GET"])
 def feeds_file():
     from static_feeds import feeds
 
@@ -196,7 +195,7 @@ def feeds_file():
 
 
 @shared.data_is_json
-@app.route(f"{ ROUTE_PATH }/parse/href/", methods=["GET"])
+@router.route("/parse/href/", methods=["GET"])
 @cross_origin(headers=["Content-Type"])  # Send Access-Control-Allow-Headers
 def test_parse_href():
     body = request.args

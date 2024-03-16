@@ -6,6 +6,7 @@ from sentry_sdk.integrations.flask import FlaskIntegration
 from flask import Flask
 from flask_cors import CORS
 
+from routes import route_feeds
 from config.db import db
 
 
@@ -35,7 +36,7 @@ with app.app_context():
 
 # routes
 CORS(app)
-import routes.route_feeds
+app.register_blueprint(route_feeds.router)
 import routes.route_updates
 
 # # telegram bot functions
