@@ -140,9 +140,9 @@ class Update(db.Model):
 
         message = (
             f"{telegram.helpers.escape_markdown(self.name)}\n\n"
-            f"\[[OPEN]({self.href})]"
+            rf"\[[OPEN]({self.href})]"
             " - "
-            f"\[[EDIT](http://192.168.0.155:30011/feeds/{self.feed_id}/edit)]"
+            rf"\[[EDIT](http://192.168.0.155:30011/feeds/{self.feed_id}/edit)]"
         )
 
         asyncio.run(
