@@ -25,15 +25,6 @@ sys.dont_write_bytecode = True  # avoid writing __pycache__ and .pyc
 app = Flask(__name__)
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SQLALCHEMY_DB_URI")
-FREQUENCIES = (
-    "minutes",
-    "hours",
-    "days",
-    "weeks",
-    "months",
-    "years",
-    "never",
-)
 db.init_app(app)
 
 # database
