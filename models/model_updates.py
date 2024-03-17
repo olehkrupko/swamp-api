@@ -5,6 +5,7 @@ from zoneinfo import ZoneInfo
 
 import emoji
 import telegram
+from telegram.helpers import escape_markdown as md_esc
 
 from config.db import db
 
@@ -138,13 +139,12 @@ class Update(db.Model):
                 parse_mode="markdown",
             )
 
-        l_bracket = "\u005B"  # [
         message_markdown = (
-            f"{telegram.helpers.escape_markdown(self.name)}"
+            f"{md_esc(self.name)}"
             "\n\n"
-            f"{l_bracket}[OPEN]({self.href})]"
+            f"{md_esc('[')}[OPEN]({self.href})]"
             " - "
-            f"{l_bracket}[EDIT](http://192.168.0.155:30011/feeds/{self.feed_id}/edit)]"
+            f"{md_esc('[')}[EDIT](http://192.168.0.155:30011/feeds/{self.feed_id}/edit)]"
         )
 
         asyncio.run(
