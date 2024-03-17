@@ -142,7 +142,7 @@ class Update(db.Model):
         message_markdown = (
             f"{telegram.helpers.escape_markdown(self.name)}"
             "\n\n"
-            f"{l_bracket}[[OPEN]({self.href})]"
+            f"{l_bracket}[OPEN]({self.href})]"
             " - "
             f"{l_bracket}[EDIT](http://192.168.0.155:30011/feeds/{self.feed_id}/edit)]"
         )
