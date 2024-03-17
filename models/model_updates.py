@@ -146,7 +146,6 @@ class Update(db.Model):
             " - "
             f"{l_bracket}[EDIT](http://192.168.0.155:30011/feeds/{self.feed_id}/edit)]"
         )
-        print(message_markdown)
 
         asyncio.run(
             _send(
