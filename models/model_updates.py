@@ -139,7 +139,7 @@ class Update(db.Model):
             )
 
         l_bracket = "\u005B"  # [
-        message = (
+        message_markdown = (
             f"{telegram.helpers.escape_markdown(self.name)}"
             "\n\n"
             f"{l_bracket}[[OPEN]({self.href})]"
@@ -149,6 +149,6 @@ class Update(db.Model):
 
         asyncio.run(
             _send(
-                message,
+                message_markdown,
             )
         )
