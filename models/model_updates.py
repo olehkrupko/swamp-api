@@ -138,11 +138,13 @@ class Update(db.Model):
                 parse_mode="markdown",
             )
 
+        l_bracket = "\u005B"  # [
         message = (
-            f"{telegram.helpers.escape_markdown(self.name)}\n\n"
-            f"`[`[OPEN]({self.href})`]`"
+            f"{telegram.helpers.escape_markdown(self.name)}"
+            "\n\n"
+            f"{l_bracket}[[OPEN]({self.href})]"
             " - "
-            f"`[`[EDIT](http://192.168.0.155:30011/feeds/{self.feed_id}/edit)`]`"
+            f"{l_bracket}[EDIT](http://192.168.0.155:30011/feeds/{self.feed_id}/edit)]"
         )
 
         asyncio.run(
