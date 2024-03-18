@@ -9,6 +9,11 @@ import telegram
 class TelegramService:
     CHAT_ID = os.environ.get("TELEGRAM_BOT_DMS")
     TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
+    MESSAGE_MARKDOWN = """
+        {name}
+        
+        ([OPEN]({href})) - ([EDIT](http://192.168.0.155:30011/feeds/{feed_id}/edit))
+    """
 
     @classmethod
     async def send_message(cls, msg):
@@ -20,17 +25,15 @@ class TelegramService:
 
     @classmethod
     def send_update(cls, update):
-        message_markdown = (
-            f"{telegram.helpers.escape_markdown(update.name)}"
-            "\n\n"
-            f"([OPEN]({update.href}))"
-            " - "
-            f"([EDIT](http://192.168.0.155:30011/feeds/{update.feed_id}/edit))"
+        message = cls.MESSAGE_MARKDOWN.format(
+            name = telegram.helpers.escape_markdown(update.name),
+            href = update.href,
+            name = update.feed_id,
         )
 
         asyncio.run(
             cls.send_message(
-                message_markdown,
+                message,
             )
         )
 
