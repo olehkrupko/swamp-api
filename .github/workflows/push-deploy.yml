@@ -6,7 +6,7 @@ on:
       - 'main'
       - '25-telegram-notifications'
 jobs:
-  checkout:
+  deploy:
     runs-on: self-hosted
     steps:
       - name: Checkout repository
