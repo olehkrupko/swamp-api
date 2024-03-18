@@ -5,7 +5,6 @@ from zoneinfo import ZoneInfo
 
 import emoji
 import telegram
-from telegram.helpers import escape_markdown as md_esc
 
 from config.db import db
 
@@ -140,11 +139,11 @@ class Update(db.Model):
             )
 
         message_markdown = (
-            f"{md_esc(self.name)}"
+            f"{telegram.helpers.escape_markdown(self.name)}"
             "\n\n"
-            f"(`[`[OPEN])({self.href})`]`"
+            f"([OPEN]({self.href}))"
             " - "
-            f"([EDIT](http://192.168.0.155:30011/feeds/{self.feed_id}/edit)])"
+            f"([EDIT](http://192.168.0.155:30011/feeds/{self.feed_id}/edit))"
         )
 
         asyncio.run(
