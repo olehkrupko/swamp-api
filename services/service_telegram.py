@@ -29,7 +29,7 @@ class TelegramService:
         message = cls.MESSAGE_MARKDOWN.format(
             name=telegram.helpers.escape_markdown(update.name),
             href=update.href,
-            name=update.feed_id,
+            feed_id=update.feed_id,
         )
 
         asyncio.run(
