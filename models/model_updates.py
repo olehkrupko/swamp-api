@@ -142,9 +142,9 @@ class Update(db.Model):
         message_markdown = (
             f"{md_esc(self.name)}"
             "\n\n"
-            f"{md_esc('[')}[OPEN]({self.href})]"
+            f"(`[`[OPEN])({self.href})`]`"
             " - "
-            f"{md_esc('[')}[EDIT](http://192.168.0.155:30011/feeds/{self.feed_id}/edit)]"
+            f"([EDIT](http://192.168.0.155:30011/feeds/{self.feed_id}/edit)])"
         )
 
         asyncio.run(
