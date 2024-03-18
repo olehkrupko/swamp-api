@@ -1,10 +1,8 @@
-import asyncio
 import datetime
 import os
 from zoneinfo import ZoneInfo
 
 import emoji
-import telegram
 
 from config.db import db
 from services.service_telegram import TelegramService

@@ -6,7 +6,7 @@ import telegram
 # from telegram.ext import Application, ContextTypes, CommandHandler
 
 
-class TelegramService():
+class TelegramService:
     CHAT_ID = os.environ.get("TELEGRAM_BOT_DMS")
     TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 
@@ -33,7 +33,6 @@ class TelegramService():
                 message_markdown,
             )
         )
-
 
 
 # async def bot_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
