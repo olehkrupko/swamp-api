@@ -12,7 +12,7 @@ class TelegramService:
     TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
     MESSAGE_MARKDOWN = """
         {name}
-        
+
         ([OPEN]({href})) - ([EDIT](http://192.168.0.155:30011/feeds/{feed_id}/edit))
     """
 
