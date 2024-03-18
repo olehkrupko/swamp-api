@@ -7,6 +7,7 @@ import emoji
 import telegram
 
 from config.db import db
+from services.service_telegram import TelegramService
 
 
 class Update(db.Model):
@@ -130,24 +131,5 @@ class Update(db.Model):
 
         return not SKIP
 
-    def send_telegram(self):
-        async def _send(msg, chat_id=os.environ.get("TELEGRAM_BOT_DMS")):
-            await telegram.Bot(os.environ.get("TELEGRAM_BOT_TOKEN")).sendMessage(
-                chat_id=chat_id,
-                text=msg,
-                parse_mode="markdown",
-            )
-
-        message_markdown = (
-            f"{telegram.helpers.escape_markdown(self.name)}"
-            "\n\n"
-            f"([OPEN]({self.href}))"
-            " - "
-            f"([EDIT](http://192.168.0.155:30011/feeds/{self.feed_id}/edit))"
-        )
-
-        asyncio.run(
-            _send(
-                message_markdown,
-            )
-        )
+    def send(self):
+        TelegramService.send_update(self)

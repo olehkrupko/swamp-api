@@ -150,7 +150,7 @@ class Feed(db.Model):
                     continue
                 if feed_len != 0:
                     new_update.datetime = datetime.now()
-                    new_update.send_telegram()
+                    new_update.send()
                 db.session.add(new_update)
                 new_items.append(new_update.as_dict())
 
