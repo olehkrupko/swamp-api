@@ -2,6 +2,7 @@ import asyncio
 import os
 
 import telegram
+
 # from telegram import Update
 # from telegram.ext import Application, ContextTypes, CommandHandler
 
@@ -26,9 +27,9 @@ class TelegramService:
     @classmethod
     def send_update(cls, update):
         message = cls.MESSAGE_MARKDOWN.format(
-            name = telegram.helpers.escape_markdown(update.name),
-            href = update.href,
-            name = update.feed_id,
+            name=telegram.helpers.escape_markdown(update.name),
+            href=update.href,
+            name=update.feed_id,
         )
 
         asyncio.run(
