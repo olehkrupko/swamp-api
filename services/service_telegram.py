@@ -10,11 +10,11 @@ import telegram
 class TelegramService:
     CHAT_ID = os.environ.get("TELEGRAM_BOT_DMS")
     TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
-    MESSAGE_MARKDOWN = """
-        {name}
-
-        ([OPEN]({href})) - ([EDIT](http://192.168.0.155:30011/feeds/{feed_id}/edit))
-    """
+    MESSAGE_MARKDOWN = (
+        "{name}\n"
+        "\n"
+        "([OPEN]({href})) - ([EDIT](http://192.168.0.155:30011/feeds/{feed_id}/edit))"
+    )
 
     @classmethod
     async def send_message(cls, msg):
