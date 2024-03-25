@@ -39,9 +39,6 @@ app.register_blueprint(route_feeds.router)
 app.register_blueprint(route_frequencies.router)
 app.register_blueprint(route_updates.router)
 
-# # telegram bot functions
-# import queues.courier
-
 # run app
 if __name__ == "__main__":
     app.run("0.0.0.0", port=30010, threaded=False, debug=True)
