@@ -190,18 +190,6 @@ def test_parse_href():
     body = request.args
     href = body["href"]
 
-    feed = Feed(
-        {
-            "title": "temp",
-            "href": href,
-            "href_user": "href",
-            "private": True,
-            "frequency": "never",
-            "notes": "temp feed to parse random URLs. Not to be saved",
-            "json": {},
-        }
-    )
-
     response = [
         Update(
             {
@@ -209,7 +197,7 @@ def test_parse_href():
                 "feed_id": None,
             }
         ).as_dict()
-        for x in feed.parse_href()
+        for x in Feed.parse_href(href)
     ]
 
     return shared.return_json(

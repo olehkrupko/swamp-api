@@ -119,9 +119,6 @@ class Feed(db.Model):
     # FEED PARSING LOGIC BELOW
     ##########################
 
-    def parse_list(self, results: List[Dict]):
-        return results
-
     def ingest_updates(self, updates):
         updates.sort(key=lambda x: x["datetime"], reverse=False)
         for each in updates:
@@ -165,11 +162,11 @@ class Feed(db.Model):
 
         return new_items
 
-    def parse_href(self, href=None, proxy: bool = True, **kwargs: Dict):
-        if href is None:
-            href = self.href
+    @staticmethod
+    def parse_href(href):
+        # URL = f"{ os.environ['PARSER_URL'] }/parse/?href={href}"
+        URL = f"{ os.environ['PARSER_URL'] }/parse/async/?href={href}"
 
-        # results = requests.get(f"{ os.environ['PARSER_URL'] }/parse/?href={href}")
-        results = requests.get(f"{ os.environ['PARSER_URL'] }/parse/async/?href={href}")
+        results = requests.get(URL)
 
-        return self.parse_list(results=results.json())
+        return results.json()
