@@ -2,7 +2,6 @@ import os
 import random
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-from typing import List, Dict
 
 import requests
 from sqlalchemy.dialects.postgresql import JSONB
