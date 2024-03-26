@@ -2,7 +2,6 @@ import os
 import random
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-from typing import List, Dict
 
 import requests
 from sqlalchemy.dialects.postgresql import JSONB
@@ -119,9 +118,6 @@ class Feed(db.Model):
     # FEED PARSING LOGIC BELOW
     ##########################
 
-    def parse_list(self, results: List[Dict]):
-        return results
-
     def ingest_updates(self, updates):
         updates.sort(key=lambda x: x["datetime"], reverse=False)
         for each in updates:
@@ -166,85 +162,10 @@ class Feed(db.Model):
         return new_items
 
     @staticmethod
-    def process_parsing(feed_id, store_new=True, proxy=False):
-        # Preparing
-        feed = (
-            db.session.query(Feed)
-            .filter_by(
-                _id=feed_id,
-            )
-            .first()
-        )
+    def parse_href(href):
+        # URL = f"{ os.environ['PARSER_URL'] }/parse/?href={href}"
+        URL = f"{ os.environ['PARSER_URL'] }/parse/async/?href={href}"
 
-        # Processing
-        updates = feed.parse_href(
-            proxy=proxy,
-        )
+        results = requests.get(URL)
 
-        # Finishing with results
-        new_items = []
-        if store_new:
-            new_items = feed.ingest_updates(updates)
-        else:
-            new_items = updates.copy()
-
-        # Return data
-        return {
-            "len": len(new_items),
-            "items": new_items,
-            "feed": feed,
-        }
-
-    @staticmethod
-    def process_parsing_multi(force_all=False, store_new=True, proxy=False):
-        results = 0
-        feed_todo_ids = []
-        feed_list = db.session.query(Feed).all()
-        random.shuffle(feed_list)
-
-        for feed in feed_list:
-            if feed.frequency not in FREQUENCIES:
-                raise ValueError(f"Invalid {feed.frequency=}, {feed.as_dict()=}")
-            elif force_all or feed.requires_update():
-                feed_todo_ids.append(feed._id)
-
-        for feed_id in feed_todo_ids:
-            results += Feed.process_parsing(
-                feed_id=feed_id,
-                store_new=store_new,
-                proxy=proxy,
-            )["len"]
-
-        # with Executor() as executor:
-        #     executor = executor.map(
-        #         Feed.process_parsing,
-        #         feed_todo_ids,
-        #         [store_new]*len(feed_todo_ids),
-        #         [proxy]*len(feed_todo_ids),
-        #     )
-        #     if options['logBar']:
-        #         executor = tqdm(executor, total=len(parse_feeds))
-
-        #     for result in executor:
-        #         print(result['len'])
-        #         if options['logEach'] or (options["logEmpty"] and
-        # result['amount_total'] == 0):
-        #             Command.print_feed(
-        #                 title=result['title'],
-        #                 amount=result['amount'],
-        #                 time=result['time']
-        #             )
-
-        #         if options['log']:
-        #             total_items += result['amount']
-
-        return results
-
-    def parse_href(self, href=None, proxy: bool = True, **kwargs: Dict):
-        if href is None:
-            href = self.href
-
-        # results = requests.get(f"{ os.environ['PARSER_URL'] }/parse/?href={href}")
-        results = requests.get(f"{ os.environ['PARSER_URL'] }/parse/async/?href={href}")
-
-        return self.parse_list(results=results.json())
+        return results.json()
