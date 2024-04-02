@@ -103,6 +103,7 @@ def push_updates(feed_id):
 
     new_updates = feed.ingest_updates(items)
 
+    print(f"\tPush[{len(new_updates)}]:", feed.href)
     return shared.return_json(
         response=new_updates,
     )
