@@ -69,6 +69,7 @@ def read_feed(feed_id):
 @cross_origin(headers=["Content-Type"])  # Send Access-Control-Allow-Headers
 def update_feed(feed_id):
     feed = db.session.query(Feed).filter_by(_id=feed_id).first()
+    feed_original = feed.as_dict()
     body = request.get_json()
 
     for key, value in body.items():
@@ -82,7 +83,7 @@ def update_feed(feed_id):
                 status=400,
             )
 
-    if "frequency" in body.items():
+    if feed_original["frequency"] != feed.frequency:
         feed.delay()
 
     db.session.add(feed)
