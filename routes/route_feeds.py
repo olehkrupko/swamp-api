@@ -42,11 +42,7 @@ def create_feed():
             response="Title already exists",
             status=400,
         )
-    elif not Frequencies.validate(body["frequency"]):
-        return shared.return_json(
-            response="Invalid frequency",
-            status=400,
-        )
+    Frequencies.validate(body["frequency"])
 
     feed = Feed(body)
 
