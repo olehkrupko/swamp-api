@@ -8,7 +8,7 @@ from flask_cors import cross_origin
 import routes._shared as shared
 from config.db import db
 from models.model_feeds import Feed
-from models.model_frequencies import frequency_validate
+from models.model_frequencies import Frequencies
 from models.model_updates import Update
 
 
@@ -46,7 +46,7 @@ def create_feed():
             response="Title already exists",
             status=400,
         )
-    elif not frequency_validate(body["frequency"]):
+    elif not Frequencies.validate(body["frequency"]):
         return shared.return_json(
             response="Invalid frequency",
             status=400,
@@ -91,12 +91,7 @@ def update_feed(feed_id):
             )
 
     if "frequency" in body.items():
-        # regenerate _delayed:
-        feed._delayed = datetime.now() + relativedelta(
-            **{
-                feed.frequency: random.randint(1, 10),
-            }
-        )
+        feed.delay()
 
     db.session.add(feed)
     db.session.commit()

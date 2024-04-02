@@ -7,7 +7,7 @@ import requests
 from sqlalchemy.dialects.postgresql import JSONB
 
 from config.db import db
-from models.model_frequencies import FREQUENCIES
+from models.model_frequencies import Frequencies
 from models.model_updates import Update
 
 # import requests
@@ -76,10 +76,10 @@ class Feed(db.Model):
 
         self.private = data.pop("private")
         frequency = data.pop("frequency")
-        if frequency in FREQUENCIES:
+        if Frequencies.validate(frequency):
             self.frequency = frequency
         else:
-            raise Exception(f"Frequency {frequency} is not in {FREQUENCIES}")
+            raise ValueError(f"Frequency {frequency} is not in {Frequencies.get_options()}")
         self.notes = data.pop("notes")
         self.json = data.pop("json")
 
@@ -113,6 +113,9 @@ class Feed(db.Model):
             return True
 
         return False
+
+    def delay(self):
+        self._delayed = datetime.now() + Frequencies.delay(self.frequency)
 
     ##########################
     # FEED PARSING LOGIC BELOW
@@ -150,11 +153,7 @@ class Feed(db.Model):
                 db.session.add(new_update)
                 new_items.append(new_update.as_dict())
 
-        self._delayed = datetime.now() + relativedelta(
-            **{
-                self.frequency: random.randint(1, 10),
-            }
-        )
+        self.delay()
 
         db.session.add(self)
         db.session.commit()
