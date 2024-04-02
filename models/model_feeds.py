@@ -7,7 +7,7 @@ import requests
 from sqlalchemy.dialects.postgresql import JSONB
 
 from config.db import db
-from models.model_frequencies import Frequencies
+from services.service_frequencies import Frequencies
 from models.model_updates import Update
 
 # import requests

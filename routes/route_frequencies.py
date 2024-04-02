@@ -1,7 +1,7 @@
 from flask import Blueprint
 
 import routes._shared as shared
-from models.model_frequencies import Frequencies
+from services.service_frequencies import Frequencies
 
 
 router = Blueprint("frequencies", __name__, url_prefix="/frequencies")
