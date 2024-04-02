@@ -1,7 +1,3 @@
-import random
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
-
 from flask import request, Blueprint
 from flask_cors import cross_origin
 

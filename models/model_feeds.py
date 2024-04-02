@@ -1,7 +1,5 @@
 import os
-import random
 from datetime import datetime
-from dateutil.relativedelta import relativedelta
 
 import requests
 from sqlalchemy.dialects.postgresql import JSONB
@@ -79,7 +77,7 @@ class Feed(db.Model):
         if Frequencies.validate(frequency):
             self.frequency = frequency
         else:
-            raise ValueError(f"Frequency {frequency} is not in {Frequencies.get_options()}")
+            raise ValueError(f"{frequency=} is not in {Frequencies.get_options()}")
         self.notes = data.pop("notes")
         self.json = data.pop("json")
 

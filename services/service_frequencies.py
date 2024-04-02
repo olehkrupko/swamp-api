@@ -2,7 +2,7 @@ import random
 from datetime import timedelta
 
 
-class Frequencies():
+class Frequencies:
     OPTIONS = (
         "minutes",
         "hours",
