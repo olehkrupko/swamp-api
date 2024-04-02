@@ -76,8 +76,6 @@ class Feed(db.Model):
         frequency = data.pop("frequency")
         if Frequencies.validate(frequency):
             self.frequency = frequency
-        else:
-            raise ValueError(f"{frequency=} is not in {Frequencies.get_options()}")
         self.notes = data.pop("notes")
         self.json = data.pop("json")
 

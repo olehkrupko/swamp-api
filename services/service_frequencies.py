@@ -18,13 +18,15 @@ class Frequencies:
         return cls.OPTIONS
 
     @classmethod
-    def validate(cls, val):
-        return val in cls.OPTIONS
+    def validate(cls, frequency):
+        if frequency in cls.OPTIONS:
+            return True
+        else:
+            raise ValueError(f"{frequency=} is not in {Frequencies.get_options()}")
 
     @classmethod
     def delay(cls, frequency):
-        if not cls.validate(frequency):
-            raise ValueError(f"Wrong value {frequency=}")
+        cls.validate(frequency)
 
         if frequency == "minutes":
             return timedelta(
