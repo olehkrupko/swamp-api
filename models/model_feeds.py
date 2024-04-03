@@ -54,7 +54,7 @@ class Feed(db.Model):
     frequency = db.Column(
         db.Enum(
             Frequencies,
-            values_callable=lambda x: [str(each.value) for each in Frequencies]
+            values_callable=lambda x: [str(each.value) for each in Frequencies],
         ),
         default=Frequencies.WEEKS,
     )
