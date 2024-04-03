@@ -37,13 +37,6 @@ def list_feeds():
 def create_feed():
     body = request.get_json()
 
-    if db.session.query(Feed).filter_by(title=body["title"]).all():
-        return shared.return_json(
-            response="Title already exists",
-            status=400,
-        )
-    Frequencies.validate(body["frequency"])
-
     feed = Feed(body)
 
     db.session.add(feed)
