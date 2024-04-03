@@ -18,13 +18,6 @@ class Frequencies(Enum):
     def list(cls):
         return list(map(lambda c: c.value, cls))
 
-    @classmethod
-    def validate(cls, frequency):
-        if frequency in cls.list():
-            return True
-        else:
-            raise ValueError(f"{frequency=} is not in {Frequencies.list()}")
-
     def delay(self):
         if self == self.MINUTES:
             return timedelta(
