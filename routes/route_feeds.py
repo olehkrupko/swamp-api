@@ -64,23 +64,7 @@ def update_feed(feed_id):
     feed = db.session.query(Feed).filter_by(_id=feed_id).first()
     body = request.get_json()
 
-    original_frequency = feed.frequency
-
-    for key, value in body.items():
-        if key[0] == "_":
-            raise ValueError(f"{key=} is read-only")
-        elif hasattr(feed, key):
-            if key == "frequency":
-                value = Frequencies(value)
-            setattr(feed, key, value)
-        else:
-            return shared.return_json(
-                response=f"Data field {key} does not exist in DB",
-                status=400,
-            )
-
-    if original_frequency != feed.frequency:
-        feed.delay()
+    feed.update_from_dict(body)
 
     db.session.add(feed)
     db.session.commit()

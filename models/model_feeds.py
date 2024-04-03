@@ -100,6 +100,29 @@ class Feed(db.Model):
     def __str__(self):
         return str(self.as_dict())
 
+    def update_from_dict(self, data: dict):
+        for key, value in data.items():
+            self.update_attr(
+                key=key,
+                value=value,
+            )
+
+    def update_attr(self, key: str, value):
+        if not hasattr(self, key):
+            # no field to update
+            raise ValueError(f"{key=} does not exist")
+        elif key[0] == "_":
+            # you cannot update these fields
+            raise ValueError(f"{key=} is read-only")
+        elif getattr(self, key) == value:
+            # nothing to update
+            return
+        elif key == "frequency":
+            self.frequency = Frequencies(value)
+            self.delay()
+        else:
+            setattr(self, key, value)
+
     def requires_update(self):
         if self.frequency == Frequencies.NEVER:
             return False
