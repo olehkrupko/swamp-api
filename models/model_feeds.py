@@ -52,8 +52,11 @@ class Feed(db.Model):
         default=False,
     )
     frequency = db.Column(
-        db.String(20),
-        default="weeks",
+        db.Enum(
+            Frequencies,
+            values_callable=lambda x: [str(each.value) for each in Frequencies]
+        ),
+        default=Frequencies.WEEKS,
     )
     notes = db.Column(
         db.String(200),
@@ -73,9 +76,7 @@ class Feed(db.Model):
         self.href_user = data.pop("href_user")
 
         self.private = data.pop("private")
-        frequency = data.pop("frequency")
-        if Frequencies.validate(frequency):
-            self.frequency = frequency
+        self.frequency = Frequencies(data.pop("frequency"))
         self.notes = data.pop("notes")
         self.json = data.pop("json")
 
@@ -91,7 +92,7 @@ class Feed(db.Model):
             "href": self.href,
             "href_user": self.href_user,
             "private": self.private,
-            "frequency": self.frequency,
+            "frequency": self.frequency.value,
             "notes": self.notes,
             "json": self.json,
         }
@@ -100,7 +101,7 @@ class Feed(db.Model):
         return str(self.as_dict())
 
     def requires_update(self):
-        if self.frequency == "never":
+        if self.frequency == Frequencies.NEVER:
             return False
 
         if not self._delayed:
@@ -111,7 +112,7 @@ class Feed(db.Model):
         return False
 
     def delay(self):
-        self._delayed = datetime.now() + Frequencies.delay(self.frequency)
+        self._delayed = datetime.now() + self.frequency.delay()
 
     ##########################
     # FEED PARSING LOGIC BELOW

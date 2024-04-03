@@ -24,7 +24,7 @@ def list_feeds():
 
     active = request.args.get("active")
     if active and active.lower() in POSITIVE:
-        feeds = filter(lambda x: x.frequency != "never", feeds)
+        feeds = filter(lambda x: x.frequency != Frequencies.NEVER, feeds)
 
     return shared.return_json(
         response=[feed.as_dict() for feed in feeds],
@@ -69,13 +69,16 @@ def read_feed(feed_id):
 @cross_origin(headers=["Content-Type"])  # Send Access-Control-Allow-Headers
 def update_feed(feed_id):
     feed = db.session.query(Feed).filter_by(_id=feed_id).first()
-    feed_original = feed.as_dict()
     body = request.get_json()
+
+    original_frequency = feed.frequency
 
     for key, value in body.items():
         if key[0] == "_":
             raise ValueError(f"{key=} is read-only")
-        if hasattr(feed, key):
+        elif hasattr(feed, key):
+            if key == "frequency":
+                value = Frequencies(value)
             setattr(feed, key, value)
         else:
             return shared.return_json(
@@ -83,7 +86,7 @@ def update_feed(feed_id):
                 status=400,
             )
 
-    if feed_original["frequency"] != feed.frequency:
+    if original_frequency != feed.frequency:
         feed.delay()
 
     db.session.add(feed)
@@ -139,13 +142,13 @@ def feeds_file():
         if "+" in emojis:
             emojis.remove("+")
         if "💎" in emojis:
-            each_feed["frequency"] = "hours"
+            each_feed["frequency"] = Frequencies.HOURS
             emojis.remove("💎")
         elif "📮" in emojis:
-            each_feed["frequency"] = "days"
+            each_feed["frequency"] = Frequencies.DAYS
             emojis.remove("📮")
         else:
-            each_feed["frequency"] = "weeks"
+            each_feed["frequency"] = Frequencies.WEEKS
         each_feed["notes"] = ""
         each_feed["json"] = {}
         if "filter" in each_feed:

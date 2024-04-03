@@ -1,70 +1,68 @@
 import random
 from datetime import timedelta
+from enum import Enum
 
 
-class Frequencies:
-    OPTIONS = (
-        "minutes",
-        "hours",
-        "days",
-        "weeks",
-        "months",
-        "years",
-        "never",  # disabled
-    )
+class Frequencies(Enum):
+    # active:
+    MINUTES = "minutes"
+    HOURS = "hours"
+    DAYS = "days"
+    WEEKS = "weeks"
+    MONTHS = "months"
+    YEARS = "years"
+    # disabled:
+    NEVER = "never"
 
     @classmethod
-    def get_options(cls):
-        return cls.OPTIONS
+    def list(cls):
+        return list(map(lambda c: c.value, cls))
 
     @classmethod
     def validate(cls, frequency):
-        if frequency in cls.OPTIONS:
+        if frequency in cls.list():
             return True
         else:
-            raise ValueError(f"{frequency=} is not in {Frequencies.get_options()}")
+            raise ValueError(f"{frequency=} is not in {Frequencies.list()}")
 
-    @classmethod
-    def delay(cls, frequency):
-        cls.validate(frequency)
-
-        if frequency == "minutes":
+    def delay(self):
+        if self == self.MINUTES:
             return timedelta(
                 minutes=random.randint(3, 60),
             )
-        elif frequency == "hours":
+        elif self == self.HOURS:
             return timedelta(
                 minutes=random.randint(-15, 15),
                 hours=random.randint(3, 12),
             )
-        elif frequency == "days":
+        elif self == self.DAYS:
             return timedelta(
                 minutes=random.randint(-15, 15),
                 hours=random.randint(-6, 6),
                 days=random.randint(2, 7),
             )
-        elif frequency == "weeks":
+        elif self == self.WEEKS:
             return timedelta(
                 minutes=random.randint(-15, 15),
                 hours=random.randint(-6, 6),
                 days=random.randint(-7, 7),
                 weeks=random.randint(2, 6),
             )
-        elif frequency == "months":
+        elif self == self.MONTHS:
             return timedelta(
                 minutes=random.randint(-15, 15),
                 hours=random.randint(-6, 6),
                 days=random.randint(-7, 7),
                 weeks=random.randint(6, 37),
             )
-        elif frequency == "years":
+        elif self == self.YEARS:
             return timedelta(
                 minutes=random.randint(-15, 15),
                 hours=random.randint(-6, 6),
                 days=random.randint(-7, 7),
                 weeks=random.randint(42, 150),
             )
-        elif frequency == "never":
+        elif self == self.NEVER:
             raise ValueError("You cannot delay if it's never updated")
         else:
-            raise Exception("It's not expected to happen")
+            raise Exception(f"It's not expected to happen, frequency={self}")

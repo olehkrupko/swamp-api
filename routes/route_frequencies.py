@@ -10,5 +10,5 @@ router = Blueprint("frequencies", __name__, url_prefix="/frequencies")
 @router.route("/", methods=["GET"])
 def feeds_frequencies():
     return shared.return_json(
-        response=Frequencies.get_options(),
+        response=Frequencies.list(),
     )
