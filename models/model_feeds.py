@@ -114,14 +114,21 @@ class Feed(db.Model):
         elif key[0] == "_":
             # you cannot update these fields
             raise ValueError(f"{key=} is read-only")
+        elif key == "frequency":
+            self.update_frequency(value)
         elif getattr(self, key) == value:
             # nothing to update
             return
-        elif key == "frequency":
-            self.frequency = Frequencies(value)
-            self.delay()
         else:
             setattr(self, key, value)
+
+    def update_frequency(self, value):
+        if self.frequency.value == value:
+            # nothing to update
+            return
+        else:
+            self.frequency = Frequencies(value)
+            self.delay()
 
     def requires_update(self):
         if self.frequency == Frequencies.NEVER:
