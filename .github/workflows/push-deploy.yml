@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - 'main'
-      - '34-use-local-timezone'
 jobs:
   deploy:
     runs-on: self-hosted
