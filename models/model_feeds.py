@@ -1,13 +1,11 @@
 import os
-import random
 from datetime import datetime
-from dateutil.relativedelta import relativedelta
 
 import requests
 from sqlalchemy.dialects.postgresql import JSONB
 
 from config.db import db
-from models.model_frequencies import FREQUENCIES
+from services.service_frequencies import Frequencies
 from models.model_updates import Update
 
 # import requests
@@ -54,8 +52,11 @@ class Feed(db.Model):
         default=False,
     )
     frequency = db.Column(
-        db.String(20),
-        default="weeks",
+        db.Enum(
+            Frequencies,
+            values_callable=lambda x: [str(each.value) for each in Frequencies],
+        ),
+        default=Frequencies.WEEKS,
     )
     notes = db.Column(
         db.String(200),
@@ -75,11 +76,7 @@ class Feed(db.Model):
         self.href_user = data.pop("href_user")
 
         self.private = data.pop("private")
-        frequency = data.pop("frequency")
-        if frequency in FREQUENCIES:
-            self.frequency = frequency
-        else:
-            raise Exception(f"Frequency {frequency} is not in {FREQUENCIES}")
+        self.frequency = Frequencies(data.pop("frequency"))
         self.notes = data.pop("notes")
         self.json = data.pop("json")
 
@@ -95,7 +92,7 @@ class Feed(db.Model):
             "href": self.href,
             "href_user": self.href_user,
             "private": self.private,
-            "frequency": self.frequency,
+            "frequency": self.frequency.value,
             "notes": self.notes,
             "json": self.json,
         }
@@ -103,8 +100,38 @@ class Feed(db.Model):
     def __str__(self):
         return str(self.as_dict())
 
+    def update_from_dict(self, data: dict):
+        for key, value in data.items():
+            self.update_attr(
+                key=key,
+                value=value,
+            )
+
+    def update_attr(self, key: str, value):
+        if not hasattr(self, key):
+            # no field to update
+            raise ValueError(f"{key=} does not exist")
+        elif key[0] == "_":
+            # you cannot update these fields
+            raise ValueError(f"{key=} is read-only")
+        elif key == "frequency":
+            self.update_frequency(value)
+        elif getattr(self, key) == value:
+            # nothing to update
+            return
+        else:
+            setattr(self, key, value)
+
+    def update_frequency(self, value):
+        if self.frequency.value == value:
+            # nothing to update
+            return
+        else:
+            self.frequency = Frequencies(value)
+            self.delay()
+
     def requires_update(self):
-        if self.frequency == "never":
+        if self.frequency == Frequencies.NEVER:
             return False
 
         if not self._delayed:
@@ -113,6 +140,9 @@ class Feed(db.Model):
             return True
 
         return False
+
+    def delay(self):
+        self._delayed = datetime.now() + self.frequency.delay()
 
     ##########################
     # FEED PARSING LOGIC BELOW
@@ -150,11 +180,7 @@ class Feed(db.Model):
                 db.session.add(new_update)
                 new_items.append(new_update.as_dict())
 
-        self._delayed = datetime.now() + relativedelta(
-            **{
-                self.frequency: random.randint(1, 10),
-            }
-        )
+        self.delay()
 
         db.session.add(self)
         db.session.commit()
