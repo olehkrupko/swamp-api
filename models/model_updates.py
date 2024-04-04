@@ -33,7 +33,7 @@ class Update(db.Model):
         nullable=False,
     )
     datetime = db.Column(
-        db.DateTime,
+        db.DateTime(timezone=True),
         default=None,
     )
 
@@ -72,7 +72,7 @@ class Update(db.Model):
                 ZoneInfo(os.environ.get("TIMEZONE_LOCAL"))
             )
         else:
-            # if no tzinfo — replace it current one
+            # if no tzinfo — replace it with current one
             datetime_event = datetime_event.replace(
                 tzinfo=ZoneInfo(os.environ.get("TIMEZONE_LOCAL"))
             )
