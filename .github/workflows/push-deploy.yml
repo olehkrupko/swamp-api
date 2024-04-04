@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - 'main'
-      - '78-updates-regenerate-delayed'
 jobs:
   deploy:
     runs-on: self-hosted
