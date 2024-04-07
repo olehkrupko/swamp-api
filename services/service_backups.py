@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 
 from config.db import db
+from config.scheduler import scheduler
 from models.model_feeds import Feed
 
 
@@ -120,12 +121,15 @@ class Backup:
     ### BACKUP RUNNER
     ##########
 
-    @classmethod
-    def run(cls):
-        # # create backup
-        backup_new = cls.dump()
-        # # get backup
-        # backup_last = cls.list()[-1]
-        # return backup_last.restore(
-        #     compare=False,
-        # )
+    @scheduler.task('cron', id='backup_generator', hour='*/6')
+    def runner():
+        with scheduler.app.app_context():
+            # create backup
+            print("Generating backup...")
+            # backup_new = Backup.dump()
+            Backup.dump()
+            # # get backup
+            # backup_last = Backup.list()[-1]
+            # return backup_last.restore(
+            #     compare=False,
+            # )

@@ -8,9 +8,11 @@ from sentry_sdk.integrations.flask import FlaskIntegration
 
 from config.config import Config
 from config.db import db
+from config.scheduler import scheduler
 from routes import route_feeds
 from routes import route_updates
 from routes import route_frequencies
+from services.service_backups import Backup  # need a proper method to run it
 
 
 sentry_sdk.init(
@@ -30,6 +32,9 @@ app = Flask(__name__)
 app.config.from_object(Config())
 # db
 db.init_app(app)
+# scheduler
+scheduler.init_app(app)
+scheduler.start()
 
 with app.app_context():
     db.create_all()
