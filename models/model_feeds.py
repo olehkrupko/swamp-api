@@ -82,6 +82,30 @@ class Feed(db.Model):
 
         if data:
             raise Exception(f"Dict {data} has extra data")
+    
+    def __init__(
+        self,
+        _id,
+        _created,
+        _delayed,
+        title,
+        href,
+        href_user,
+        private,
+        frequency,
+        notes,
+        json,
+    ):
+        self._id = _id
+        self._created = _created
+        self._delayed = _delayed
+        self.title = title
+        self.href = href
+        self.href_user = href_user
+        self.private = private
+        self.frequency = frequency
+        self.notes = notes
+        self.json = json
 
     def as_dict(self) -> dict:
         return {
