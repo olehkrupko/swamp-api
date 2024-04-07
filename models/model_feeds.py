@@ -84,7 +84,7 @@ class Feed(db.Model):
             self._created = _created
             self._delayed = _delayed
         elif _id or _created or _delayed:
-            raise Exception("You need to pass only all or none of _id, _created and _delayed")
+            raise Exception("Pass all or none of [_id, _created, _delayed]")
 
         self.title = title
         self.href = href
