@@ -49,9 +49,9 @@ class Backup:
 
         return True
 
-    ##########
-    ### BACKUP DUMP
-    ##########
+    #############
+    # BACKUP DUMP
+    #############
 
     @staticmethod
     def get_data():
@@ -69,9 +69,9 @@ class Backup:
             filename=filename,
         )
 
-    ##########
-    ### BACKUP RESTORE
-    ##########
+    ################
+    # BACKUP RESTORE
+    ################
 
     @classmethod
     def list(cls):
@@ -111,15 +111,15 @@ class Backup:
                         notes=each["notes"],
                         json=each["json"],
                     )
+                    db.session.add(feed)
 
-                    # db.session.add(feed)
-                    # db.session.commit()
+                db.session.commit()
 
                 return "Restoration complete"
 
-    ##########
-    ### BACKUP RUNNER
-    ##########
+    ###############
+    # BACKUP RUNNER
+    ###############
 
     @scheduler.task("cron", id="backup_generator", hour="*/6")
     def runner():
