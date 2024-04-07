@@ -66,23 +66,6 @@ class Feed(db.Model):
     )
     json = db.Column(JSONB)
 
-    def __init__(self, data: dict):
-        data = data.copy()
-        if not isinstance(data, dict):
-            raise Exception(f"{type(data)} {data=} has to be a dict")
-
-        self.title = data.pop("title")
-        self.href = data.pop("href")
-        self.href_user = data.pop("href_user")
-
-        self.private = data.pop("private")
-        self.frequency = Frequencies(data.pop("frequency"))
-        self.notes = data.pop("notes")
-        self.json = data.pop("json")
-
-        if data:
-            raise Exception(f"Dict {data} has extra data")
-    
     def __init__(
         self,
         _id,
@@ -96,14 +79,24 @@ class Feed(db.Model):
         notes,
         json,
     ):
-        self._id = _id
-        self._created = _created
-        self._delayed = _delayed
+        if _id and _created and _delayed:
+            self._id = _id
+            self._created = _created
+            self._delayed = _delayed
+        elif _id or _created or _delayed:
+            raise Exception("You need to pass only all or none of _id, _created and _delayed")
+
         self.title = title
         self.href = href
         self.href_user = href_user
+
         self.private = private
-        self.frequency = frequency
+        if type(frequency) is str:
+            self.frequency = Frequencies(frequency)
+        elif type(frequency) is Frequencies:
+            self.frequency = frequency
+        else:
+            raise ValueError(f"Frequency {frequency} is not str or Frequencies")
         self.notes = notes
         self.json = json
 

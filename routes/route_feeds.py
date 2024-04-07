@@ -37,7 +37,7 @@ def list_feeds():
 def create_feed():
     body = request.get_json()
 
-    feed = Feed(body)
+    feed = Feed(**body)
 
     db.session.add(feed)
     db.session.commit()
@@ -135,7 +135,7 @@ def feeds_file():
         else:
             each_feed["href_user"] = None
 
-        feed = Feed(each_feed)
+        feed = Feed(**each_feed)
 
         db.session.add(feed)
         db.session.commit()
