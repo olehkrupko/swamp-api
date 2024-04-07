@@ -12,7 +12,6 @@ from config.scheduler import scheduler
 from routes import route_feeds
 from routes import route_updates
 from routes import route_frequencies
-from services.service_backups import Backup  # need a proper method to run it
 
 
 sentry_sdk.init(

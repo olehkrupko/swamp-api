@@ -3,8 +3,10 @@ from flask_cors import cross_origin
 
 import routes._shared as shared
 from config.db import db
+from config.scheduler import scheduler
 from models.model_feeds import Feed
 from models.model_updates import Update
+from services.service_backups import Backup
 from services.service_frequencies import Frequencies
 
 
@@ -151,7 +153,6 @@ def feeds_file():
     )
 
 
-@shared.data_is_json
 @router.route("/parse/href/", methods=["GET"])
 @cross_origin(headers=["Content-Type"])  # Send Access-Control-Allow-Headers
 def test_parse_href():
@@ -171,3 +172,15 @@ def test_parse_href():
     return shared.return_json(
         response=response,
     )
+
+
+@scheduler.task("cron", id="backup_generator", hour="*/6")
+@router.route("/backup/", methods=["GET"])
+def backup():
+    with scheduler.app.app_context():
+        backup_new = Backup.dump()
+
+        print(f"Generated backup {backup_new.filename}")
+        return shared.return_json(
+            response=backup_new.filename,
+        )

@@ -116,20 +116,3 @@ class Backup:
                 db.session.commit()
 
                 return "Restoration complete"
-
-    ###############
-    # BACKUP RUNNER
-    ###############
-
-    @scheduler.task("cron", id="backup_generator", hour="*/6")
-    def runner():
-        with scheduler.app.app_context():
-            # create backup
-            print("Generating backup...")
-            # backup_new = Backup.dump()
-            Backup.dump()
-            # # get backup
-            # backup_last = Backup.list()[-1]
-            # return backup_last.restore(
-            #     compare=False,
-            # )
