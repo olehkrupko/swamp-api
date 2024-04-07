@@ -3,7 +3,6 @@ import os
 from datetime import datetime
 
 from config.db import db
-from config.scheduler import scheduler
 from models.model_feeds import Feed
 
 
