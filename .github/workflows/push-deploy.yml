@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'main'
+      - '10-database-backup-generation'
 jobs:
   deploy:
     runs-on: self-hosted
