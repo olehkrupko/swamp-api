@@ -28,7 +28,7 @@ class Backup:
 
     @classmethod
     def validate(cls, filename):
-        folder, file = filename.rsplit('/', 1)
+        folder, file = filename.rsplit("/", 1)
 
         # check if filename is valid
         if folder != cls.BACKUP_LOCATION:
@@ -40,7 +40,7 @@ class Backup:
 
         # check if file is valid
         try:
-            with open(filename, 'r') as f:
+            with open(filename, "r") as f:
                 json.load(f)
         except FileNotFoundError:
             return False
@@ -62,8 +62,8 @@ class Backup:
         data = cls.get_data()
         filename = cls.today()
 
-        with open(filename, 'w') as file:
-            json.dump(data, file, indent=4)
+        with open(filename, "w") as f:
+            json.dump(data, f, indent=4)
 
         return cls(
             filename=filename,
@@ -90,8 +90,8 @@ class Backup:
         return items
 
     def restore(self, compare=True):
-        with open(self.filename) as file:
-            json_data = json.load(file)
+        with open(self.filename) as f:
+            json_data = json.load(f)
             if compare:
                 if self.get_data() == json_data:
                     return "Backup data equals current DB data"
@@ -121,7 +121,7 @@ class Backup:
     ### BACKUP RUNNER
     ##########
 
-    @scheduler.task('cron', id='backup_generator', hour='*/6')
+    @scheduler.task("cron", id="backup_generator", hour="*/6")
     def runner():
         with scheduler.app.app_context():
             # create backup
