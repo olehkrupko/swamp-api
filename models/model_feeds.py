@@ -121,7 +121,7 @@ class Feed(db.Model):
             "json": self.json,
         }
 
-    def __str__(self):
+    def __repr__(self):
         return str(self.as_dict())
 
     def update_from_dict(self, data: dict):
