@@ -47,9 +47,6 @@ def create_feed():
         frequency=body["frequency"],
         notes=body["notes"],
         json=body["json"],
-        _id=body["_id"],
-        _created=body["_created"],
-        _delayed=body["_delayed"],
     )
 
     db.session.add(feed)

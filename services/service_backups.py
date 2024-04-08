@@ -108,7 +108,7 @@ class Backup:
                         json=each["json"],
                         _id=each["_id"],
                         _created=each["_created"],
-                        _delayed=each["_delayed"],
+                        _delayed=None,
                     )
                     db.session.add(feed)
 
