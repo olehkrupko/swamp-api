@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import requests
 from sqlalchemy.dialects.postgresql import JSONB
@@ -194,6 +194,12 @@ class Feed(db.Model):
                 if feed_len != 0:
                     new_update.datetime = datetime.now()
                     new_update.send()
+                elif new_update.datetime >= datetime.now() - timedelta(days=7):
+                    # many feeds might post right away when added
+                    # usually it's alright, but mass adding can cause a lot of trouble
+                    # that's why we are sending first results to past if they are recent
+                    new_update.datetime - timedelta(days=7)
+
                 db.session.add(new_update)
                 new_items.append(new_update.as_dict())
 
