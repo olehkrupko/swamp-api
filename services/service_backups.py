@@ -99,9 +99,6 @@ class Backup:
             else:
                 for each in json_data:
                     feed = Feed(
-                        _id=each["_id"],
-                        _created=each["_created"],
-                        _delayed=each["_delayed"],
                         title=each["title"],
                         href=each["href"],
                         href_user=each["href_user"],
@@ -109,6 +106,9 @@ class Backup:
                         frequency=each["frequency"],
                         notes=each["notes"],
                         json=each["json"],
+                        _id=each["_id"],
+                        _created=each["_created"],
+                        _delayed=each["_delayed"],
                     )
                     db.session.add(feed)
 

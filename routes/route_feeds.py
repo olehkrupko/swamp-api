@@ -39,7 +39,18 @@ def list_feeds():
 def create_feed():
     body = request.get_json()
 
-    feed = Feed(**body)
+    feed = Feed(
+        title=body["title"],
+        href=body["href"],
+        href_user=body["href_user"],
+        private=body["private"],
+        frequency=body["frequency"],
+        notes=body["notes"],
+        json=body["json"],
+        _id=body["_id"],
+        _created=body["_created"],
+        _delayed=body["_delayed"],
+    )
 
     db.session.add(feed)
     db.session.commit()
@@ -137,7 +148,15 @@ def feeds_file():
         else:
             each_feed["href_user"] = None
 
-        feed = Feed(**each_feed)
+        feed = Feed(
+            title=each_feed["title"],
+            href=each_feed["href"],
+            href_user=each_feed["href_user"],
+            private=each_feed["private"],
+            frequency=each_feed["frequency"],
+            notes=each_feed["notes"],
+            json=each_feed["json"],
+        )
 
         db.session.add(feed)
         db.session.commit()

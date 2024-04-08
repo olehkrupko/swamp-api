@@ -68,9 +68,6 @@ class Feed(db.Model):
 
     def __init__(
         self,
-        _id,
-        _created,
-        _delayed,
         title,
         href,
         href_user,
@@ -78,14 +75,10 @@ class Feed(db.Model):
         frequency,
         notes,
         json,
+        _id=None,
+        _created=None,
+        _delayed=None,
     ):
-        if _id and _created and _delayed:
-            self._id = _id
-            self._created = _created
-            self._delayed = _delayed
-        elif _id or _created or _delayed:
-            raise Exception("Pass all or none of [_id, _created, _delayed]")
-
         self.title = title
         self.href = href
         self.href_user = href_user
@@ -99,6 +92,13 @@ class Feed(db.Model):
             raise ValueError(f"Frequency {frequency} is not str or Frequencies")
         self.notes = notes
         self.json = json
+
+        if _id and _created and _delayed:
+            self._id = _id
+            self._created = _created
+            self._delayed = _delayed
+        elif _id or _created or _delayed:
+            raise Exception("Pass all or none of [_id, _created, _delayed]")
 
     def as_dict(self) -> dict:
         return {
