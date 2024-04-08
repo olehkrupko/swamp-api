@@ -25,7 +25,7 @@ sentry_sdk.init(
     traces_sample_rate=1.0,
 )
 
-# configuration
+# config
 sys.dont_write_bytecode = True  # avoid writing __pycache__ and .pyc
 app = Flask(__name__)
 app.config.from_object(Config())
