@@ -198,9 +198,7 @@ class Feed(db.Model):
                     # many feeds might post right away when added
                     # usually it's alright, but mass adding can cause a lot of trouble
                     # that's why we are sending first results to past if they are recent
-                    print(1, new_update.datetime)
                     new_update.datetime - timedelta(days=7)
-                    print(2, new_update.datetime)
 
                 db.session.add(new_update)
                 new_items.append(new_update.as_dict())
