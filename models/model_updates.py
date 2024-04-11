@@ -104,6 +104,8 @@ class Update(db.Model):
     # filter is used to remove unnecessary items
     # {field}        - don't skip what's mentioned there
     # {field}_ignore - skip these ones
+    # in case of future review:
+    # SELECT _id, title, json FROM feed_updates.feed WHERE json ? 'filter'
     def filter_skip(self, json):
         # adding it to make code more readable
         SKIP = True
