@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'main'
+      - '109-updates-_ignore-filter-not-working'
 jobs:
   deploy:
     runs-on: self-hosted
