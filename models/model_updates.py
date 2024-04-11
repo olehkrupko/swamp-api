@@ -40,7 +40,10 @@ class Update(db.Model):
     # METADATA
     feed_id = db.Column(
         db.Integer,
-        db.ForeignKey("feed_updates.feed._id"),
+        db.ForeignKey(
+            "feed_updates.feed._id",
+            ondelete='CASCADE',
+        ),
         nullable=False,
     )
 
