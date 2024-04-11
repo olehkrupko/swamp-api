@@ -122,9 +122,8 @@ class Update(db.Model):
                 raise TypeError("Filter value is expected to be STR or LIST")
 
             for each_value in filter_value:
-                if (
-                    filter_name in SUPPORTED_FIELDS
-                    and each_value not in getattr(self, filter_name)
+                if filter_name in SUPPORTED_FIELDS and each_value not in getattr(
+                    self, filter_name
                 ):
                     return SKIP
                 elif (
