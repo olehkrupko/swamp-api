@@ -120,15 +120,17 @@ class Update(db.Model):
                 raise TypeError("Filter value is expected to be STR or LIST")
 
             for each_value in filter_value:
-                if filter_name in SUPPORTED_FIELDS:
-                    if each_value not in getattr(self, filter_name):
-                        return SKIP
                 if (
-                    "_ignore" in filter_name
-                    and filter_name.strip("_ignore") in SUPPORTED_FIELDS
+                    filter_name in SUPPORTED_FIELDS
+                    and each_value not in getattr(self, filter_name)
                 ):
-                    if each_value in getattr(self, filter_name.strip("_ignore")):
-                        return SKIP
+                    return SKIP
+                elif (
+                    "_ignore" in filter_name
+                    and filter_name.replace("_ignore", "") in SUPPORTED_FIELDS
+                    and each_value in getattr(self, filter_name.replace("_ignore", ""))
+                ):
+                    return SKIP
 
         return not SKIP
 
