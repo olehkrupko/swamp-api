@@ -56,6 +56,6 @@ class Frequencies(Enum):
                 weeks=random.randint(42, 150),
             )
         elif self == self.NEVER:
-            raise ValueError("You cannot delay if it's never updated")
+            return timedelta(0)
         else:
             raise Exception(f"It's not expected to happen, frequency={self}")
