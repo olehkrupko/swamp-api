@@ -2,14 +2,16 @@ import os
 import sys
 
 import sentry_sdk
-from sentry_sdk.integrations.flask import FlaskIntegration
 from flask import Flask
 from flask_cors import CORS
+from sentry_sdk.integrations.flask import FlaskIntegration
 
+from config.config import Config
+from config.db import db
+from config.scheduler import scheduler
 from routes import route_feeds
 from routes import route_updates
 from routes import route_frequencies
-from config.db import db
 
 
 sentry_sdk.init(
@@ -26,9 +28,12 @@ sentry_sdk.init(
 # config
 sys.dont_write_bytecode = True  # avoid writing __pycache__ and .pyc
 app = Flask(__name__)
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SQLALCHEMY_DB_URI")
+app.config.from_object(Config())
+# db
 db.init_app(app)
+# scheduler
+scheduler.init_app(app)
+scheduler.start()
 
 with app.app_context():
     db.create_all()

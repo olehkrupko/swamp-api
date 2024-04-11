@@ -66,28 +66,45 @@ class Feed(db.Model):
     )
     json = db.Column(JSONB)
 
-    def __init__(self, data: dict):
-        data = data.copy()
-        if not isinstance(data, dict):
-            raise Exception(f"{type(data)} {data=} has to be a dict")
+    def __init__(
+        self,
+        title,
+        href,
+        href_user,
+        private,
+        frequency,
+        notes,
+        json,
+        _id=None,
+        _created=None,
+        _delayed=None,
+    ):
+        self.title = title
+        self.href = href
+        self.href_user = href_user
 
-        self.title = data.pop("title")
-        self.href = data.pop("href")
-        self.href_user = data.pop("href_user")
+        self.private = private
+        if type(frequency) is str:
+            self.frequency = Frequencies(frequency)
+        elif type(frequency) is Frequencies:
+            self.frequency = frequency
+        else:
+            raise ValueError(f"Frequency {frequency} is not str or Frequencies")
+        self.notes = notes
+        self.json = json
 
-        self.private = data.pop("private")
-        self.frequency = Frequencies(data.pop("frequency"))
-        self.notes = data.pop("notes")
-        self.json = data.pop("json")
-
-        if data:
-            raise Exception(f"Dict {data} has extra data")
+        if _id and _created and _delayed:
+            self._id = _id
+            self._created = _created
+            self._delayed = _delayed
+        elif _id or _created or _delayed:
+            raise Exception("Pass all or none of [_id, _created, _delayed]")
 
     def as_dict(self) -> dict:
         return {
             "_id": self._id,
-            "_created": self._created,
-            "_delayed": self._delayed,
+            "_created": str(self._created),
+            "_delayed": str(self._delayed),
             "title": self.title,
             "href": self.href,
             "href_user": self.href_user,
@@ -97,7 +114,7 @@ class Feed(db.Model):
             "json": self.json,
         }
 
-    def __str__(self):
+    def __repr__(self):
         return str(self.as_dict())
 
     def update_from_dict(self, data: dict):

@@ -3,9 +3,11 @@ from flask_cors import cross_origin
 
 import routes._shared as shared
 from config.db import db
+from config.scheduler import scheduler
 from models.model_feeds import Feed
-from services.service_frequencies import Frequencies
 from models.model_updates import Update
+from services.service_backups import Backup
+from services.service_frequencies import Frequencies
 
 
 router = Blueprint("feeds", __name__, url_prefix="/feeds")
@@ -37,7 +39,15 @@ def list_feeds():
 def create_feed():
     body = request.get_json()
 
-    feed = Feed(body)
+    feed = Feed(
+        title=body["title"],
+        href=body["href"],
+        href_user=body["href_user"],
+        private=body["private"],
+        frequency=body["frequency"],
+        notes=body["notes"],
+        json=body["json"],
+    )
 
     db.session.add(feed)
     db.session.commit()
@@ -135,7 +145,15 @@ def feeds_file():
         else:
             each_feed["href_user"] = None
 
-        feed = Feed(each_feed)
+        feed = Feed(
+            title=each_feed["title"],
+            href=each_feed["href"],
+            href_user=each_feed["href_user"],
+            private=each_feed["private"],
+            frequency=each_feed["frequency"],
+            notes=each_feed["notes"],
+            json=each_feed["json"],
+        )
 
         db.session.add(feed)
         db.session.commit()
@@ -151,7 +169,6 @@ def feeds_file():
     )
 
 
-@shared.data_is_json
 @router.route("/parse/href/", methods=["GET"])
 @cross_origin(headers=["Content-Type"])  # Send Access-Control-Allow-Headers
 def test_parse_href():
@@ -171,3 +188,15 @@ def test_parse_href():
     return shared.return_json(
         response=response,
     )
+
+
+@scheduler.task("cron", id="backup_generator", hour="*/6")
+@router.route("/backup/", methods=["GET"])
+def backup():
+    with scheduler.app.app_context():
+        backup_new = Backup.dump()
+
+        print(f"Generated backup {backup_new.filename}")
+        return shared.return_json(
+            response=backup_new.filename,
+        )

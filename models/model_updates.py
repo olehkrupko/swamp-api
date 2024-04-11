@@ -40,7 +40,10 @@ class Update(db.Model):
     # METADATA
     feed_id = db.Column(
         db.Integer,
-        db.ForeignKey("feed_updates.feed._id"),
+        db.ForeignKey(
+            "feed_updates.feed._id",
+            ondelete="CASCADE",
+        ),
         nullable=False,
     )
 
@@ -95,7 +98,7 @@ class Update(db.Model):
             "datetime": self.datetime,
         }
 
-    def __str__(self):
+    def __repr__(self):
         return str(self.as_dict())
 
     # filter is used to remove unnecessary items

@@ -9,3 +9,4 @@ beautifulsoup4==4.12.2
 sentry-sdk[flask]==1.29.0
 emoji==2.8.0
 python-telegram-bot==20.6
+Flask-APScheduler==1.13.1
