@@ -42,7 +42,7 @@ class Update(db.Model):
         db.Integer,
         db.ForeignKey(
             "feed_updates.feed._id",
-            ondelete='CASCADE',
+            ondelete="CASCADE",
         ),
         nullable=False,
     )
