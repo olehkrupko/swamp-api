@@ -3,7 +3,7 @@ from datetime import timedelta
 from enum import Enum
 
 
-class Frequencies(Enum):
+class Frequency(Enum):
     # active:
     MINUTES = "minutes"
     HOURS = "hours"

@@ -11,7 +11,7 @@ from config.db import db
 from config.scheduler import scheduler
 from routes import route_feeds
 from routes import route_updates
-from routes import route_frequencies
+from routes import route_frequency
 
 
 sentry_sdk.init(
@@ -41,7 +41,7 @@ with app.app_context():
 # routes
 CORS(app)
 app.register_blueprint(route_feeds.router)
-app.register_blueprint(route_frequencies.router)
+app.register_blueprint(route_frequency.router)
 app.register_blueprint(route_updates.router)
 
 # run app
