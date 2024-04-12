@@ -3,7 +3,7 @@ from datetime import timedelta
 from enum import Enum
 
 
-class Frequencies(Enum):
+class Frequency(Enum):
     # active:
     MINUTES = "minutes"
     HOURS = "hours"
@@ -56,6 +56,6 @@ class Frequencies(Enum):
                 weeks=random.randint(42, 150),
             )
         elif self == self.NEVER:
-            raise ValueError("You cannot delay if it's never updated")
+            return timedelta(0)
         else:
             raise Exception(f"It's not expected to happen, frequency={self}")

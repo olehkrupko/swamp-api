@@ -104,6 +104,8 @@ class Update(db.Model):
     # filter is used to remove unnecessary items
     # {field}        - don't skip what's mentioned there
     # {field}_ignore - skip these ones
+    # in case of future review:
+    # SELECT _id, title, json FROM feed_updates.feed WHERE json ? 'filter'
     def filter_skip(self, json):
         # adding it to make code more readable
         SKIP = True
@@ -120,15 +122,16 @@ class Update(db.Model):
                 raise TypeError("Filter value is expected to be STR or LIST")
 
             for each_value in filter_value:
-                if filter_name in SUPPORTED_FIELDS:
-                    if each_value not in getattr(self, filter_name):
-                        return SKIP
-                if (
-                    "_ignore" in filter_name
-                    and filter_name.strip("_ignore") in SUPPORTED_FIELDS
+                if filter_name in SUPPORTED_FIELDS and each_value not in getattr(
+                    self, filter_name
                 ):
-                    if each_value in getattr(self, filter_name.strip("_ignore")):
-                        return SKIP
+                    return SKIP
+                elif (
+                    "_ignore" in filter_name
+                    and filter_name.replace("_ignore", "") in SUPPORTED_FIELDS
+                    and each_value in getattr(self, filter_name.replace("_ignore", ""))
+                ):
+                    return SKIP
 
         return not SKIP
 

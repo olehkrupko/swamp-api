@@ -5,7 +5,7 @@ import requests
 from sqlalchemy.dialects.postgresql import JSONB
 
 from config.db import db
-from services.service_frequencies import Frequencies
+from services.service_frequency import Frequency
 from models.model_updates import Update
 
 # import requests
@@ -53,10 +53,10 @@ class Feed(db.Model):
     )
     frequency = db.Column(
         db.Enum(
-            Frequencies,
-            values_callable=lambda x: [str(each.value) for each in Frequencies],
+            Frequency,
+            values_callable=lambda x: [str(each.value) for each in Frequency],
         ),
-        default=Frequencies.WEEKS,
+        default=Frequency.WEEKS,
     )
     notes = db.Column(
         db.String(200),
@@ -85,11 +85,11 @@ class Feed(db.Model):
 
         self.private = private
         if type(frequency) is str:
-            self.frequency = Frequencies(frequency)
-        elif type(frequency) is Frequencies:
+            self.frequency = Frequency(frequency)
+        elif type(frequency) is Frequency:
             self.frequency = frequency
         else:
-            raise ValueError(f"Frequency {frequency} is not str or Frequencies")
+            raise ValueError(f"Frequency {frequency} is not str or Frequency")
         self.notes = notes
         self.json = json
 
@@ -144,11 +144,11 @@ class Feed(db.Model):
             # nothing to update
             return
         else:
-            self.frequency = Frequencies(value)
+            self.frequency = Frequency(value)
             self.delay()
 
     def requires_update(self):
-        if self.frequency == Frequencies.NEVER:
+        if self.frequency == Frequency.NEVER:
             return False
 
         if not self._delayed:

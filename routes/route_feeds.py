@@ -7,7 +7,7 @@ from config.scheduler import scheduler
 from models.model_feeds import Feed
 from models.model_updates import Update
 from services.service_backups import Backup
-from services.service_frequencies import Frequencies
+from services.service_frequency import Frequency
 
 
 router = Blueprint("feeds", __name__, url_prefix="/feeds")
@@ -26,7 +26,7 @@ def list_feeds():
 
     active = request.args.get("active")
     if active and active.lower() in POSITIVE:
-        feeds = filter(lambda x: x.frequency != Frequencies.NEVER, feeds)
+        feeds = filter(lambda x: x.frequency != Frequency.NEVER, feeds)
 
     return shared.return_json(
         response=[feed.as_dict() for feed in feeds],
@@ -129,13 +129,13 @@ def feeds_file():
         if "+" in emojis:
             emojis.remove("+")
         if "💎" in emojis:
-            each_feed["frequency"] = Frequencies.HOURS
+            each_feed["frequency"] = Frequency.HOURS
             emojis.remove("💎")
         elif "📮" in emojis:
-            each_feed["frequency"] = Frequencies.DAYS
+            each_feed["frequency"] = Frequency.DAYS
             emojis.remove("📮")
         else:
-            each_feed["frequency"] = Frequencies.WEEKS
+            each_feed["frequency"] = Frequency.WEEKS
         each_feed["notes"] = ""
         each_feed["json"] = {}
         if "filter" in each_feed:
