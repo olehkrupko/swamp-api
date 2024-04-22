@@ -12,20 +12,8 @@ router = Blueprint("updates", __name__, url_prefix="/updates")
 @router.route("/", methods=["GET"])
 def list_updates():
     kwargs = dict(request.args)
-    limit = 140
-    if "limit" in kwargs:
-        limit = kwargs.pop("limit")
 
-    feeds = db.session.query(Feed).filter_by(**kwargs)
-
-    updates = [
-        x.as_dict(feed_data=True)
-        for x in db.session.query(Update)
-        .filter(Update.feed_id.in_([x._id for x in feeds]))
-        .order_by(Update.dt_event.desc())
-        .limit(limit)
-        .all()
-    ]
+    updates = Update.get_updates(**kwargs)
 
     return shared.return_json(
         response=updates,

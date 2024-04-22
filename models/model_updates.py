@@ -9,6 +9,7 @@ from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import relationship
 
 from config.db import db
+from models.model_feeds import Feed
 from services.service_telegram import TelegramService
 
 
@@ -17,6 +18,9 @@ if TYPE_CHECKING:
 
 
 class Update(db.Model):
+    # CREATE INDEX update_dt_event_desc_index ON feed_updates.update (dt_event DESC NULLS LAST);
+    # CREATE INDEX update_feed_id ON feed_updates.update (feed_id);
+    # REINDEX (verbose, concurrently) TABLE feed_updates.update;
     __table_args__ = {
         "schema": "feed_updates",
     }
@@ -32,6 +36,7 @@ class Update(db.Model):
             ondelete="CASCADE",
         ),
         nullable=False,
+        index=True,
     )
     feed: Mapped["Feed"] = relationship(back_populates="updates")
     # CORE / REQUIRED
@@ -52,7 +57,8 @@ class Update(db.Model):
     # METADATA
     dt_event = db.Column(  # rename
         db.DateTime(timezone=True),
-        default=None,
+        nullable=False,
+        index=True,
     )
     dt_original = db.Column(
         db.DateTime(timezone=True),
@@ -137,3 +143,58 @@ class Update(db.Model):
         self.dt_event = self.zone_fix(
             dt.datetime.now(ZoneInfo(os.environ.get("TIMEZONE_LOCAL")))
         )
+
+    @classmethod
+    def get_updates(cls, limit=140, private=None):
+        start_time = time.time()
+        kwargs = {}
+        if private is not None:
+            kwargs["private"] = private
+
+        print(f"{kwargs=}")
+        if not kwargs:
+            # updates first, feeds second
+            updates = (
+                db.session.query(cls)
+                .order_by(cls.dt_event.desc())
+                .limit(limit)
+                .all()
+            )
+
+            feed_data = {
+                x._id: x.as_dict() for x in 
+                db.session.query(Feed)
+                .filter(Feed._id.in_(
+                    set(x.feed_id for x in updates)
+                ))
+            }
+
+            updates = [
+                dict(
+                    x.as_dict(),
+                    feed_data=feed_data[x.feed_id],
+                )
+                for x in updates
+            ]
+        else:
+            # feeds first, updates second
+            feeds = db.session.query(Feed).filter_by(**kwargs)
+            feed_data = {x._id: x.as_dict() for x in feeds}
+
+            updates = (
+                db.session.query(cls)
+                .filter(cls.feed_id.in_([feed._id for feed in feeds]))
+                .order_by(cls.dt_event.desc())
+                .limit(limit)
+                .all()
+            )
+
+        updates = [
+            dict(
+                x.as_dict(),
+                feed_data=feed_data[x.feed_id],
+            )
+            for x in updates
+        ]
+
+        return updates
