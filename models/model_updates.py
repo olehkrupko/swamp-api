@@ -1,5 +1,6 @@
 import datetime as dt
 import os
+from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
 import emoji
@@ -10,6 +11,9 @@ from sqlalchemy.orm import relationship
 from config.db import db
 from services.service_telegram import TelegramService
 
+
+if TYPE_CHECKING:
+    from models.model_feeds import Feed
 
 class Update(db.Model):
     __table_args__ = {

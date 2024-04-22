@@ -1,19 +1,20 @@
 import os
 from datetime import datetime
 from typing import List
+from typing import TYPE_CHECKING
 
 import requests
 from sqlalchemy.dialects.postgresql import JSONB
 
 from config.db import db
 from services.service_frequency import Frequency
-from models.model_updates import Update
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import relationship
 
-# import requests
-# from bs4 import BeautifulSoup, SoupStrainer
+
+if TYPE_CHECKING:
+    from models.model_updates import Update
 
 
 class Feed(db.Model):
