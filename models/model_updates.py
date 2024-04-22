@@ -85,16 +85,7 @@ class Update(db.Model):
             datetime = dt.datetime.fromisoformat(datetime)
         else:
             raise ValueError("Update.__init__() datetime is expected to be str")
-        if datetime.tzinfo:
-            # if tzinfo present — convert to current one
-            datetime = datetime.astimezone(
-                ZoneInfo(os.environ.get("TIMEZONE_LOCAL"))
-            )
-        else:
-            # if no tzinfo — replace it with current one
-            datetime = datetime.replace(
-                tzinfo=ZoneInfo(os.environ.get("TIMEZONE_LOCAL"))
-            )
+        datetime = self.zone_fix(datetime)
 
         self.name = name[:300]
         self.href = href[:300]
@@ -122,8 +113,23 @@ class Update(db.Model):
 
     def send(self):
         TelegramService.send_update(self)
+
+    @staticmethod
+    def zone_fix(datetime):
+        if datetime.tzinfo:
+            # if tzinfo present — convert to current one
+            return datetime.astimezone(
+                ZoneInfo(os.environ.get("TIMEZONE_LOCAL"))
+            )
+        else:
+            # if no tzinfo — replace it with current one
+            return datetime.replace(
+                tzinfo=ZoneInfo(os.environ.get("TIMEZONE_LOCAL"))
+            )
     
     def dt_now(self):
-        self.dt_event = dt.datetime.now(
-            ZoneInfo(os.environ.get("TIMEZONE_LOCAL"))
+        self.dt_event = self.zone_fix(
+            dt.datetime.now(
+                ZoneInfo(os.environ.get("TIMEZONE_LOCAL"))
+            )
         )
