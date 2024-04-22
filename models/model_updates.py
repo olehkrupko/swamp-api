@@ -137,7 +137,6 @@ class Update(db.Model):
 
     @classmethod
     def get_updates(cls, limit=140, private=None):
-        start_time = time.time()
         kwargs = {}
         if private is not None:
             kwargs["private"] = private
@@ -145,19 +144,13 @@ class Update(db.Model):
         print(f"{kwargs=}")
         if not kwargs:
             # updates first, feeds second
-            updates = (
-                db.session.query(cls)
-                .order_by(cls.dt_event.desc())
-                .limit(limit)
-                .all()
-            )
+            updates = db.session.query(cls).order_by(cls.dt_event.desc()).limit(limit).all()
 
             feed_data = {
-                x._id: x.as_dict() for x in 
-                db.session.query(Feed)
-                .filter(Feed._id.in_(
-                    set(x.feed_id for x in updates)
-                ))
+                x._id: x.as_dict()
+                for x in db.session.query(Feed).filter(
+                    Feed._id.in_(set(x.feed_id for x in updates))
+                )
             }
 
             updates = [
