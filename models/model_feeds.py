@@ -202,19 +202,22 @@ class Feed(db.Model):
             if not isinstance(filter_value, list):
                 raise TypeError("Filter value is expected to be STR or LIST")
 
+            if "_ignore" not in filter_name:
+                field_value = getattr(update, filter_name)
+            else:
+                field_value = getattr(update, filter_name.replace("_ignore", ""))
+
             # replace with python filter?
             for each_value in filter_value:
-                filter_name_ignored = filter_name.replace("_ignore", "")
-
                 if (
                     filter_name in SUPPORTED_FIELDS
-                    and each_value not in getattr(update, filter_name)
+                    and each_value not in field_value
                 ):
                     return SKIP
                 elif (
                     "_ignore" in filter_name
-                    and filter_name_ignored in SUPPORTED_FIELDS
-                    and each_value in getattr(update, filter_name_ignored)
+                    and filter_name.replace("_ignore", "") in SUPPORTED_FIELDS
+                    and each_value in field_value
                 ):
                     return SKIP
 
