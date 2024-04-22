@@ -123,7 +123,7 @@ class Update(db.Model):
         else:
             # if no tzinfo — replace it with current one
             return datetime.replace(tzinfo=ZoneInfo(os.environ.get("TIMEZONE_LOCAL")))
-    
+
     def dt_now(self):
         self.dt_event = self.zone_fix(
             dt.datetime.now(ZoneInfo(os.environ.get("TIMEZONE_LOCAL")))
