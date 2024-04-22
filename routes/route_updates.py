@@ -22,7 +22,7 @@ def list_updates():
         x.as_dict()
         for x in db.session.query(Update)
         .filter(Update.feed_id.in_([x._id for x in feeds]))
-        .order_by(Update.datetime.desc())
+        .order_by(Update.dt_event.desc())
         .limit(limit)
         .all()
     ]

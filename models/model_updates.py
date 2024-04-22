@@ -96,7 +96,7 @@ class Update(db.Model):
     def as_dict(self):
         return {
             # DATA STRUCTURE
-            "id": self._id,
+            "id": self.id,
             "feed_id": self.feed_id,
             # CORE / REQUIRED
             "name": self.name,
