@@ -9,7 +9,6 @@ from sqlalchemy.orm import relationship
 
 from config.db import db
 from services.service_telegram import TelegramService
-from models.model_feeds import Feed
 
 
 class Update(db.Model):
@@ -29,7 +28,7 @@ class Update(db.Model):
         ),
         nullable=False,
     )
-    feed: Mapped[Feed] = relationship(back_populates="updates")
+    feed: Mapped["Feed"] = relationship(back_populates="updates")
     # CORE / REQUIRED
     name = db.Column(
         db.String(300),
