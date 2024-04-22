@@ -49,6 +49,10 @@ class Update(db.Model):
         db.DateTime(timezone=True),
         default=None,
     )
+    dt_original = db.Column(
+        db.DateTime(timezone=True),
+        nullable=False,
+    )
     dt_created = db.Column(
         db.DateTime,
         default=dt.datetime.utcnow,
@@ -95,6 +99,7 @@ class Update(db.Model):
         self.name = name[:300]
         self.href = href[:300]
         self.dt_event = datetime
+        self.dt_original = datetime
         self.feed_id = feed_id
 
     def as_dict(self):
@@ -108,6 +113,7 @@ class Update(db.Model):
             "datetime": self.datetime,
             # METADATA
             "dt_event": self.dt_event,
+            "dt_original": self.dt_original,
             "dt_created": self.dt_created,
         }
 
