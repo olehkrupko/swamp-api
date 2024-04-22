@@ -89,9 +89,9 @@ def update_feed(feed_id):
 @cross_origin(headers=["Content-Type"])  # Send Access-Control-Allow-Headers
 def push_updates(feed_id):
     feed = db.session.query(Feed).filter_by(_id=feed_id).first()
-    items = request.get_json()
+    updates = [Update(**x, feed_id=feed_id) for x in request.get_json()]
 
-    new_updates = feed.ingest_updates(items)
+    new_updates = feed.ingest_updates(updates)
 
     return shared.return_json(
         response=new_updates,

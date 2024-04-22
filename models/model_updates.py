@@ -1,8 +1,11 @@
-import datetime
+import datetime as dt
 import os
 from zoneinfo import ZoneInfo
 
 import emoji
+from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import relationship
 
 from config.db import db
 from services.service_telegram import TelegramService
@@ -20,9 +23,8 @@ class Update(db.Model):
     )
     _created = db.Column(
         db.DateTime,
-        default=datetime.datetime.utcnow,
+        default=dt.datetime.utcnow,
     )
-
     # CORE / REQUIRED
     name = db.Column(
         db.String(140),
@@ -36,16 +38,16 @@ class Update(db.Model):
         db.DateTime(timezone=True),
         default=None,
     )
-
     # METADATA
-    feed_id = db.Column(
-        db.Integer,
+    feed_id: Mapped[int] = mapped_column(
         db.ForeignKey(
             "feed_updates.feed._id",
             ondelete="CASCADE",
         ),
         nullable=False,
     )
+    # RELATIONSHIPS
+    feed: Mapped["Feed"] = relationship(back_populates="updates")
 
     def __init__(self, data: dict):
         data = data.copy()
@@ -100,40 +102,6 @@ class Update(db.Model):
 
     def __repr__(self):
         return str(self.as_dict())
-
-    # filter is used to remove unnecessary items
-    # {field}        - don't skip what's mentioned there
-    # {field}_ignore - skip these ones
-    # in case of future review:
-    # SELECT _id, title, json FROM feed_updates.feed WHERE json ? 'filter'
-    def filter_skip(self, json):
-        # adding it to make code more readable
-        SKIP = True
-        SUPPORTED_FIELDS = ["name", "href"]
-
-        if "filter" not in json:
-            return not SKIP
-
-        for filter_name, filter_value in json["filter"].items():
-            if isinstance(filter_value, str):
-                filter_value = [filter_value]
-
-            if not isinstance(filter_value, list):
-                raise TypeError("Filter value is expected to be STR or LIST")
-
-            for each_value in filter_value:
-                if filter_name in SUPPORTED_FIELDS and each_value not in getattr(
-                    self, filter_name
-                ):
-                    return SKIP
-                elif (
-                    "_ignore" in filter_name
-                    and filter_name.replace("_ignore", "") in SUPPORTED_FIELDS
-                    and each_value in getattr(self, filter_name.replace("_ignore", ""))
-                ):
-                    return SKIP
-
-        return not SKIP
 
     def send(self):
         TelegramService.send_update(self)
