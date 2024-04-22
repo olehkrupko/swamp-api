@@ -16,29 +16,11 @@ class Update(db.Model):
         "schema": "feed_updates",
     }
 
-    # TECHNICAL
-    _id = db.Column(
+    # DATA STRUCTURE
+    id = db.Column(
         db.Integer,
         primary_key=True,
     )
-    _created = db.Column(
-        db.DateTime,
-        default=dt.datetime.utcnow,
-    )
-    # CORE / REQUIRED
-    name = db.Column(
-        db.String(140),
-        nullable=False,
-    )
-    href = db.Column(
-        db.String(300),
-        nullable=False,
-    )
-    datetime = db.Column(
-        db.DateTime(timezone=True),
-        default=None,
-    )
-    # METADATA
     feed_id: Mapped[int] = mapped_column(
         db.ForeignKey(
             "feed_updates.feed._id",
@@ -46,8 +28,32 @@ class Update(db.Model):
         ),
         nullable=False,
     )
-    # RELATIONSHIPS
     feed: Mapped["Feed"] = relationship(back_populates="updates")
+    # CORE / REQUIRED
+    name = db.Column(
+        db.String(300),
+        nullable=False,
+    )
+    href = db.Column(
+        db.String(300),
+        nullable=False,
+    )
+
+    @property
+    def datetime(self):
+        """Get the current voltage."""
+        return self.dt_event
+
+    # METADATA
+    dt_event = db.Column(  # rename
+        db.DateTime(timezone=True),
+        default=None,
+    )
+    dt_created = db.Column(
+        db.DateTime,
+        default=dt.datetime.utcnow,
+        nullable=False,
+    )
 
     def __init__(
         self,
@@ -86,19 +92,23 @@ class Update(db.Model):
                 tzinfo=ZoneInfo(os.environ.get("TIMEZONE_LOCAL"))
             )
 
-        self.name = name[:140]
+        self.name = name[:300]
         self.href = href[:300]
-        self.datetime = datetime
+        self.dt_event = datetime
         self.feed_id = feed_id
 
     def as_dict(self):
         return {
-            "_id": self._id,
+            # DATA STRUCTURE
+            "id": self._id,
             "feed_id": self.feed_id,
-            "_created": self._created,
+            # CORE / REQUIRED
             "name": self.name,
             "href": self.href,
             "datetime": self.datetime,
+            # METADATA
+            "dt_event": self.dt_event,
+            "dt_created": self.dt_created,
         }
 
     def __repr__(self):
@@ -106,3 +116,8 @@ class Update(db.Model):
 
     def send(self):
         TelegramService.send_update(self)
+    
+    def dt_now(self):
+        self.dt_event = dt.datetime.now(
+            ZoneInfo(os.environ.get("TIMEZONE_LOCAL"))
+        )

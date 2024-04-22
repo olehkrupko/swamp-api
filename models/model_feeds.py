@@ -231,7 +231,7 @@ class Feed(db.Model):
             # checking if href is present in DB
             if self.update_href_not_present(each_update.href):
                 if feed_len != 0:
-                    each_update.datetime = datetime.now()
+                    each_update.dt_now()
                     each_update.send()
                 db.session.add(each_update)
                 new_items.append(each_update.as_dict())
