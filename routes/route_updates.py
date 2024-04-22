@@ -19,17 +19,13 @@ def list_updates():
     feeds = db.session.query(Feed).filter_by(**kwargs)
 
     updates = [
-        x.as_dict()
+        x.as_dict(feed_data=True)
         for x in db.session.query(Update)
         .filter(Update.feed_id.in_([x._id for x in feeds]))
         .order_by(Update.dt_event.desc())
         .limit(limit)
         .all()
     ]
-    for feed in feeds:
-        for update in updates:
-            if feed._id == update["feed_id"]:
-                update["feed_data"] = feed.as_dict()
 
     return shared.return_json(
         response=updates,

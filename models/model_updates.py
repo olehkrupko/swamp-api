@@ -98,8 +98,8 @@ class Update(db.Model):
         self.dt_original = datetime
         self.feed_id = feed_id
 
-    def as_dict(self):
-        return {
+    def as_dict(self, feed_data=False):
+        data = {
             # DATA STRUCTURE
             "id": self.id,
             "feed_id": self.feed_id,
@@ -112,6 +112,11 @@ class Update(db.Model):
             "dt_original": self.dt_original,
             "dt_created": self.dt_created,
         }
+
+        if feed_data == True:
+            data["feed_data"] = self.feed.as_dict()
+
+        return data
 
     def __repr__(self):
         return str(self.as_dict())
