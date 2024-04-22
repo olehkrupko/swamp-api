@@ -209,10 +209,7 @@ class Feed(db.Model):
 
             # replace with python filter?
             for each_value in filter_value:
-                if (
-                    filter_name in SUPPORTED_FIELDS
-                    and each_value not in field_value
-                ):
+                if filter_name in SUPPORTED_FIELDS and each_value not in field_value:
                     return SKIP
                 elif (
                     "_ignore" in filter_name
