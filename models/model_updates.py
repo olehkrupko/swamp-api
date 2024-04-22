@@ -15,6 +15,7 @@ from services.service_telegram import TelegramService
 if TYPE_CHECKING:
     from models.model_feeds import Feed
 
+
 class Update(db.Model):
     __table_args__ = {
         "schema": "feed_updates",
