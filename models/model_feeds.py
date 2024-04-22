@@ -204,19 +204,19 @@ class Feed(db.Model):
 
             # replace with python filter?
             for each_value in filter_value:
-                if filter_name in SUPPORTED_FIELDS and each_value not in getattr(
-                    update, filter_name
-                ):
+                if all([
+                    filter_name in SUPPORTED_FIELDS,
+                    each_value not in getattr(update, filter_name),
+                ]):
                     return SKIP
-                elif (
-                    "_ignore" in filter_name
-                    and filter_name.replace("_ignore", "") in SUPPORTED_FIELDS
-                    and each_value in getattr(update, filter_name.replace("_ignore", ""))
-                ):
+                elif all([
+                    "_ignore" in filter_name,
+                    filter_name.replace("_ignore", "") in SUPPORTED_FIELDS,
+                    each_value in getattr(update, filter_name.replace("_ignore", "")),
+                ]):
                     return SKIP
 
         return not SKIP
-
 
     def ingest_updates(self, updates):
         # sort items and limit amount of updates

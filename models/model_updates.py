@@ -9,6 +9,7 @@ from sqlalchemy.orm import relationship
 
 from config.db import db
 from services.service_telegram import TelegramService
+from models.model_feeds import Feed
 
 
 class Update(db.Model):
@@ -28,7 +29,7 @@ class Update(db.Model):
         ),
         nullable=False,
     )
-    feed: Mapped["Feed"] = relationship(back_populates="updates")
+    feed: Mapped[Feed] = relationship(back_populates="updates")
     # CORE / REQUIRED
     name = db.Column(
         db.String(300),
@@ -118,18 +119,12 @@ class Update(db.Model):
     def zone_fix(datetime):
         if datetime.tzinfo:
             # if tzinfo present — convert to current one
-            return datetime.astimezone(
-                ZoneInfo(os.environ.get("TIMEZONE_LOCAL"))
-            )
+            return datetime.astimezone(ZoneInfo(os.environ.get("TIMEZONE_LOCAL")))
         else:
             # if no tzinfo — replace it with current one
-            return datetime.replace(
-                tzinfo=ZoneInfo(os.environ.get("TIMEZONE_LOCAL"))
-            )
+            return datetime.replace(tzinfo=ZoneInfo(os.environ.get("TIMEZONE_LOCAL")))
     
     def dt_now(self):
         self.dt_event = self.zone_fix(
-            dt.datetime.now(
-                ZoneInfo(os.environ.get("TIMEZONE_LOCAL"))
-            )
+            dt.datetime.now(ZoneInfo(os.environ.get("TIMEZONE_LOCAL")))
         )
