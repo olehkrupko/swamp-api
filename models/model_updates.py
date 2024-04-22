@@ -135,10 +135,12 @@ class Update(db.Model):
         )
 
     @classmethod
-    def get_updates(cls, limit=140, private=None):
+    def get_updates(cls, limit=140, private=None, _id=None):
         kwargs = {}
         if private is not None:
             kwargs["private"] = private
+        if _id is not None:
+            kwargs["_id"] = _id
 
         print(f"{kwargs=}")
         if not kwargs:
