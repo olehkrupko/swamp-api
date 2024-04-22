@@ -1,8 +1,6 @@
 from flask import request, Blueprint
 
 import routes._shared as shared
-from config.db import db
-from models.model_feeds import Feed
 from models.model_updates import Update
 
 
