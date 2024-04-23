@@ -135,9 +135,7 @@ class Update(db.Model):
         )
 
     def dt_event_adjust_first(self):
-        now = self.zone_fix(
-            dt.datetime.now(ZoneInfo(os.environ.get("TIMEZONE_LOCAL")))
-        )
+        now = self.zone_fix(dt.datetime.now(ZoneInfo(os.environ.get("TIMEZONE_LOCAL"))))
         if self.dt_event > now:
             self.dt_event = now
 
