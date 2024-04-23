@@ -227,13 +227,11 @@ class Feed(db.Model):
         if "limit" in self.json and isinstance(self.json["limit"], int):
             updates = updates[: self.json["limit"]]
 
-        feed_len = len(self.updates)
-
         new_items = []
         for each_update in filter(self.update_filter, updates):
             # checking if href is present in DB
             if self.update_href_not_present(each_update.href):
-                if feed_len != 0:
+                if self.updates:
                     each_update.dt_now()
                     each_update.send()
                 db.session.add(each_update)
