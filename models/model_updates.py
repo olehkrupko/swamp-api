@@ -155,14 +155,6 @@ class Update(db.Model):
                     Feed._id.in_(set(x.feed_id for x in updates))
                 )
             }
-
-            updates = [
-                dict(
-                    x.as_dict(),
-                    feed_data=feed_data[x.feed_id],
-                )
-                for x in updates
-            ]
         else:
             # feeds first, updates second
             feeds = db.session.query(Feed).filter_by(**kwargs)
