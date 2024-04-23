@@ -234,6 +234,8 @@ class Feed(db.Model):
                 if self.updates:
                     each_update.dt_now()
                     each_update.send()
+                else:
+                    each_update.dt_event_adjust_first()
                 db.session.add(each_update)
                 new_items.append(each_update.as_dict())
 

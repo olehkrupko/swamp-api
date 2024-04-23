@@ -134,6 +134,13 @@ class Update(db.Model):
             dt.datetime.now(ZoneInfo(os.environ.get("TIMEZONE_LOCAL")))
         )
 
+    def dt_event_adjust_first(self):
+        now = self.zone_fix(
+            dt.datetime.now(ZoneInfo(os.environ.get("TIMEZONE_LOCAL")))
+        )
+        if self.dt_event > now:
+            self.dt_event = now
+
     @classmethod
     def get_updates(cls, limit=140, private=None, _id=None):
         kwargs = {}
