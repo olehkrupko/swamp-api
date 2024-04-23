@@ -1,5 +1,4 @@
 from flask import request, Blueprint
-from flask_cors import cross_origin
 
 import routes._shared as shared
 from config.db import db
@@ -14,7 +13,6 @@ router = Blueprint("feeds", __name__, url_prefix="/feeds")
 
 
 @router.route("/", methods=["GET"])
-@cross_origin(headers=["Content-Type"])  # Send Access-Control-Allow-Headers
 def list_feeds():
     POSITIVE = ["true", "yes", "1"]
 
@@ -35,7 +33,6 @@ def list_feeds():
 
 @shared.data_is_json
 @router.route("/", methods=["PUT", "OPTIONS"])
-@cross_origin(headers=["Content-Type"])  # Send Access-Control-Allow-Headers
 def create_feed():
     body = request.get_json()
 
@@ -69,7 +66,6 @@ def read_feed(feed_id):
 
 @shared.data_is_json
 @router.route("/<feed_id>/", methods=["PUT", "OPTIONS"])
-@cross_origin(headers=["Content-Type"])  # Send Access-Control-Allow-Headers
 def update_feed(feed_id):
     feed = db.session.query(Feed).filter_by(_id=feed_id).first()
     body = request.get_json()
@@ -86,7 +82,6 @@ def update_feed(feed_id):
 
 @shared.data_is_json
 @router.route("/<feed_id>/", methods=["POST"])
-@cross_origin(headers=["Content-Type"])  # Send Access-Control-Allow-Headers
 def push_updates(feed_id):
     feed = db.session.query(Feed).filter_by(_id=feed_id).first()
     updates = [Update(**x, feed_id=feed_id) for x in request.get_json()]
@@ -170,7 +165,6 @@ def feeds_file():
 
 
 @router.route("/parse/href/", methods=["GET"])
-@cross_origin(headers=["Content-Type"])  # Send Access-Control-Allow-Headers
 def test_parse_href():
     body = request.args
     href = body["href"]

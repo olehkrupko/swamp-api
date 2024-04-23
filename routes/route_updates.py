@@ -8,6 +8,7 @@ router = Blueprint("updates", __name__, url_prefix="/updates")
 
 
 @router.route("/", methods=["GET"])
+@cross_origin(headers=["Content-Type"])  # Send Access-Control-Allow-Headers
 def list_updates():
     kwargs = dict(request.args)
 

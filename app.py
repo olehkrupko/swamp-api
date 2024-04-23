@@ -39,7 +39,7 @@ with app.app_context():
     db.create_all()
 
 # routes
-CORS(app)
+CORS(app, resources={"*": {"origins": ["http://192.168.0.155:30011"]}})
 app.register_blueprint(route_feeds.router)
 app.register_blueprint(route_frequency.router)
 app.register_blueprint(route_updates.router)
