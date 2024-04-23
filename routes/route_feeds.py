@@ -171,10 +171,10 @@ def test_parse_href():
 
     response = [
         Update(
-            {
-                **x,
-                "feed_id": None,
-            }
+            name=x["name"],
+            href=x["href"],
+            datetime=x["datetime"],
+            feed_id=None,
         ).as_dict()
         for x in Feed.parse_href(href)
     ]

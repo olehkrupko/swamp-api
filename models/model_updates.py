@@ -142,7 +142,6 @@ class Update(db.Model):
         if _id is not None:
             kwargs["_id"] = _id
 
-        print(f"{kwargs=}")
         if not kwargs:
             # updates first, feeds second
             updates = (
