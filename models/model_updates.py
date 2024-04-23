@@ -84,7 +84,7 @@ class Update(db.Model):
             #     _id=feed_id
             # ).first().title
             # name = f"No name in update by { feed_title }"
-            name = "No name in update by {feed_title}"
+            name = "No name in update"
 
         # datetime
         if isinstance(datetime, str):
