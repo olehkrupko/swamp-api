@@ -190,11 +190,11 @@ class Feed(db.Model):
     # SELECT _id, title, json FROM feed_updates.feed WHERE json ? 'filter'
     def update_filter(self, update):
         # adding it to make code more readable
-        SKIP = True
+        KEEP = True
         SUPPORTED_FIELDS = ["name", "href"]
 
         if "filter" not in self.json:
-            return not SKIP
+            return KEEP
 
         for filter_name, filter_value in self.json["filter"].items():
             if isinstance(filter_value, str):
@@ -211,15 +211,15 @@ class Feed(db.Model):
             # replace with python filter?
             for each_value in filter_value:
                 if filter_name in SUPPORTED_FIELDS and each_value not in field_value:
-                    return SKIP
+                    return not KEEP
                 elif (
                     "_ignore" in filter_name
                     and filter_name.replace("_ignore", "") in SUPPORTED_FIELDS
                     and each_value in field_value
                 ):
-                    return SKIP
+                    return not KEEP
 
-        return not SKIP
+        return KEEP
 
     def ingest_updates(self, updates):
         # sort items and limit amount of updates
