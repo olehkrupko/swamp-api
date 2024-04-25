@@ -16,9 +16,12 @@ class Update(db.Model):
     # CREATE INDEX update_dt_event_desc_index ON feed_updates.update (dt_event DESC NULLS LAST);
     # CREATE INDEX update_feed_id ON feed_updates.update (feed_id);
     # REINDEX (verbose, concurrently) TABLE feed_updates.update;
-    __table_args__ = {
-        "schema": "feed_updates",
-    }
+    __table_args__ = (
+        db.UniqueConstraint("feed_id", "href"),
+        {
+            "schema": "feed_updates",
+        }
+    )
 
     # DATA STRUCTURE
     id = db.Column(
