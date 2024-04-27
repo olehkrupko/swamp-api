@@ -1,15 +1,20 @@
 import os
 from datetime import datetime
+from typing import List
+from typing import TYPE_CHECKING
 
 import requests
 from sqlalchemy.dialects.postgresql import JSONB
 
 from config.db import db
 from services.service_frequency import Frequency
-from models.model_updates import Update
+from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import relationship
 
-# import requests
-# from bs4 import BeautifulSoup, SoupStrainer
+
+if TYPE_CHECKING:
+    from models.model_updates import Update
 
 
 class Feed(db.Model):
@@ -17,9 +22,8 @@ class Feed(db.Model):
         "schema": "feed_updates",
     }
 
-    # technical
-    _id = db.Column(
-        db.Integer,
+    # TECHNICAL
+    _id: Mapped[int] = mapped_column(
         primary_key=True,
     )
     _created = db.Column(
@@ -30,7 +34,7 @@ class Feed(db.Model):
         db.DateTime,
         default=None,
     )
-    # core/required
+    # CORE / REQUIRED
     title = db.Column(
         db.String(100),
         unique=True,
@@ -46,7 +50,7 @@ class Feed(db.Model):
         unique=False,
         nullable=True,
     )
-    # metadata
+    # METADATA
     private = db.Column(
         db.Boolean,
         default=False,
@@ -65,6 +69,8 @@ class Feed(db.Model):
         unique=False,
     )
     json = db.Column(JSONB)
+    # RELATIONSHIPS
+    updates: Mapped[List["Update"]] = relationship(back_populates="feed")
 
     def __init__(
         self,
@@ -165,37 +171,73 @@ class Feed(db.Model):
     # FEED PARSING LOGIC BELOW
     ##########################
 
+    def update_href_not_present(self, href):
+        PRESENT = False
+
+        if not self.updates:
+            return not PRESENT
+
+        for each in self.updates:
+            if each.href == href:
+                return PRESENT
+
+        return not PRESENT
+
+    # filter is used to remove unnecessary items
+    # {field}        - don't skip what's mentioned there
+    # {field}_ignore - skip these ones
+    # in case of future review:
+    # SELECT _id, title, json FROM feed_updates.feed WHERE json ? 'filter'
+    def update_filter(self, update):
+        # adding it to make code more readable
+        KEEP = True
+        SUPPORTED_FIELDS = ["name", "href"]
+
+        if "filter" not in self.json:
+            return KEEP
+
+        for filter_name, filter_value in self.json["filter"].items():
+            if isinstance(filter_value, str):
+                filter_value = [filter_value]
+
+            if not isinstance(filter_value, list):
+                raise TypeError("Filter value is expected to be STR or LIST")
+
+            if "_ignore" not in filter_name:
+                field_value = getattr(update, filter_name)
+            else:
+                field_value = getattr(update, filter_name.replace("_ignore", ""))
+
+            # replace with python filter?
+            for each_value in filter_value:
+                if filter_name in SUPPORTED_FIELDS and each_value not in field_value:
+                    return not KEEP
+                elif (
+                    "_ignore" in filter_name
+                    and filter_name.replace("_ignore", "") in SUPPORTED_FIELDS
+                    and each_value in field_value
+                ):
+                    return not KEEP
+
+        return KEEP
+
     def ingest_updates(self, updates):
-        updates.sort(key=lambda x: x["datetime"], reverse=False)
-        for each in updates:
-            each["feed_id"] = self._id
+        # sort items and limit amount of updates
+        updates.sort(key=lambda x: x.datetime, reverse=False)
         if "limit" in self.json and isinstance(self.json["limit"], int):
             updates = updates[: self.json["limit"]]
 
-        feed_data = list(
-            db.session.query(Update).filter_by(
-                feed_id=self._id,
-            )
-        )
-        feed_len = len(feed_data)
-
         new_items = []
-        for each in updates:
+        for each_update in filter(self.update_filter, updates):
             # checking if href is present in DB
-            if not list(
-                filter(
-                    lambda x: (x.href == each["href"]),
-                    feed_data,
-                )
-            ):
-                new_update = Update(each)
-                if new_update.filter_skip(json=self.json):
-                    continue
-                if feed_len != 0:
-                    new_update.datetime = datetime.now()
-                    new_update.send()
-                db.session.add(new_update)
-                new_items.append(new_update.as_dict())
+            if self.update_href_not_present(each_update.href):
+                if self.updates:
+                    each_update.dt_now()
+                    each_update.send()
+                else:
+                    each_update.dt_event_adjust_first()
+                db.session.add(each_update)
+                new_items.append(each_update.as_dict())
 
         self.delay()
 
