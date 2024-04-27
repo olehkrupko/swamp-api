@@ -107,63 +107,6 @@ def push_updates(feed_id):
     )
 
 
-@router.route("/parse/file/", methods=["GET"])
-def feeds_file():
-    from static_feeds import feeds
-
-    feeds_created = []
-    for each_feed in feeds:
-        if "title_full" in each_feed:
-            each_feed["title"] = each_feed.pop("title_full")
-        if db.session.query(Feed).filter_by(title=each_feed["title"]).all():
-            continue
-        emojis = list(each_feed.pop("emojis", ""))
-        each_feed["private"] = "🏮" in emojis
-        if "x" in emojis:
-            emojis.remove("x")
-        if "+" in emojis:
-            emojis.remove("+")
-        if "💎" in emojis:
-            each_feed["frequency"] = Frequency.HOURS
-            emojis.remove("💎")
-        elif "📮" in emojis:
-            each_feed["frequency"] = Frequency.DAYS
-            emojis.remove("📮")
-        else:
-            each_feed["frequency"] = Frequency.WEEKS
-        each_feed["notes"] = ""
-        each_feed["json"] = {}
-        if "filter" in each_feed:
-            each_feed["json"]["filter"] = each_feed.pop("filter")
-        if "href_title" in each_feed:
-            each_feed["href_user"] = each_feed.pop("href_title")
-        else:
-            each_feed["href_user"] = None
-
-        feed = Feed(
-            title=each_feed["title"],
-            href=each_feed["href"],
-            href_user=each_feed["href_user"],
-            private=each_feed["private"],
-            frequency=each_feed["frequency"],
-            notes=each_feed["notes"],
-            json=each_feed["json"],
-        )
-
-        db.session.add(feed)
-        db.session.commit()
-        db.session.refresh(feed)
-
-        feeds_created.append(feed._id)
-
-    return shared.return_json(
-        response={
-            "feeds_file": len(feeds),
-            "feeds_created": len(feeds_created),
-        },
-    )
-
-
 @router.route("/parse/href/", methods=["GET"])
 def test_parse_href():
     body = request.args
