@@ -80,6 +80,20 @@ def update_feed(feed_id):
     )
 
 
+@router.route("/<feed_id>/", methods=["DELETE"])
+def delete_feed(feed_id):
+    feed = db.session.query(Feed).filter_by(_id=feed_id)
+
+    feed.delete()
+    db.session.commit()
+
+    return shared.return_json(
+        response={
+            "success": True,
+        },
+    )
+
+
 @shared.data_is_json
 @router.route("/<feed_id>/", methods=["POST"])
 def push_updates(feed_id):
@@ -90,20 +104,6 @@ def push_updates(feed_id):
 
     return shared.return_json(
         response=new_updates,
-    )
-
-
-@router.route("/<feed_id>/", methods=["DELETE"])
-def delete_item(feed_id):
-    feed = db.session.query(Feed).filter_by(_id=feed_id)
-
-    feed.delete()
-    db.session.commit()
-
-    return shared.return_json(
-        response={
-            "success": True,
-        },
     )
 
 
