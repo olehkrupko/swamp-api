@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - 'main'
-      - '55-python-map-reduce-filter-zip'
 jobs:
   deploy:
     runs-on: self-hosted
