@@ -20,7 +20,7 @@ class Update(db.Model):
         db.UniqueConstraint("feed_id", "href"),
         {
             "schema": "feed_updates",
-        }
+        },
     )
 
     # DATA STRUCTURE
