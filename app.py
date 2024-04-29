@@ -40,9 +40,12 @@ with app.app_context():
 
 # routes
 CORS(app, origins=["http://192.168.0.155:30011", "http://127.0.0.1:30011"])
-app.register_blueprint(route_feeds.router)
-app.register_blueprint(route_frequency.router)
-app.register_blueprint(route_updates.router)
+if os.environ.get("MODE") == "FULL":
+    app.register_blueprint(route_feeds.router)
+    app.register_blueprint(route_frequency.router)
+    app.register_blueprint(route_updates.router)
+elif os.environ.get("MODE") == "PUBLIC":
+    app.register_blueprint(route_updates.router)
 
 # run app
 if __name__ == "__main__":
