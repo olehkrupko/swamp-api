@@ -5,12 +5,13 @@ from typing import TYPE_CHECKING
 
 import requests
 from sqlalchemy.dialects.postgresql import JSONB
-
-from config.db import db
-from services.service_frequency import Frequency
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import relationship
+
+from config.db import db
+from services.service_frequency import Frequency
+from services.service_telegram import TelegramService
 
 
 if TYPE_CHECKING:
@@ -233,18 +234,20 @@ class Feed(db.Model):
             if self.update_href_not_present(each_update.href):
                 if self.updates:
                     each_update.dt_now()
-                    each_update.send()
+                    # each_update.send()
                 else:
                     each_update.dt_event_adjust_first()
                 db.session.add(each_update)
-                new_items.append(each_update.as_dict())
+                new_items.append(each_update)
 
         self.delay()
 
         db.session.add(self)
         db.session.commit()
 
-        return new_items
+        TelegramService.send_update_bulk(new_items)
+
+        return [x.as_dict() for x in new_items]
 
     @staticmethod
     def parse_href(href):
