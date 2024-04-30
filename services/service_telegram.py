@@ -23,25 +23,20 @@ class TelegramService:
         )
 
     @classmethod
-    def send_update_bulk(cls, updates):
+    def send_update_bulk(cls, updates, feed):
         if not updates:
             raise ValueError(f"Bulk cannot be empty {updates=}")
 
-        MESSAGE_START = (
-            f"{updates[0].feed.title}\n"
-            f"{updates[0].feed.json.region} [{updates[0].feed.json.tags}]\n"
-            "\n"
-        )
-        MESSAGE_END = (
+        message = f"{feed.title}\n"
+        message += f"[{feed.json.get('tags')}]\n"
+        message += f"{feed.json.get('region')}\n"
+        message += "\n"
+        for each in updates:
+            message += f"» ([OPEN]({each.href})) {each.name}\n"
+        message += (
             "\n"
             "([EDIT](http://192.168.0.155:30011/feeds/{feed_id}/edit))"
         )
-
-        message = ""
-        message += MESSAGE_START
-        for each in updates:
-            message += f"- {each.title} - ([OPEN]({each.href}))"
-        message += MESSAGE_END
 
         asyncio.run(
             cls.send_message(

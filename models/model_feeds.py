@@ -243,7 +243,10 @@ class Feed(db.Model):
         self.delay()
 
         if new_items:
-            TelegramService.send_update_bulk(new_items)
+            TelegramService.send_update_bulk(
+                updates=new_items,
+                feed=self,
+            )
 
         db.session.add(self)
         db.session.commit()
