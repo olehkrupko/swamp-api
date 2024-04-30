@@ -27,13 +27,9 @@ class TelegramService:
         if not updates:
             raise ValueError(f"Bulk cannot be empty {updates=}")
 
-        message = f"{feed.title}\n"
-        message += f"[{feed.json.get('tags')}]\n"
-        message += f"{feed.json.get('region', 'no region')}\n"
+        message = f"`{feed.title}`\n"
         message += f"=> [{feed.json.get('tags')}]\n"
         message += f"=> {feed.json.get('region', 'no region')}\n"
-        message += f"tags:   [{feed.json.get('tags')}]\n"
-        message += f"region: {feed.json.get('region', '-')}\n"
         message += "\n"
         for each in updates:
             message += f"» ([OPEN]({each.href})) {each.name}\n"
