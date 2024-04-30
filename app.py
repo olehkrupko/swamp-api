@@ -46,6 +46,8 @@ if os.environ.get("MODE") == "FULL":
     app.register_blueprint(route_updates.router)
 elif os.environ.get("MODE") == "PUBLIC":
     app.register_blueprint(route_updates.router)
+else:
+    raise Exception(f"MODE not specified or invalid {os.environ.get('MODE')=}")
 
 # run app
 if __name__ == "__main__":
