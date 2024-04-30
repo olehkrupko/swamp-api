@@ -33,10 +33,8 @@ class TelegramService:
         message += "\n"
         for each in updates:
             message += f"» ([OPEN]({each.href})) {each.name}\n"
-        message += (
-            "\n"
-            "([EDIT](http://192.168.0.155:30011/feeds/{feed_id}/edit))"
-        )
+        message += "\n"
+        message += "([EDIT](http://192.168.0.155:30011/feeds/{feed_id}/edit))"
 
         asyncio.run(
             cls.send_message(
