@@ -9,7 +9,6 @@ from sqlalchemy.orm import relationship
 
 from config.db import db
 from models.model_feeds import Feed
-# from services.service_telegram import TelegramService
 
 
 class Update(db.Model):
@@ -119,9 +118,6 @@ class Update(db.Model):
 
     def __repr__(self):
         return str(self.as_dict())
-
-    # def send(self):
-    #     TelegramService.send_update(self)
 
     @staticmethod
     def zone_fix(datetime):

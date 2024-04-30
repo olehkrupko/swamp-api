@@ -234,7 +234,6 @@ class Feed(db.Model):
             if self.update_href_not_present(each_update.href):
                 if self.updates:
                     each_update.dt_now()
-                    # each_update.send()
                 else:
                     each_update.dt_event_adjust_first()
                 db.session.add(each_update)
