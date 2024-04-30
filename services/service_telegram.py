@@ -32,7 +32,7 @@ class TelegramService:
         message += f"=> {feed.json.get('region', 'no region')}\n"
         message += "\n"
         for each in updates:
-            message += f"» ([OPEN]({each.href})) {each.name}\n"
+            message += f"» {each.name}\n\t{each.href}\n"
         message += "\n"
         message += "([EDIT](http://192.168.0.155:30011/feeds/{feed_id}/edit))"
 
