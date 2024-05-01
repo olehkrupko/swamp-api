@@ -39,7 +39,15 @@ with app.app_context():
     db.create_all()
 
 # routes
-CORS(app, origins=["http://192.168.0.155:30011", "http://127.0.0.1:30011"], always_send=False)
+CORS(
+    app,
+    origins=[
+        "http://192.168.0.155:30011",
+        "http://127.0.0.1:30011",
+        "http://localhost:30011",
+    ],
+    always_send=False,
+)
 if os.environ.get("MODE") == "FULL":
     app.register_blueprint(route_feeds.router)
     app.register_blueprint(route_frequency.router)
