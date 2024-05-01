@@ -33,7 +33,7 @@ class TelegramService:
         message += "\n"
         for each in updates:
             message += f"» `{each.name}`\n"
-            message += f"  {each.href}\n"
+            message += f"    {each.href}\n"
         message += "\n"
         message += "([EDIT](http://192.168.0.155:30011/feeds/{feed_id}/edit))"
 
