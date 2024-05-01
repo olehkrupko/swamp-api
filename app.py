@@ -41,11 +41,11 @@ with app.app_context():
 # routes
 CORS(
     app,
-    origins=[
-        "http://192.168.0.155:30011",
-        "http://127.0.0.1:30011",
-        "http://localhost:30011",
-    ],
+    # origins=[
+    #     "http://192.168.0.155:30011",
+    #     "http://127.0.0.1:30011",
+    #     "http://localhost:30011",
+    # ],
     always_send=False,
 )
 if os.environ.get("MODE") == "FULL":
