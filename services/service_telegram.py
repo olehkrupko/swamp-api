@@ -29,7 +29,7 @@ class TelegramService:
 
         # plaintext section
         message = f"{feed.title}\n"
-        message += f"=> [{feed.json.get('tags')}]\n"
+        message += f"=> {feed.json.get('tags', [])}\n"
         message += f"=> {feed.json.get('region', 'no region')}\n"
         message += "\n"
         for each in updates:
