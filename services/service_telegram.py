@@ -36,8 +36,10 @@ class TelegramService:
             message += f"» {each.name}\n"
             message += f"{each.href}\n"
             if len(message) > 2000:
-                cls.send_message(
-                    message,
+                asyncio.run(
+                    cls.send_message(
+                        message,
+                    )
                 )
                 message = ""
         message += "\n"
