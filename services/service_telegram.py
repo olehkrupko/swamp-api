@@ -35,6 +35,11 @@ class TelegramService:
         for each in updates:
             message += f"» {each.name[:42]}\n"
             message += f"{each.href}\n"
+            if len(message) > 2000:
+                cls.send_message(
+                    message,
+                )
+                message = ""
         message += "\n"
 
         message = telegram.helpers.escape_markdown(message)
