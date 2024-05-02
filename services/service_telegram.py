@@ -33,7 +33,7 @@ class TelegramService:
         message += f"=> {feed.json.get('region', 'no region')}\n"
         message += "\n"
         for each in updates:
-            message += f"» {each.name}\n"
+            message += f"» {each.name[:42]}\n"
             message += f"{each.href}\n"
         message += "\n"
 
