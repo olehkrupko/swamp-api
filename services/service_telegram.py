@@ -27,14 +27,18 @@ class TelegramService:
         if not updates:
             raise ValueError(f"Bulk cannot be empty {updates=}")
 
-        message = f"`{feed.title}`\n"
+        # plaintext section
+        message = f"{feed.title}\n"
         message += f"=> [{feed.json.get('tags')}]\n"
         message += f"=> {feed.json.get('region', 'no region')}\n"
         message += "\n"
         for each in updates:
-            message += f"» `{each.name}`\n"
-            message += f"([`{each.href}`]({each.href}))\n"
+            message += f"» {each.name}\n"
+            message += f"{each.href}\n"
         message += "\n"
+
+        message = telegram.helpers.escape_markdown(message)
+        # markdown section
         message += "([EDIT](http://192.168.0.155:30011/feeds/{feed_id}/edit))"
 
         asyncio.run(
