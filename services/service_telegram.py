@@ -38,7 +38,7 @@ class TelegramService:
             if len(message) > 2000:
                 asyncio.run(
                     cls.send_message(
-                        message,
+                        telegram.helpers.escape_markdown(message),
                     )
                 )
                 message = ""
