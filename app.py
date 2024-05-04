@@ -45,6 +45,7 @@ CORS(
     #     "http://192.168.0.155:30011",
     #     "http://127.0.0.1:30011",
     #     "http://localhost:30011",
+    #     "http://krupko.space:30018",
     # ],
     always_send=False,
 )
