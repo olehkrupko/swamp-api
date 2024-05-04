@@ -6,7 +6,7 @@ on:
       - 'main'
       - '117-telegram-bulk-updates'
 jobs:
-  deploy:
+  checkout:
     runs-on: self-hosted
     steps:
       - name: Checkout repository
