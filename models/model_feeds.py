@@ -252,8 +252,6 @@ class Feed(db.Model):
 
         db.session.add(self)
         db.session.commit()
-        if "instagram.com" in self.href:
-            print(f">>>> { self.href= } { len(ingested)= }, { len(updates)= }")
 
         return [x.as_dict() for x in ingested]
 
