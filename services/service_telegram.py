@@ -35,7 +35,8 @@ class TelegramService:
         for each in updates:
             message += f"» {each.name}\n"
             message += f"{each.href}\n"
-            if len(message) > 2000:
+            # cutting big messages and avoiding footer being sent alone
+            if len(message) > 2000 and each != updates[-1]:
                 asyncio.run(
                     cls.send_message(
                         telegram.helpers.escape_markdown(message),
