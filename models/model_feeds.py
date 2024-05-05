@@ -222,37 +222,40 @@ class Feed(db.Model):
 
         return KEEP
 
+    # ingest => add to database
+    # notify => send as notification
     def ingest_updates(self, updates):
         # sort items and limit amount of updates
         updates.sort(key=lambda x: x.datetime, reverse=False)
         if "limit" in self.json and isinstance(self.json["limit"], int):
             updates = updates[: self.json["limit"]]
 
-        new_items = []
+        ingested, notify = [], []
         for each_update in filter(self.update_filter, updates):
             # checking if href is present in DB
             if self.update_href_not_present(each_update.href):
                 if self.updates:
                     each_update.dt_now()
+                    notify.append(each_update)
                 else:
                     each_update.dt_event_adjust_first()
                 db.session.add(each_update)
-                new_items.append(each_update)
+                ingested.append(each_update)
 
         self.delay()
 
-        if new_items:
+        if notify:
             TelegramService.send_update_bulk(
-                updates=new_items,
+                updates=notify,
                 feed=self,
             )
 
         db.session.add(self)
         db.session.commit()
         if "instagram.com" in self.href:
-            print(f">>>> { self.href= } { len(new_items)= }, { len(updates)= }")
+            print(f">>>> { self.href= } { len(ingested)= }, { len(updates)= }")
 
-        return [x.as_dict() for x in new_items]
+        return [x.as_dict() for x in ingested]
 
     @staticmethod
     def parse_href(href):
