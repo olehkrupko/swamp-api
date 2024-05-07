@@ -23,9 +23,7 @@ class TelegramService:
         )
 
     def escape(text):
-        return telegram.helpers.escape_markdown(
-            str(text).replace("@", "[at]")
-        )
+        return telegram.helpers.escape_markdown(str(text).replace("@", "[at]"))
 
     @classmethod
     def send_update_bulk(cls, updates, feed):
