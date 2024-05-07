@@ -31,7 +31,7 @@ class TelegramService:
             raise ValueError(f"Bulk cannot be empty {updates=}")
 
         # plaintext section
-        message = cls.escape(feed.title)
+        message = cls.escape(feed.title) + "\n"
         message += "=> " + cls.escape(feed.json.get('tags', [])) + "\n"
         message += "=> " + cls.escape(feed.json.get('region', 'unknown region')) + "\n"
         for each in updates:
