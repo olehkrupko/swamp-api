@@ -33,7 +33,7 @@ class TelegramService:
         # plaintext section
         message = cls.escape(feed.title) + "\n"
         message += "=> " + cls.escape(feed.json.get('tags', [])) + "\n"
-        message += "=> " + cls.escape(feed.json.get('region', 'unknown region')) + "\n"
+        message += "=> " + cls.escape(feed.json.get('region', 'region unknown')) + "\n"
         for each in updates:
             message += f"\n[»»»»]({each.href}) {cls.escape(each.name.replace('@', '[at]'))}"
             # cutting big messages and avoiding footer being sent alone
