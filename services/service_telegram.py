@@ -22,31 +22,30 @@ class TelegramService:
             text=msg,
         )
 
+    def escape(text):
+        return telegram.helpers.escape_markdown(str(text))
+
     @classmethod
     def send_update_bulk(cls, updates, feed):
         if not updates:
             raise ValueError(f"Bulk cannot be empty {updates=}")
 
         # plaintext section
-        message = f"{feed.title}\n"
-        message += f"=> {feed.json.get('tags', [])}\n"
-        message += f"=> {feed.json.get('region', 'no region')}\n"
-        message += "\n"
+        message = cls.escape(feed.title)
+        message += "=> " + cls.escape(feed.json.get('tags', [])) + "\n"
+        message += "=> " + cls.escape(feed.json.get('region', 'unknown region')) + "\n"
         for each in updates:
-            message += f"[» EDIT]({each.href}) {each.name.replace('@', '[at]')}\n"
+            message += f"\n[» EDIT]({each.href}) {cls.escape(each.name.replace('@', '[at]'))}"
             # cutting big messages and avoiding footer being sent alone
             if len(message) > 2000 and each != updates[-1]:
                 asyncio.run(
                     cls.send_message(
-                        telegram.helpers.escape_markdown(message),
+                        message,
                     )
                 )
                 message = ""
-        message += "\n"
 
-        message = telegram.helpers.escape_markdown(message)
-        # markdown section
-        message += "([EDIT](http://192.168.0.155:30011/feeds/{feed_id}/edit))"
+        message += f"\n\n([EDIT](http://192.168.0.155:30011/feeds/{feed._id}/edit))"
 
         asyncio.run(
             cls.send_message(
