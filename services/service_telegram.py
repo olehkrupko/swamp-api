@@ -23,7 +23,9 @@ class TelegramService:
         )
 
     def escape(text):
-        return telegram.helpers.escape_markdown(str(text))
+        return telegram.helpers.escape_markdown(
+            str(text).replace("@", "[at]")
+        )
 
     @classmethod
     def send_update_bulk(cls, updates, feed):
@@ -32,10 +34,10 @@ class TelegramService:
 
         # plaintext section
         message = cls.escape(feed.title) + "\n"
-        message += "=> " + cls.escape(feed.json.get('tags', [])) + "\n"
-        message += "=> " + cls.escape(feed.json.get('region', 'region unknown')) + "\n"
+        message += "=> " + cls.escape(feed.json.get("tags", [])) + "\n"
+        message += "=> " + cls.escape(feed.json.get("region", "region unknown")) + "\n"
         for each in updates:
-            message += f"\n[»»»»]({each.href}) {cls.escape(each.name.replace('@', '[at]'))}"
+            message += f"\n[»»»»]({each.href}) {cls.escape(each.name)}"
             # cutting big messages and avoiding footer being sent alone
             if len(message) > 2000 and each != updates[-1]:
                 asyncio.run(
