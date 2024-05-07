@@ -35,7 +35,7 @@ class TelegramService:
         message += "=> " + cls.escape(feed.json.get('tags', [])) + "\n"
         message += "=> " + cls.escape(feed.json.get('region', 'unknown region')) + "\n"
         for each in updates:
-            message += f"\n[» EDIT]({each.href}) {cls.escape(each.name.replace('@', '[at]'))}"
+            message += f"\n[»»»»]({each.href}) {cls.escape(each.name.replace('@', '[at]'))}"
             # cutting big messages and avoiding footer being sent alone
             if len(message) > 2000 and each != updates[-1]:
                 asyncio.run(
