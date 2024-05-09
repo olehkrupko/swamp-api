@@ -30,7 +30,7 @@ class TelegramService:
 
         # plaintext section
         message = em(feed.title) + "\n"
-        message += "=> " + em(feed.json.get("tags", [])) + "\n"
+        message += "=> " + em(str(feed.json.get("tags", []))) + "\n"
         message += "=> " + em(feed.json.get("region", "region unknown")) + "\n"
         for each in updates:
             message += f"\n[»➡➤ [OPEN]]({em(each.href)}) {em(each.name.replace('@', '[at]'))}"
