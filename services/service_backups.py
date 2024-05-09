@@ -11,7 +11,7 @@ class Backup:
     FILENAME_FORMAT = "%Y-%m-%d.json"
 
     def __init__(self, filename=None):
-        if self.validate(filename):
+        if self.validate_name(filename):
             self.filename = filename
         else:
             raise RuntimeError(f"Generated {filename=} is wrong")
@@ -26,7 +26,7 @@ class Backup:
         return f"{folder}/{date}"
 
     @classmethod
-    def validate(cls, filename):
+    def validate_name(cls, filename):
         folder, file = filename.rsplit("/", 1)
 
         # check if filename is valid
@@ -37,6 +37,10 @@ class Backup:
         except ValueError:
             return False
 
+        return True
+    
+    @classmethod
+    def validate_file(cls, filename):
         # check if file is valid
         try:
             with open(filename, "r") as f:
