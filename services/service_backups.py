@@ -38,7 +38,7 @@ class Backup:
             return False
 
         return True
-    
+
     @classmethod
     def validate_file(cls, filename):
         # check if file is valid
