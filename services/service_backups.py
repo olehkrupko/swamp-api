@@ -81,7 +81,7 @@ class Backup:
         items = []
         for filename in os.listdir(path=cls.BACKUP_LOCATION):
             filename = f"{ cls.BACKUP_LOCATION }/{ filename }"
-            if cls.validate(filename):
+            if cls.validate_name(filename) and cls.validate_file(filename):
                 items.append(
                     cls(
                         filename=filename,
