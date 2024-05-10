@@ -28,9 +28,12 @@ class TelegramService:
         if not updates:
             raise ValueError(f"Bulk cannot be empty {updates=}")
 
+        tags = ["#"+x for x in feed.json.get("tags", [])]
+        tags = " ".join(tags)
+
         # plaintext section
         message = em(feed.title) + "\n"
-        message += "➤ " + em(str(feed.json.get("tags", []))) + "\n"
+        message += f"➤ [{em(tags)}]\n"
         message += "➤ " + em(feed.json.get("region", "region unknown")) + "\n"
         for each in updates:
             message += f"\n➤ [(OPEN)]({em(each.href)}) {em(each.name.replace('@', '[at]'))}\n"
