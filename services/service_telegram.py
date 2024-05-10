@@ -29,7 +29,7 @@ class TelegramService:
             raise ValueError(f"Bulk cannot be empty {updates=}")
 
         tags = ["#"+x for x in feed.json.get("tags", [])]
-        tags = "[" + " ".join(tags) } + "]"
+        tags = "[" + " ".join(tags) + "]"
 
         # plaintext section
         message = em(feed.title) + "\n"
