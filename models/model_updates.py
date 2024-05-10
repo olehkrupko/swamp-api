@@ -1,5 +1,6 @@
 import datetime as dt
 import os
+from datetime import timedelta
 from zoneinfo import ZoneInfo
 
 import emoji
@@ -135,7 +136,8 @@ class Update(db.Model):
 
     def dt_event_adjust_first(self):
         now = self.zone_fix(dt.datetime.now(ZoneInfo(os.environ.get("TIMEZONE_LOCAL"))))
-        if self.dt_event > now:
+        # all recent events are assigned now to avoid confusion
+        if self.dt_event > now - timedelta(days=7):
             self.dt_event = now
 
     @classmethod
