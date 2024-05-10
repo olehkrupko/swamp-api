@@ -46,7 +46,7 @@ class TelegramService:
                 )
                 message = ""
 
-        message += f"\n\n([EDIT](http://192.168.0.155:30011/feeds/{feed._id}/edit))"
+        message += f"\n([EDIT](http://192.168.0.155:30011/feeds/{feed._id}/edit))"
 
         asyncio.run(
             cls.send_message(
