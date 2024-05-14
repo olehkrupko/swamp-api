@@ -5,12 +5,13 @@ from typing import TYPE_CHECKING
 
 import requests
 from sqlalchemy.dialects.postgresql import JSONB
-
-from config.db import db
-from services.service_frequency import Frequency
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import relationship
+
+from config.db import db
+from services.service_frequency import Frequency
+from services.service_telegram import TelegramService
 
 
 if TYPE_CHECKING:
@@ -221,30 +222,38 @@ class Feed(db.Model):
 
         return KEEP
 
+    # ingest => add to database
+    # notify => send as notification
     def ingest_updates(self, updates):
         # sort items and limit amount of updates
         updates.sort(key=lambda x: x.datetime, reverse=False)
         if "limit" in self.json and isinstance(self.json["limit"], int):
             updates = updates[: self.json["limit"]]
 
-        new_items = []
+        ingested, notify = [], []
         for each_update in filter(self.update_filter, updates):
             # checking if href is present in DB
             if self.update_href_not_present(each_update.href):
                 if self.updates:
                     each_update.dt_now()
-                    each_update.send()
+                    notify.append(each_update)
                 else:
                     each_update.dt_event_adjust_first()
                 db.session.add(each_update)
-                new_items.append(each_update.as_dict())
+                ingested.append(each_update)
 
         self.delay()
+
+        if notify:
+            TelegramService.send_update_bulk(
+                updates=notify,
+                feed=self,
+            )
 
         db.session.add(self)
         db.session.commit()
 
-        return new_items
+        return [x.as_dict() for x in ingested]
 
     @staticmethod
     def parse_href(href):

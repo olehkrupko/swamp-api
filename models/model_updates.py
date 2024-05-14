@@ -1,5 +1,6 @@
 import datetime as dt
 import os
+from datetime import timedelta
 from zoneinfo import ZoneInfo
 
 import emoji
@@ -9,7 +10,6 @@ from sqlalchemy.orm import relationship
 
 from config.db import db
 from models.model_feeds import Feed
-from services.service_telegram import TelegramService
 
 
 class Update(db.Model):
@@ -41,6 +41,7 @@ class Update(db.Model):
     name = db.Column(
         db.String(300),
         nullable=False,
+        # convert_unicode=True,  # activate later?
     )
     href = db.Column(
         db.String(300),
@@ -120,9 +121,6 @@ class Update(db.Model):
     def __repr__(self):
         return str(self.as_dict())
 
-    def send(self):
-        TelegramService.send_update(self)
-
     @staticmethod
     def zone_fix(datetime):
         if datetime.tzinfo:
@@ -139,7 +137,8 @@ class Update(db.Model):
 
     def dt_event_adjust_first(self):
         now = self.zone_fix(dt.datetime.now(ZoneInfo(os.environ.get("TIMEZONE_LOCAL"))))
-        if self.dt_event > now:
+        # all recent events are assigned now to avoid confusion
+        if self.dt_event > now - timedelta(days=7):
             self.dt_event = now
 
     @classmethod
