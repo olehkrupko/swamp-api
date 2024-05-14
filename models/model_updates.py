@@ -41,6 +41,7 @@ class Update(db.Model):
     name = db.Column(
         db.String(300),
         nullable=False,
+        # convert_unicode=True,  # activate later?
     )
     href = db.Column(
         db.String(300),
