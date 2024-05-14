@@ -28,7 +28,7 @@ class TelegramService:
         if not updates:
             raise ValueError(f"Bulk cannot be empty {updates=}")
 
-        tags = ["#"+x for x in feed.json.get("tags", [])]
+        tags = [f"#{x}" for x in feed.json.get("tags", [])]
         tags = "[" + ", ".join(tags) + "]"
 
         # plaintext section
@@ -36,7 +36,9 @@ class TelegramService:
         message += f"➤ {em(tags)}\n"
         message += "➤ " + em(feed.json.get("region", "region unknown")) + "\n"
         for each in updates:
-            message += f"\n➤ [(OPEN)]({em(each.href)}) {em(each.name.replace('@', '[at]'))}\n"
+            message += (
+                f"\n➤ [(OPEN)]({em(each.href)}) {em(each.name.replace('@', '[at]'))}\n"
+            )
             # cutting big messages and avoiding footer being sent alone
             if len(message) > 2000 and each != updates[-1]:
                 asyncio.run(
