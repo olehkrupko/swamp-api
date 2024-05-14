@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - 'main'
-      - '117-telegram-bulk-updates'
 jobs:
   checkout:
     runs-on: self-hosted
