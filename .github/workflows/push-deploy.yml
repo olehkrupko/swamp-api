@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'main'
+      - '119-feeds-explain'
 jobs:
   checkout:
     runs-on: self-hosted
