@@ -127,6 +127,18 @@ def test_parse_href():
     )
 
 
+@router.route("/parse/explain/", methods=["GET"])
+def test_parse_href():
+    body = request.args
+    href = body["href"]
+
+    response = Feed.parse_explain(href)
+
+    return shared.return_json(
+        response=response,
+    )
+
+
 @scheduler.task("cron", id="backup_generator", hour="*/6")
 @router.route("/backup/", methods=["GET"])
 def backup():

@@ -263,3 +263,11 @@ class Feed(db.Model):
         results = requests.get(URL)
 
         return results.json()
+
+    @staticmethod
+    def parse_explain(href):
+        URL = f"{ os.environ['PARSER_URL'] }/explain/?href={href}"
+
+        results = requests.get(URL)
+
+        return results.json()
