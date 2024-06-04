@@ -108,7 +108,7 @@ def push_updates(feed_id):
 
 
 @router.route("/parse/href/", methods=["GET"])
-def test_parse_href():
+def parse_href():
     body = request.args
     href = body["href"]
 
@@ -128,7 +128,7 @@ def test_parse_href():
 
 
 @router.route("/parse/explain/", methods=["GET"])
-def test_parse_href():
+def parse_explain():
     body = request.args
     href = body["href"]
 
