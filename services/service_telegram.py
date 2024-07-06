@@ -37,7 +37,7 @@ class TelegramService:
         message += "➤ " + em(feed.json.get("region", "region unknown")) + "\n"
         for each in updates:
             message += (
-                f"\n➤ [(OPEN)]({em(each.href)}) {em(each.name.replace('@', '[at]'))}\n"
+                f"\n➤ [(OPEN)]({each.href}) {em(each.name.replace('@', '[at]'))}\n"
             )
             # cutting big messages and avoiding footer being sent alone
             if len(message) > 2000 and each != updates[-1]:
