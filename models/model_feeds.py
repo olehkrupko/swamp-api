@@ -257,8 +257,7 @@ class Feed(db.Model):
 
     @staticmethod
     def parse_href(href):
-        # URL = f"{ os.environ['PARSER_URL'] }/parse/?href={href}"
-        URL = f"{ os.environ['PARSER_URL'] }/parse/async/?href={href}"
+        URL = f"{ os.environ['PARSER_URL'] }/parse/updates?href={href}"
 
         results = requests.get(URL)
 
@@ -266,7 +265,7 @@ class Feed(db.Model):
 
     @staticmethod
     def parse_explain(href):
-        URL = f"{ os.environ['PARSER_URL'] }/explain/?href={href}"
+        URL = f"{ os.environ['PARSER_URL'] }/parse/explained?href={href}"
 
         results = requests.get(URL)
 
