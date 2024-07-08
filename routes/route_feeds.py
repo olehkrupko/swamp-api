@@ -108,7 +108,7 @@ def push_updates(feed_id):
 
 
 @router.route("/parse/href/", methods=["GET"])
-def test_parse_href():
+def parse_href():
     body = request.args
     href = body["href"]
 
@@ -121,6 +121,18 @@ def test_parse_href():
         ).as_dict()
         for x in Feed.parse_href(href)
     ]
+
+    return shared.return_json(
+        response=response,
+    )
+
+
+@router.route("/parse/explain/", methods=["GET"])
+def parse_explain():
+    body = request.args
+    href = body["href"]
+
+    response = Feed.parse_explain(href)
 
     return shared.return_json(
         response=response,
