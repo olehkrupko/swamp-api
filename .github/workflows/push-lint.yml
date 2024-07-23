@@ -69,6 +69,15 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: 3.11
+      - name: pwd
+        run: |
+          pwd
+      - name: ls
+        run: |
+          ls
+      - name: Install requirements
+        run: |
+          pip3 install -r ./requirements.txt
       - name: Install isort
         run: pip install isort==5.13.2
       - name: Lint with isort
