@@ -74,10 +74,10 @@ jobs:
           pwd
       - name: ls
         run: |
-          ls
+          ls ${{github.job}}
       - name: Install requirements
         run: |
-          pip3 install -r ./requirements.txt
+          pip3 install -r ${{github.job}}/requirements.txt
       - name: Install isort
         run: pip install isort==5.13.2
       - name: Lint with isort
