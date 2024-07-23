@@ -1,2 +1,2 @@
 [tool.isort]
-group_by_package = true
+group_by_package = false
