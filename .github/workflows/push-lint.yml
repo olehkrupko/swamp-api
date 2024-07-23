@@ -74,7 +74,7 @@ jobs:
           pwd
       - name: ls
         run: |
-          ls ${{github.job}}/.github/workflows
+          ls ${{github.job}}/.github/workflows/.configs
       - name: Install requirements
         run: |
           pip3 install -r ${{github.job}}/requirements.txt
@@ -82,4 +82,4 @@ jobs:
         run: pip install isort==5.13.2
       - name: Lint with isort
         run: |
-          isort --diff --check-only --settings "${{github.job}}/.github/workflows/.configs/isort.toml" .
+          isort --diff --check-only --settings "${{github.job}}/.github/workflows/.configs/" .
