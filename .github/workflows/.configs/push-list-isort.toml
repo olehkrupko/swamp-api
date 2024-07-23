@@ -1,2 +1,3 @@
 [tool.isort]
 group_by_package = false
+src_paths = ["swamp-api"]
