@@ -76,9 +76,9 @@ jobs:
         run: |
           pip3 install -r ${{github.job}}/requirements.txt
       - name: Install isort
-        run: pip install usort==1.0.8.post1
+        run: pip3 install reorder-python-imports==3.13.0
       - name: Lint with isort
         run: |
           pip3 install -r ${{github.job}}/requirements.txt
-          usort diff  ${{github.job}}
-          usort check ${{github.job}}
+          reorder-python-imports --help
+          reorder-python-imports
