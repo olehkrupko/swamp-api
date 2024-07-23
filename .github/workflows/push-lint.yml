@@ -79,5 +79,5 @@ jobs:
         run: pip install isort==5.13.2
       - name: Lint with isort
         run: |
-          pip3 install -r ${{github.job}}/requirements.txt && |
+          pip3 install -r ${{github.job}}/requirements.txt
           isort --diff --check-only --settings "${{github.job}}/.github/workflows/.configs/" .
