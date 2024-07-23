@@ -69,17 +69,14 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: 3.11
-      - name: pwd
+      - name: cd ${{github.job}}
         run: |
-          pwd
-      - name: ls
-        run: |
-          ls ${{github.job}}/.github/workflows/.configs
+          cd ${{github.job}}
       - name: Install requirements
         run: |
-          pip3 install -r ${{github.job}}/requirements.txt
+          pip3 install -r requirements.txt
       - name: Install isort
         run: pip install isort==5.13.2
       - name: Lint with isort
         run: |
-          isort --diff --check-only --settings "${{github.job}}/.github/workflows/.configs/" .
+          isort --diff --check-only --settings ".github/workflows/.configs/" .
