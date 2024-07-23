@@ -82,4 +82,4 @@ jobs:
         run: pip install isort==5.13.2
       - name: Lint with isort
         run: |
-          isort --diff --check-only --settings "{'group_by_package': True}" .
+          isort --diff --check-only --settings ".github/workflows/.configs/isort.toml" .
