@@ -81,4 +81,4 @@ jobs:
         run: |
           pip3 install -r ${{github.job}}/requirements.txt
           reorder-python-imports --help
-          reorder-python-imports
+          reorder-python-imports .
