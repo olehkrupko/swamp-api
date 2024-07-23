@@ -58,3 +58,11 @@ jobs:
       - name: Lint with black
         run: |
           black --diff --check black
+  import-sort:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+      - uses: isort/isort-action@v1
+        with:
+          sort-paths: .
+          requirements-files: "requirements.txt"
