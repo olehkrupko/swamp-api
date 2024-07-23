@@ -71,6 +71,6 @@ jobs:
           python-version: 3.11
       - name: Install isort
         run: pip install isort==5.13.2
-      - name: Lint with black
+      - name: Lint with isort
         run: |
-          isort . --check-only
+          isort . --diff --check-only
