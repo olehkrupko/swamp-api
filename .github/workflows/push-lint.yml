@@ -74,7 +74,7 @@ jobs:
           pwd
       - name: ls
         run: |
-          ls ${{github.job}}
+          ls ${{github.job}}/.github/workflows
       - name: Install requirements
         run: |
           pip3 install -r ${{github.job}}/requirements.txt
