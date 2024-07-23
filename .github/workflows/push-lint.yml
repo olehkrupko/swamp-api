@@ -61,8 +61,12 @@ jobs:
   import-sort:
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v4
-      - uses: isort/isort-action@v1
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
-          sort-paths: .
+          path: ${{github.job}}
+      - name: Check for import sorting
+        uses: isort/isort-action@v1
+        with:
+          sort-paths: ${{github.job}}
           requirements-files: "requirements.txt"
