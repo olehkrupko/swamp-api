@@ -1,4 +1,5 @@
 from flask import request, Blueprint
+from sqlalchemy import or_
 
 import routes._shared as shared
 from config.db import db
@@ -131,11 +132,25 @@ def parse_href():
 def parse_explain():
     body = request.args
     href = body["href"]
+    id = body.get("_id")  # id of current feed if present
 
-    response = Feed.parse_explain(href)
+    explained_feed = Feed.parse_explain(href)
+
+    # looking for similar entries:
+    similar_feeds = db.session.query(Feed).filter(
+        or_(
+            Feed.title == explained_feed["title"],
+            Feed.href == explained_feed["href"],
+        ),
+        Feed._id != id,  # ignoring current feed
+    )
+    similar_feeds = [x.as_dict() for x in similar_feeds]
 
     return shared.return_json(
-        response=response,
+        response={
+            "explained": explained_feed,
+            "similar_feeds": similar_feeds,
+        },
     )
 
 
