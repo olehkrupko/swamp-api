@@ -178,9 +178,8 @@ class Feed(db.Model):
         if not self.updates:
             return not PRESENT
 
-        for each in self.updates:
-            if each.href == href:
-                return PRESENT
+        if href in [x.href for x in self.updates]:
+            return PRESENT
 
         return not PRESENT
 
