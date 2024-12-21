@@ -1,5 +1,4 @@
 from flask import request, Blueprint
-from sqlalchemy import or_
 
 import routes._shared as shared
 from config.db import db
@@ -131,7 +130,7 @@ def parse_explain():
 
     return shared.return_json(
         response={
-            "explained": explained_feed,
+            "explained": feed.as_dict(),
             "similar_feeds": similar_feeds,
         },
     )

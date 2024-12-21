@@ -126,13 +126,17 @@ class Feed(db.Model):
         return str(self.as_dict())
 
     def get_similar_feeds(self):
-        similar_feeds = db.session.query(Feed).filter(
-            Feed._id != self.id,  # ignoring current feed
-            or_(
-                Feed.title == self.title,
-                Feed.href == self.href,
-            ),
-        ).all()
+        similar_feeds = (
+            db.session.query(Feed)
+            .filter(
+                Feed._id != self.id,  # ignoring current feed
+                or_(
+                    Feed.title == self.title,
+                    Feed.href == self.href,
+                ),
+            )
+            .all()
+        )
 
         return [x.as_dict() for x in similar_feeds]
 
