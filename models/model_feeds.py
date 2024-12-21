@@ -140,16 +140,6 @@ class Feed(db.Model):
 
         return [x.as_dict() for x in similar_feeds]
 
-    @staticmethod
-    def get_from_href(href: str) -> "Feed":
-        URL = f"{ os.environ['PARSER_URL'] }/parse/explained?href={href}"
-
-        results = requests.get(URL)
-
-        return Feed(
-            **results.json()
-        )
-
     def update_from_dict(self, data: dict):
         for key, value in data.items():
             self.update_attr(
@@ -279,3 +269,11 @@ class Feed(db.Model):
         db.session.commit()
 
         return [x.as_dict() for x in ingested]
+
+    @staticmethod
+    def parse_href(href: str) -> "Feed":
+        URL = f"{ os.environ['PARSER_URL'] }/parse/explained?href={href}"
+
+        results = requests.get(URL)
+
+        return Feed(**results.json())
