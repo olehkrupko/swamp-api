@@ -130,7 +130,7 @@ def parse_explain():
 
     return shared.return_json(
         response={
-            "explained": feed.as_dict(),
+            "explained": explained_feed,
             "similar_feeds": similar_feeds,
         },
     )
