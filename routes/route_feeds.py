@@ -136,19 +136,17 @@ def parse_explain():
 @router.route("/parse/push/", methods=["GET"])
 def parse_push():
     body = request.args
-
     href = body["href"]
-    id = body.get("_id")  # id of current feed if present
 
-    explained_feed = Feed.parse_href(href)
+    feed = Feed.parse_href(href)
 
     # if there are no similar feeds
     # then we can can add it to the database and ignore responses
-    if not explained_feed.get_similar_feeds():
-        db.session.add(explained_feed)
+    if not feed.get_similar_feeds():
+        db.session.add(feed)
         db.session.commit()
         # we don't need to refresh the feed, because it's not used
-        # db.session.refresh(explained_feed)
+        # db.session.refresh(feed)
 
     return shared.return_json(
         response={
