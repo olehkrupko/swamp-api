@@ -4,6 +4,7 @@ from datetime import timedelta
 from zoneinfo import ZoneInfo
 
 import emoji
+import requests
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import relationship
@@ -180,6 +181,24 @@ class Update(db.Model):
                 feed_data=feed_data[x.feed_id],
             )
             for x in updates
+        ]
+
+        return updates
+
+    @staticmethod
+    def parse_feed_href(href: str) -> list["Update"]:
+        URL = f"{ os.environ['PARSER_URL'] }/parse/updates?href={href}"
+
+        results = requests.get(URL)
+
+        updates = [
+            Update(
+                name=x["name"],
+                href=x["href"],
+                datetime=x["datetime"],
+                feed_id=None,
+            ).as_dict()
+            for x in results.json()
         ]
 
         return updates

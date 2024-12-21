@@ -279,11 +279,3 @@ class Feed(db.Model):
         db.session.commit()
 
         return [x.as_dict() for x in ingested]
-
-    @staticmethod
-    def parse_href(href):
-        URL = f"{ os.environ['PARSER_URL'] }/parse/updates?href={href}"
-
-        results = requests.get(URL)
-
-        return results.json()
