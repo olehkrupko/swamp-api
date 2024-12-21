@@ -104,15 +104,7 @@ def parse_href():
     body = request.args
     href = body["href"]
 
-    response = [
-        Update(
-            name=x["name"],
-            href=x["href"],
-            datetime=x["datetime"],
-            feed_id=None,
-        ).as_dict()
-        for x in Feed.parse_href(href)
-    ]
+    response = Update.parse_feed_href(href)
 
     return shared.return_json(
         response=response,
