@@ -134,7 +134,7 @@ def parse_explain():
     href = body["href"]
     id = body.get("_id")  # id of current feed if present
 
-    explained_feed = Feed.parse_explain(href)
+    explained_feed = Feed.get_from_href(href)
 
     # looking for similar entries:
     similar_feeds = db.session.query(Feed).filter(
@@ -169,7 +169,7 @@ def parse_explain():
 #     for href in file.split("\n"):
 #         try:
 #             # print(f">>>>{href.strip()}<<<<")
-#             explained_feed = Feed.parse_explain(href.strip())
+#             explained_feed = Feed.get_from_href(href.strip()).as_dict()
 #         except:
 #             failed.append(href)
 #             # print(">>>> failed", href)

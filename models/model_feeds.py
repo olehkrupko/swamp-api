@@ -124,6 +124,16 @@ class Feed(db.Model):
     def __repr__(self):
         return str(self.as_dict())
 
+    @staticmethod
+    def get_from_href(href: str) -> "Feed":
+        URL = f"{ os.environ['PARSER_URL'] }/parse/explained?href={href}"
+
+        results = requests.get(URL)
+
+        return Feed(
+            **results.json()
+        )
+
     def update_from_dict(self, data: dict):
         for key, value in data.items():
             self.update_attr(
@@ -257,14 +267,6 @@ class Feed(db.Model):
     @staticmethod
     def parse_href(href):
         URL = f"{ os.environ['PARSER_URL'] }/parse/updates?href={href}"
-
-        results = requests.get(URL)
-
-        return results.json()
-
-    @staticmethod
-    def parse_explain(href):
-        URL = f"{ os.environ['PARSER_URL'] }/parse/explained?href={href}"
 
         results = requests.get(URL)
 
