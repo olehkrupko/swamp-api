@@ -132,6 +132,31 @@ def parse_explain():
     )
 
 
+# Explain, push and ignore results
+@router.route("/parse/push/", methods=["GET"])
+def parse_push():
+    body = request.args
+
+    href = body["href"]
+    id = body.get("_id")  # id of current feed if present
+
+    explained_feed = Feed.parse_href(href)
+
+    # if there are no similar feeds
+    # then we can can add it to the database and ignore responses
+    if not explained_feed.get_similar_feeds():
+        db.session.add(explained_feed)
+        db.session.commit()
+        # we don't need to refresh the feed, because it's not used
+        # db.session.refresh(explained_feed)
+
+    return shared.return_json(
+        response={
+            "completed": True,
+        },
+    )
+
+
 # It was used at some point, but it's not needed.
 # Disabled as dangerous.
 # # curl -X GET "http://127.0.0.1:30010/feeds/parse/txt/"
