@@ -37,15 +37,7 @@ def list_feeds():
 def create_feed():
     body = request.get_json()
 
-    feed = Feed(
-        title=body["title"],
-        href=body["href"],
-        href_user=body["href_user"],
-        private=body["private"],
-        frequency=body["frequency"],
-        notes=body["notes"],
-        json=body["json"],
-    )
+    feed = Feed(**body)
 
     db.session.add(feed)
     db.session.commit()
@@ -167,7 +159,7 @@ def parse_explain():
 #             continue
 
 #         # looking for similar entries:
-                                              
+
 #         similar_hrefs = db.session.query(Feed).filter(
 #             Feed.href.like(f"{explained_feed['href']}%")
 #         ).all()
