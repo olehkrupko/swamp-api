@@ -135,16 +135,7 @@ def parse_explain():
     id = body.get("_id")  # id of current feed if present
 
     explained_feed = Feed.get_from_href(href)
-
-    # looking for similar entries:
-    similar_feeds = db.session.query(Feed).filter(
-        or_(
-            Feed.title == explained_feed["title"],
-            Feed.href == explained_feed["href"],
-        ),
-        Feed._id != id,  # ignoring current feed
-    )
-    similar_feeds = [x.as_dict() for x in similar_feeds]
+    similar_feeds = explained_feed.get_similar_feeds()
 
     return shared.return_json(
         response={

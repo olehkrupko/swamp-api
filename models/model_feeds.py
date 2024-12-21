@@ -4,6 +4,7 @@ from typing import List
 from typing import TYPE_CHECKING
 
 import requests
+from sqlalchemy import or_
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import Mapped
@@ -123,6 +124,17 @@ class Feed(db.Model):
 
     def __repr__(self):
         return str(self.as_dict())
+
+    def get_similar_feeds(self):
+        similar_feeds = db.session.query(Feed).filter(
+            Feed._id != self.id,  # ignoring current feed
+            or_(
+                Feed.title == self.title,
+                Feed.href == self.href,
+            ),
+        ).all()
+
+        return [x.as_dict() for x in similar_feeds]
 
     @staticmethod
     def get_from_href(href: str) -> "Feed":
