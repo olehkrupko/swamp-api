@@ -129,7 +129,9 @@ class Feed(db.Model):
         similar_feeds = (
             db.session.query(Feed)
             .filter(
-                Feed._id != getattr(self, "id", None),  # ignoring current feed if exists
+                # ignoring current feed if exists:
+                Feed._id != getattr(self, "id", None),
+                # checking for matching title or href:
                 or_(
                     Feed.title == self.title,
                     Feed.href == self.href,

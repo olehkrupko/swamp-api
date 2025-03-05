@@ -117,7 +117,11 @@ def parse_href():
 def parse_explain():
     body = request.args
     href = body["href"]
-    mode = body["mode"] if body["mode"] in ["explain", "push", "push_ignore"] else "explain"
+    mode = (
+        body["mode"]
+        if body["mode"] in ["explain", "push", "push_ignore"]
+        else "explain"
+    )
     id = body.get("_id")  # id of current feed if present
 
     if id:
