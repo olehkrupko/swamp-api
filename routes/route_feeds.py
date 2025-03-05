@@ -1,5 +1,7 @@
 from flask import request, Blueprint
 
+from sqlalchemy.exc import IntegrityError as sqlalchemy_IntegrityError
+
 import routes._shared as shared
 from config.db import db
 from config.scheduler import scheduler
@@ -115,6 +117,7 @@ def parse_href():
 def parse_explain():
     body = request.args
     href = body["href"]
+    mode = body["mode"] if body["mode"] in ["explain", "push", "push_ignore"] else "explain"
     id = body.get("_id")  # id of current feed if present
 
     if id:
@@ -124,33 +127,25 @@ def parse_explain():
 
     similar_feeds = feed.get_similar_feeds()
 
+    # if there are no similar feeds
+    # then we can add it to the database and ignore responses
+    if mode == "push" and not similar_feeds:
+        db.session.add(feed)
+        db.session.commit()
+        # we don't need to refresh the feed, because it's not used
+        db.session.refresh(feed)
+    elif mode == "push_ignore":
+        try:
+            db.session.add(feed)
+            db.session.commit()
+        except sqlalchemy_IntegrityError:
+            # ignoring it as expected behaviour
+            pass
+
     return shared.return_json(
         response={
             "explained": feed.as_dict(),
             "similar_feeds": similar_feeds,
-        },
-    )
-
-
-# Explain, push and ignore results
-@router.route("/parse/push/", methods=["GET"])
-def parse_push():
-    body = request.args
-    href = body["href"]
-
-    feed = Feed.parse_href(href)
-
-    # if there are no similar feeds
-    # then we can can add it to the database and ignore responses
-    if not feed.get_similar_feeds():
-        db.session.add(feed)
-        db.session.commit()
-        # we don't need to refresh the feed, because it's not used
-        # db.session.refresh(feed)
-
-    return shared.return_json(
-        response={
-            "completed": True,
         },
     )
 
