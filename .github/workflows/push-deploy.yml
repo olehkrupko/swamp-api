@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - 'main'
-      - '16-explain-href-context'
 jobs:
   checkout:
     runs-on: self-hosted
