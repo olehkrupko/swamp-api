@@ -138,9 +138,11 @@ class Update(db.Model):
 
     def dt_event_adjust_first(self):
         now = self.zone_fix(dt.datetime.now(ZoneInfo(os.environ.get("TIMEZONE_LOCAL"))))
+        a_week_ago = now - timedelta(days=7)
+
         # all recent events are moved to the past to avoid confusion
-        if self.dt_event > now - timedelta(days=7):
-            self.dt_event = now - timedelta(days=7)
+        if self.dt_event > a_week_ago:
+            self.dt_event = a_week_ago
 
     @classmethod
     def get_updates(cls, limit=140, private=None, _id=None):
