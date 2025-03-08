@@ -134,6 +134,8 @@ class Feed(db.Model):
                 # checking for matching title or href:
                 or_(
                     Feed.title == self.title,
+                    # " - " is used to separate title from website name
+                    Feed.title == self.title.split(" - ")[0],
                     Feed.href == self.href,
                 ),
             )
