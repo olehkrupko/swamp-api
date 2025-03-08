@@ -117,13 +117,11 @@ def parse_href():
 def parse_explain():
     body = request.args
     href = body["href"]
-    mode = (
-        body["mode"]
-        if body["mode"] in ["explain", "push", "push_ignore"]
-        else "explain"
-    )
+    mode = body.get("mode", "explain")
     id = body.get("_id")  # id of current feed if present
 
+    if mode not in ["explain", "push", "push_ignore"]:
+        raise ValueError("Mode not supported")
     if id:
         feed = db.session.query(Feed).filter_by(_id=id).first()
     else:
