@@ -106,7 +106,7 @@ def parse_href():
     body = request.args
     href = body["href"]
 
-    response = Update.parse_feed_href(href)
+    response = Update.parse_href(href)
 
     return shared.return_json(
         response=response,

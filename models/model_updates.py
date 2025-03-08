@@ -188,7 +188,7 @@ class Update(db.Model):
         return updates
 
     @staticmethod
-    def parse_feed_href(href: str) -> list["Update"]:
+    def parse_href(href: str) -> list["Update"]:
         URL = f"{ os.environ['PARSER_URL'] }/parse/updates?href={href}"
 
         results = requests.get(URL)
