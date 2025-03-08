@@ -20,3 +20,15 @@ def list_updates():
     return shared.return_json(
         response=updates,
     )
+
+
+@router.route("/parse/", methods=["GET"])
+def parse_updates():
+    body = request.args
+    href = body["href"]
+
+    response = Update.parse_href(href)
+
+    return shared.return_json(
+        response=response,
+    )

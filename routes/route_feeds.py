@@ -1,5 +1,7 @@
 from flask import request, Blueprint
 
+from sqlalchemy.exc import IntegrityError as sqlalchemy_IntegrityError
+
 import routes._shared as shared
 from config.db import db
 from config.scheduler import scheduler
@@ -36,15 +38,7 @@ def list_feeds():
 def create_feed():
     body = request.get_json()
 
-    feed = Feed(
-        title=body["title"],
-        href=body["href"],
-        href_user=body["href_user"],
-        private=body["private"],
-        frequency=body["frequency"],
-        notes=body["notes"],
-        json=body["json"],
-    )
+    feed = Feed(**body)
 
     db.session.add(feed)
     db.session.commit()
@@ -107,36 +101,103 @@ def push_updates(feed_id):
     )
 
 
-@router.route("/parse/href/", methods=["GET"])
-def parse_href():
+@router.route("/parse/", methods=["GET"])
+def explain_feed():
     body = request.args
     href = body["href"]
+    mode = body.get("mode", "explain")
+    id = body.get("_id")  # id of current feed if present
 
-    response = [
-        Update(
-            name=x["name"],
-            href=x["href"],
-            datetime=x["datetime"],
-            feed_id=None,
-        ).as_dict()
-        for x in Feed.parse_href(href)
-    ]
+    if mode not in ["explain", "push", "push_ignore"]:
+        raise ValueError("Mode not supported")
+    if id:
+        feed = db.session.query(Feed).filter_by(_id=id).first()
+    else:
+        feed = Feed.parse_href(href)
+
+    similar_feeds = feed.get_similar_feeds()
+
+    # if there are no similar feeds
+    # then we can add it to the database and ignore responses
+    if mode == "push" and not similar_feeds:
+        db.session.add(feed)
+        db.session.commit()
+        # we don't need to refresh the feed, because it's not used
+        db.session.refresh(feed)
+    elif mode == "push_ignore":
+        try:
+            db.session.add(feed)
+            db.session.commit()
+        except sqlalchemy_IntegrityError:
+            # ignoring it as expected behaviour
+            pass
 
     return shared.return_json(
-        response=response,
+        response={
+            "explained": feed.as_dict(),
+            "similar_feeds": similar_feeds,
+        },
     )
 
 
-@router.route("/parse/explain/", methods=["GET"])
-def parse_explain():
-    body = request.args
-    href = body["href"]
+# It was used at some point, but it's not needed.
+# Disabled as dangerous.
+# # curl -X GET "http://127.0.0.1:30010/feeds/parse/txt/"
+# @router.route("/parse/txt/", methods=["GET"])
+# def parse_explain_from_txt():
+#     with open("output_urls_valid.txt", "r", encoding="utf-8") as f:
+#         file = f.read()
 
-    response = Feed.parse_explain(href)
+#     failed = []
+#     duplicate_titles = []
+#     already_there = []
+#     new = []
+#     for href in file.split("\n"):
+#         try:
+#             # print(f">>>>{href.strip()}<<<<")
+#             explained_feed = Feed.parse_href(href.strip()).as_dict()
+#         except:
+#             failed.append(href)
+#             # print(">>>> failed", href)
+#             continue
 
-    return shared.return_json(
-        response=response,
-    )
+#         # looking for similar entries:
+
+#         similar_hrefs = db.session.query(Feed).filter(
+#             Feed.href.like(f"{explained_feed['href']}%")
+#         ).all()
+#         if similar_hrefs:
+#             # print(">>>> already_there", similar_hrefs)
+#             already_there.append(href)
+#             continue
+#         similar_titles = db.session.query(Feed).filter(
+#             Feed.title.like(f"{explained_feed['title'].split(' - ')[0]}%")
+#         ).all()
+#         if similar_titles:
+#             duplicate_titles.append(
+#                 {
+#                     "explained": explained_feed,
+#                     "similar_titles": [x.as_dict() for x in similar_titles],
+#                 }
+#             )
+#             # print(">>>> similar_titles", href)
+#             continue
+
+#         # print(">>>> new", href)
+#         if explained_feed not in new:
+#             new.append(explained_feed)
+
+#     for each in new:
+#         print(">>>>", each["href"], each["title"], len(each["title"]))
+#         db.session.add(Feed(**each))
+#         db.session.commit()
+#     results = {
+#         "duplicate_titles": duplicate_titles,
+#         "already_there": already_there,
+#         "failed": failed,
+#         "new": new,
+#     }
+#     return shared.return_json(results)
 
 
 @scheduler.task("cron", id="backup_generator", hour="*/6")

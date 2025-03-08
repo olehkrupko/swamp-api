@@ -4,6 +4,7 @@ from typing import List
 from typing import TYPE_CHECKING
 
 import requests
+from sqlalchemy import or_
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import Mapped
@@ -124,6 +125,25 @@ class Feed(db.Model):
     def __repr__(self):
         return str(self.as_dict())
 
+    def get_similar_feeds(self):
+        similar_feeds = (
+            db.session.query(Feed)
+            .filter(
+                # ignoring current feed if exists:
+                Feed._id != getattr(self, "id", None),
+                # checking for matching title or href:
+                or_(
+                    Feed.title == self.title,
+                    # " - " is used to separate title from website name
+                    Feed.title == self.title.split(" - ")[0],
+                    Feed.href == self.href,
+                ),
+            )
+            .all()
+        )
+
+        return [x.as_dict() for x in similar_feeds]
+
     def update_from_dict(self, data: dict):
         for key, value in data.items():
             self.update_attr(
@@ -178,9 +198,8 @@ class Feed(db.Model):
         if not self.updates:
             return not PRESENT
 
-        for each in self.updates:
-            if each.href == href:
-                return PRESENT
+        if href in [x.href for x in self.updates]:
+            return PRESENT
 
         return not PRESENT
 
@@ -256,17 +275,9 @@ class Feed(db.Model):
         return [x.as_dict() for x in ingested]
 
     @staticmethod
-    def parse_href(href):
-        URL = f"{ os.environ['PARSER_URL'] }/parse/updates?href={href}"
-
-        results = requests.get(URL)
-
-        return results.json()
-
-    @staticmethod
-    def parse_explain(href):
+    def parse_href(href: str) -> "Feed":
         URL = f"{ os.environ['PARSER_URL'] }/parse/explained?href={href}"
 
         results = requests.get(URL)
 
-        return results.json()
+        return Feed(**results.json())

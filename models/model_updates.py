@@ -4,6 +4,7 @@ from datetime import timedelta
 from zoneinfo import ZoneInfo
 
 import emoji
+import requests
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import relationship
@@ -137,9 +138,11 @@ class Update(db.Model):
 
     def dt_event_adjust_first(self):
         now = self.zone_fix(dt.datetime.now(ZoneInfo(os.environ.get("TIMEZONE_LOCAL"))))
-        # all recent events are assigned now to avoid confusion
-        if self.dt_event > now - timedelta(days=7):
-            self.dt_event = now
+        a_week_ago = now - timedelta(days=7)
+
+        # all recent events are moved to the past to avoid confusion
+        if self.dt_event > a_week_ago:
+            self.dt_event = a_week_ago
 
     @classmethod
     def get_updates(cls, limit=140, private=None, _id=None):
@@ -180,6 +183,24 @@ class Update(db.Model):
                 feed_data=feed_data[x.feed_id],
             )
             for x in updates
+        ]
+
+        return updates
+
+    @staticmethod
+    def parse_href(href: str) -> list["Update"]:
+        URL = f"{ os.environ['PARSER_URL'] }/parse/updates?href={href}"
+
+        results = requests.get(URL)
+
+        updates = [
+            Update(
+                name=x["name"],
+                href=x["href"],
+                datetime=x["datetime"],
+                feed_id=None,
+            ).as_dict()
+            for x in results.json()
         ]
 
         return updates
