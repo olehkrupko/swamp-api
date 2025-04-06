@@ -140,64 +140,86 @@ def explain_feed():
     )
 
 
-# It was used at some point, but it's not needed.
-# Disabled as dangerous.
+# # It was used at some point, but it's not needed.
+# # Disabled as dangerous.
 # # curl -X GET "http://127.0.0.1:30010/feeds/parse/txt/"
 # @router.route("/parse/txt/", methods=["GET"])
 # def parse_explain_from_txt():
-#     with open("output_urls_valid.txt", "r", encoding="utf-8") as f:
+#     import os
+#     import re
+#     import time
+#     import random
+#     from sqlalchemy.orm import Session
+
+#     def str_denied(s):
+#         if not s.startswith("https://") and not s.startswith("http://"):
+#             return True
+#         elif s.startswith("https://www.instagram.com/reel/") or s.startswith("https://instagram.com/reel/"):
+#             return True
+#         elif s.startswith("https://www.instagram.com/p/") or s.startswith("https://instagram.com/p/"):
+#             return True
+#         elif s.startswith("https://www.instagram.com/") or s.startswith("https://instagram.com/"):
+#             return False
+#         elif s.startswith("https://www.tiktok.com/@") and "/video/" in s:
+#             return True
+#         elif s.startswith("https://www.tiktok.com/@"):
+#             return False
+#         elif s.startswith("https://youtube.com/@") or s.startswith("https://www.youtube.com/channel/"):
+#             return False
+
+#         return True
+
+#     lines = set()
+#     with open("2_unique_lines.txt", "r", encoding="UTF-8") as f:
 #         file = f.read()
 
-#     failed = []
-#     duplicate_titles = []
-#     already_there = []
-#     new = []
-#     for href in file.split("\n"):
-#         try:
-#             # print(f">>>>{href.strip()}<<<<")
-#             explained_feed = Feed.parse_href(href.strip()).as_dict()
-#         except:
-#             failed.append(href)
-#             # print(">>>> failed", href)
+#         for each in file.split("\n"):
+#             lines.add(each.strip())
+    
+#     random.shuffle(list(lines))
+#     for line in lines:
+#         # https://www.instagram.com/romyrosemariekuester?igsh=MXJocXdoMTR0OXcyZg==
+#         # https://www.tiktok.com/@koval_l?_t=8q7aPhBPyx4
+#         # https://www.tiktok.com/@tinakross_massage?_t=ZM-8tGSEa3UiTG
+#         line = line.split("?igsh=")[0]
+#         line = line.split("?_t=")[0]
+#         if db.session.query(Feed).filter_by(href=line).count() > 0:
+#             with open("3_B_already_there.txt", "a", encoding="UTF-8") as f:
+#                 f.write(f"{line}\n")
 #             continue
 
-#         # looking for similar entries:
+#         if str_denied(line):
+#             with open("3_A_denied.txt", "a", encoding="UTF-8") as f:
+#                 f.write(f"{line}\n")
+#         else:
+#             # print("APPROVED", line)
+#             if "instagram.com" in line:
+#                 time.sleep(random.randrange(15, 60))
 
-#         similar_hrefs = db.session.query(Feed).filter(
-#             Feed.href.like(f"{explained_feed['href']}%")
-#         ).all()
-#         if similar_hrefs:
-#             # print(">>>> already_there", similar_hrefs)
-#             already_there.append(href)
-#             continue
-#         similar_titles = db.session.query(Feed).filter(
-#             Feed.title.like(f"{explained_feed['title'].split(' - ')[0]}%")
-#         ).all()
-#         if similar_titles:
-#             duplicate_titles.append(
-#                 {
-#                     "explained": explained_feed,
-#                     "similar_titles": [x.as_dict() for x in similar_titles],
-#                 }
-#             )
-#             # print(">>>> similar_titles", href)
-#             continue
+#             session = Session(db.engine)
+#             try:
+#                 feed = Feed.parse_href(line)
 
-#         # print(">>>> new", href)
-#         if explained_feed not in new:
-#             new.append(explained_feed)
+#                 if not feed.get_similar_feeds():
+#                     with session.begin():
+#                         session.add(feed)
+#                         session.commit()
+#                     with open("3_C_new", "a", encoding="UTF-8") as f:
+#                         f.write(f"{line}\n")
+#                         print("NEW", line)
+#                 else:
+#                     with open("3_B_already_there.txt", "a", encoding="UTF-8") as f:
+#                         f.write(f"{line}\n")
+#                         print("ALREADY THERE", line)
+#             except Exception as e:
+#                 with open("3_D_failed.txt", "a", encoding="UTF-8") as f:
+#                     f.write(f"{line}\n")
+#                 with open("3_E_failed_reasons.txt", "a", encoding="UTF-8") as f:
+#                     f.write(f"{line} {e}\n")
+#                     print("FAILED", line, e)
+#                 continue
 
-#     for each in new:
-#         print(">>>>", each["href"], each["title"], len(each["title"]))
-#         db.session.add(Feed(**each))
-#         db.session.commit()
-#     results = {
-#         "duplicate_titles": duplicate_titles,
-#         "already_there": already_there,
-#         "failed": failed,
-#         "new": new,
-#     }
-#     return shared.return_json(results)
+#     return shared.return_json("Success")
 
 
 @scheduler.task("cron", id="backup_generator", hour="*/6")
