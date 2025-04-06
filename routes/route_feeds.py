@@ -49,7 +49,7 @@ def create_feed():
     )
 
 
-@router.route("/<feed_id>/", methods=["GET"])
+@router.route("/<int:feed_id>/", methods=["GET"])
 def read_feed(feed_id):
     feed = db.session.query(Feed).filter_by(_id=feed_id).first()
 
@@ -59,7 +59,7 @@ def read_feed(feed_id):
 
 
 @shared.data_is_json
-@router.route("/<feed_id>/", methods=["PUT", "OPTIONS"])
+@router.route("/<int:feed_id>/", methods=["PUT", "OPTIONS"])
 def update_feed(feed_id):
     feed = db.session.query(Feed).filter_by(_id=feed_id).first()
     body = request.get_json()
@@ -74,7 +74,7 @@ def update_feed(feed_id):
     )
 
 
-@router.route("/<feed_id>/", methods=["DELETE"])
+@router.route("/<int:feed_id>/", methods=["DELETE"])
 def delete_feed(feed_id):
     feed = db.session.query(Feed).filter_by(_id=feed_id)
 
@@ -89,7 +89,7 @@ def delete_feed(feed_id):
 
 
 @shared.data_is_json
-@router.route("/<feed_id>/", methods=["POST"])
+@router.route("/<int:feed_id>/", methods=["POST"])
 def push_updates(feed_id):
     feed = db.session.query(Feed).filter_by(_id=feed_id).first()
     updates = [Update(**x, feed_id=int(feed_id)) for x in request.get_json()]
