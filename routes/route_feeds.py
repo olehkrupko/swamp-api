@@ -154,9 +154,9 @@ def explain_feed():
 #     def str_denied(s):
 #         if not s.startswith("https://") and not s.startswith("http://"):
 #             return True
-#         elif s.startswith("https://www.instagram.com/reel/") or s.startswith("https://instagram.com/reel/"):
+#         elif "instagram.com/reel/" in s:
 #             return True
-#         elif s.startswith("https://www.instagram.com/p/") or s.startswith("https://instagram.com/p/"):
+#         elif "instagram.com/p/" in s:
 #             return True
 #         elif s.startswith("https://www.instagram.com/") or s.startswith("https://instagram.com/"):
 #             return False
@@ -164,7 +164,9 @@ def explain_feed():
 #             return True
 #         elif s.startswith("https://www.tiktok.com/@"):
 #             return False
-#         elif s.startswith("https://youtube.com/@") or s.startswith("https://www.youtube.com/channel/"):
+#         elif s.startswith("https://youtube.com/@"):
+#             return False
+#         elif s.startswith("https://www.youtube.com/channel/"):
 #             return False
 
 #         return True
@@ -175,7 +177,7 @@ def explain_feed():
 
 #         for each in file.split("\n"):
 #             lines.add(each.strip())
-    
+
 #     random.shuffle(list(lines))
 #     for line in lines:
 #         # https://www.instagram.com/romyrosemariekuester?igsh=MXJocXdoMTR0OXcyZg==
