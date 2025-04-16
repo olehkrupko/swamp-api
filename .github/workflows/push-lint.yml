@@ -1,6 +1,8 @@
 name: push-lint
 run-name: Lint push to ${{ github.ref_name }}
-on: push
+on:
+  push:
+  workflow_call:
 jobs:
   flake8-errors:
     runs-on: self-hosted
