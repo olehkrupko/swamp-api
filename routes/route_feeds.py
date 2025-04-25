@@ -4,7 +4,7 @@ from sqlalchemy.exc import IntegrityError as sqlalchemy_IntegrityError
 
 import routes._shared as shared
 from config.db import db
-# from config.scheduler import scheduler
+from config.scheduler import scheduler
 from models.model_feeds import Feed
 from models.model_updates import Update
 from services.service_backups import Backup
@@ -224,13 +224,13 @@ def explain_feed():
 #     return shared.return_json("Success")
 
 
-# Generate backup of all feeds every 6 hours
+@scheduler.task("cron", id="backup_generator", hour="*/6")
 # @router.route("/backup/", methods=["GET"])  # for testing purposes
-# def backup():
-#     with scheduler.app.app_context():
-#         backup_new = Backup.dump()
+def backup():
+    with scheduler.app.app_context():
+        backup_new = Backup.dump()
 
-#         print(f"Generated backup {backup_new.filename}")
-#         return shared.return_json(
-#             response=backup_new.filename,
-#         )
+        print(f"Generated backup {backup_new.filename}")
+        return shared.return_json(
+            response=backup_new.filename,
+        )

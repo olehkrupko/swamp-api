@@ -3,7 +3,6 @@ import os
 from datetime import datetime
 
 from config.db import db
-from config.scheduler import scheduler
 from models.model_feeds import Feed
 
 
@@ -62,7 +61,6 @@ class Backup:
         return [x.as_dict() for x in db.session.query(Feed).all()]
 
     @classmethod
-    @scheduler.task("cron", id="backup_generator", hour="*/6")
     def dump(cls):
         data = cls.get_data()
         filename = cls.today()
