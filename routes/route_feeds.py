@@ -225,7 +225,7 @@ def explain_feed():
 
 
 @scheduler.task("cron", id="backup_generator", hour="*/6")
-@router.route("/backup/", methods=["GET"])
+# @router.route("/backup/", methods=["GET"])  # for testing purposes
 def backup():
     with scheduler.app.app_context():
         backup_new = Backup.dump()
