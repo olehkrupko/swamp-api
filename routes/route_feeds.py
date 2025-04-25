@@ -224,6 +224,7 @@ def explain_feed():
 #     return shared.return_json("Success")
 
 
+# Generate backup of all feeds every 6 hours
 @scheduler.task("cron", id="backup_generator", hour="*/6")
 # @router.route("/backup/", methods=["GET"])  # for testing purposes
 def backup():
