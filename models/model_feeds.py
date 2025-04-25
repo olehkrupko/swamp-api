@@ -263,10 +263,10 @@ class Feed(db.Model):
 
         self.delay()
 
-        if notify:
-            TelegramService.send_update_bulk(
-                updates=notify,
+        if notify and os.environ.get("TELEGRAM_POST_UPDATES", False) == True:
+            TelegramService.send_feed_updates(
                 feed=self,
+                updates=notify,
             )
 
         db.session.add(self)
