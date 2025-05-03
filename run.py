@@ -1,5 +1,5 @@
-import os
 import sys
+from os import getenv
 
 import sentry_sdk
 from flask import Flask
@@ -15,7 +15,7 @@ from routes import route_frequency
 
 
 sentry_sdk.init(
-    dsn=os.environ.get("SENTRY_SDK_DSN"),
+    dsn=getenv("SENTRY_SDK_DSN"),
     integrations=[
         FlaskIntegration(),
     ],
