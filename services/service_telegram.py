@@ -6,8 +6,8 @@ from telegram.helpers import escape_markdown as em
 
 
 class TelegramService:
-    CHAT_ID = os.environ.get("TELEGRAM_BOT_DMS")
-    TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
+    CHAT_ID = os.environ.get("TELEGRAM_CHATID")
+    TOKEN = os.environ.get("TELEGRAM_BOTTOKEN")
     PARSE_MODE = "markdown"
     MESSAGE_MARKDOWN = (
         "{name}\n"
