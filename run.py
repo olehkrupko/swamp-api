@@ -50,14 +50,9 @@ CORS(
     # ],
     always_send=False,
 )
-if os.environ.get("MODE") == "FULL":
-    app.register_blueprint(route_feeds.router)
-    app.register_blueprint(route_frequency.router)
-    app.register_blueprint(route_updates.router)
-elif os.environ.get("MODE") == "PUBLIC":
-    app.register_blueprint(route_updates.router)
-else:
-    raise Exception(f"MODE not specified or invalid {os.environ.get('MODE')=}")
+app.register_blueprint(route_feeds.router)
+app.register_blueprint(route_frequency.router)
+app.register_blueprint(route_updates.router)
 
 # run app
 if __name__ == "__main__":
