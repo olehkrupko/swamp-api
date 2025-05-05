@@ -24,7 +24,7 @@ class TelegramService:
         )
 
     @classmethod
-    def send_update_bulk(cls, updates, feed):
+    def send_feed_updates(cls, feed, updates):
         if not updates:
             raise ValueError(f"Bulk cannot be empty {updates=}")
 
