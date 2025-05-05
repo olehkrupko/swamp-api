@@ -1,10 +1,7 @@
 import sys
-# from os import getenv
 
 from flask import Flask
 from flask_cors import CORS
-# import sentry_sdk
-# from sentry_sdk.integrations.flask import FlaskIntegration
 
 from config.config import Config
 from config.db import db
@@ -14,6 +11,9 @@ from routes import route_updates
 from routes import route_frequency
 
 
+# from os import getenv
+# import sentry_sdk
+# from sentry_sdk.integrations.flask import FlaskIntegration
 # sentry_sdk.init(
 #     dsn=getenv("SENTRY_SDK_DSN"),
 #     integrations=[
