@@ -14,17 +14,17 @@ from routes import route_updates
 from routes import route_frequency
 
 
-sentry_sdk.init(
-    dsn=getenv("SENTRY_SDK_DSN"),
-    integrations=[
-        FlaskIntegration(),
-    ],
-    # Set traces_sample_rate to 1.0 to capture 100%
-    # of transactions for performance monitoring.
-    # We recommend adjusting this value in production.
-    traces_sample_rate=0.1,
-    profiles_sample_rate=0.1,
-)
+# sentry_sdk.init(
+#     dsn=getenv("SENTRY_SDK_DSN"),
+#     integrations=[
+#         FlaskIntegration(),
+#     ],
+#     # Set traces_sample_rate to 1.0 to capture 100%
+#     # of transactions for performance monitoring.
+#     # We recommend adjusting this value in production.
+#     traces_sample_rate=0.1,
+#     profiles_sample_rate=0.1,
+# )
 
 # config
 sys.dont_write_bytecode = True  # avoid writing __pycache__ and .pyc
