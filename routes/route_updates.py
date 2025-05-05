@@ -1,4 +1,4 @@
-import os
+from os import getenv
 
 from flask import request, Blueprint
 
@@ -12,7 +12,7 @@ router = Blueprint("updates", __name__, url_prefix="/updates")
 @router.route("/", methods=["GET"])
 def list_updates():
     kwargs = dict(request.args)
-    if os.environ.get("MODE") == "PUBLIC":
+    if getenv("MODE") == "PUBLIC":
         kwargs["private"] = False
 
     updates = Update.get_updates(**kwargs)

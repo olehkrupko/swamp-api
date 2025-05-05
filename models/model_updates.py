@@ -1,6 +1,6 @@
 import datetime as dt
-import os
 from datetime import timedelta
+from os import getenv
 from zoneinfo import ZoneInfo
 
 import emoji
@@ -126,18 +126,18 @@ class Update(db.Model):
     def zone_fix(datetime):
         if datetime.tzinfo:
             # if tzinfo present — convert to current one
-            return datetime.astimezone(ZoneInfo(os.environ.get("TIMEZONE_LOCAL")))
+            return datetime.astimezone(ZoneInfo(getenv("TIMEZONE_LOCAL")))
         else:
             # if no tzinfo — replace it with current one
-            return datetime.replace(tzinfo=ZoneInfo(os.environ.get("TIMEZONE_LOCAL")))
+            return datetime.replace(tzinfo=ZoneInfo(getenv("TIMEZONE_LOCAL")))
 
     def dt_now(self):
         self.dt_event = self.zone_fix(
-            dt.datetime.now(ZoneInfo(os.environ.get("TIMEZONE_LOCAL")))
+            dt.datetime.now(ZoneInfo(getenv("TIMEZONE_LOCAL")))
         )
 
     def dt_event_adjust_first(self):
-        now = self.zone_fix(dt.datetime.now(ZoneInfo(os.environ.get("TIMEZONE_LOCAL"))))
+        now = self.zone_fix(dt.datetime.now(ZoneInfo(getenv("TIMEZONE_LOCAL"))))
         a_week_ago = now - timedelta(days=7)
 
         # all recent events are moved to the past to avoid confusion
@@ -189,7 +189,7 @@ class Update(db.Model):
 
     @staticmethod
     def parse_href(href: str) -> list["Update"]:
-        URL = f"{ os.environ['PARSER_URL'] }/parse/updates?href={href}"
+        URL = f"{ getenv('PARSER_URL') }/parse/updates?href={href}"
 
         results = requests.get(URL)
 
