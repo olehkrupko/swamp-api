@@ -263,7 +263,7 @@ class Feed(db.Model):
 
         self.delay()
 
-        if notify and getenv("TELEGRAM_POST_UPDATES", False) is True:
+        if notify:
             TelegramService.send_feed_updates(
                 feed=self,
                 updates=notify,
@@ -276,7 +276,7 @@ class Feed(db.Model):
 
     @staticmethod
     def parse_href(href: str) -> "Feed":
-        URL = f"{ getenv('PARSER_URL') }/parse/explained?href={href}"
+        URL = f"{ getenv('SWAMP_PARSER') }/parse/explained?href={href}"
 
         results = requests.get(URL)
 

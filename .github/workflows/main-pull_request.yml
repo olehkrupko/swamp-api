@@ -1,0 +1,24 @@
+name: PR main - package Docker image
+run-name: PR main - package Docker image for ${{ github.ref_name }}
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  python-docker:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - name: build, tag & push Docker image
+        uses: olehkrupko/actions/python-docker@main
+        with:
+          image-name: ${{ github.repository }}
+          is-latest: false
+          pr-number: ${{ github.event.pull_request.number }}
+          milestone-number: ${{ github.event.pull_request.milestone.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
