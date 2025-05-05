@@ -1,10 +1,10 @@
 import sys
-from os import getenv
+# from os import getenv
 
-import sentry_sdk
 from flask import Flask
 from flask_cors import CORS
-from sentry_sdk.integrations.flask import FlaskIntegration
+# import sentry_sdk
+# from sentry_sdk.integrations.flask import FlaskIntegration
 
 from config.config import Config
 from config.db import db
