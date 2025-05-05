@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - 'main'
-      - '26-telegram-ingestion'
 jobs:
   checkout:
     runs-on: self-hosted
