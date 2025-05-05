@@ -1,5 +1,5 @@
-import os
 from datetime import datetime
+from os import getenv
 from typing import List
 from typing import TYPE_CHECKING
 
@@ -263,10 +263,10 @@ class Feed(db.Model):
 
         self.delay()
 
-        if notify:
-            TelegramService.send_update_bulk(
-                updates=notify,
+        if notify and getenv("TELEGRAM_POST_UPDATES", False) is True:
+            TelegramService.send_feed_updates(
                 feed=self,
+                updates=notify,
             )
 
         db.session.add(self)
@@ -276,7 +276,7 @@ class Feed(db.Model):
 
     @staticmethod
     def parse_href(href: str) -> "Feed":
-        URL = f"{ os.environ['PARSER_URL'] }/parse/explained?href={href}"
+        URL = f"{ getenv('PARSER_URL') }/parse/explained?href={href}"
 
         results = requests.get(URL)
 

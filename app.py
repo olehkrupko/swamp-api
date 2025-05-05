@@ -1,5 +1,5 @@
-import os
 import sys
+from os import getenv
 
 import sentry_sdk
 from flask import Flask
@@ -15,7 +15,7 @@ from routes import route_frequency
 
 
 sentry_sdk.init(
-    dsn=os.environ.get("SENTRY_SDK_DSN"),
+    dsn=getenv("SENTRY_SDK_DSN"),
     integrations=[
         FlaskIntegration(),
     ],
@@ -50,14 +50,14 @@ CORS(
     # ],
     always_send=False,
 )
-if os.environ.get("MODE") == "FULL":
+if getenv("MODE") == "FULL":
     app.register_blueprint(route_feeds.router)
     app.register_blueprint(route_frequency.router)
     app.register_blueprint(route_updates.router)
-elif os.environ.get("MODE") == "PUBLIC":
+elif getenv("MODE") == "PUBLIC":
     app.register_blueprint(route_updates.router)
 else:
-    raise Exception(f"MODE not specified or invalid {os.environ.get('MODE')=}")
+    raise Exception(f"MODE not specified or invalid { getenv('MODE')= }")
 
 # run app
 if __name__ == "__main__":

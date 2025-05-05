@@ -1,13 +1,13 @@
 import asyncio
-import os
+from os import getenv
 
 import telegram
 from telegram.helpers import escape_markdown as em
 
 
 class TelegramService:
-    CHAT_ID = os.environ.get("TELEGRAM_BOT_DMS")
-    TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
+    CHAT_ID = getenv("TELEGRAM_BOT_DMS")
+    TOKEN = getenv("TELEGRAM_BOT_TOKEN")
     PARSE_MODE = "markdown"
     MESSAGE_MARKDOWN = (
         "{name}\n"
