@@ -263,7 +263,7 @@ class Feed(db.Model):
 
         self.delay()
 
-        if notify and getenv("TELEGRAM_BROADCAST", False) is True:
+        if notify:
             TelegramService.send_feed_updates(
                 feed=self,
                 updates=notify,
