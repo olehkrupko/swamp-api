@@ -62,7 +62,8 @@ class Backup:
         query = select(Feed)
 
         async with get_db_session_context() as session:
-            return [feed.as_dict() for feed in (await session.execute(query)).scalars().all()]
+            feeds = (await session.execute(query)).scalars().all()
+            return [feed.as_dict() for feed in feeds]
 
     @classmethod
     async def dump(cls):

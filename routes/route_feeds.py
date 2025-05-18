@@ -31,7 +31,8 @@ async def list_feeds(
     if active is True:
         query = query.where(Feed.frequency != Frequency.NEVER)
 
-    return [feed.as_dict() for feed in (await session.execute(query)).scalars().all()]
+    feeds = (await session.execute(query)).scalars().all()
+    return [feed.as_dict() for feed in feeds]
 
 
 @router.put("/", response_class=PrettyJsonResponse)
