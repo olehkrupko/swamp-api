@@ -29,11 +29,4 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
 
 @asynccontextmanager
 async def get_db_session_context() -> AsyncGenerator[AsyncSession, None]:
-    async with async_session() as session:
-        try:
-            session.info["read_only"] = True
-            yield session
-            await session.commit()
-        except exc.SQLAlchemyError:
-            await session.rollback()
-            raise
+    await get_db_session()
