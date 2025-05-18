@@ -1,150 +1,157 @@
-from flask import request, Blueprint
-
+from fastapi import APIRouter, Depends
 from sqlalchemy.exc import IntegrityError as sqlalchemy_IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 
-import routes._shared as shared
-from config.db import db
+from config.session import get_db_session
 from config.scheduler import scheduler
 from models.model_feeds import Feed
 from models.model_updates import Update
+from responses.PrettyJsonResponse import PrettyJsonResponse
 from services.service_backups import Backup
 from services.service_frequency import Frequency
+from sqlalchemy import select, insert
+from sqlalchemy.orm import joinedload
 
 
-router = Blueprint("feeds", __name__, url_prefix="/feeds")
+router = APIRouter(
+    prefix="/feeds",
+)
 
 
-@router.route("/", methods=["GET"])
-def list_feeds():
-    POSITIVE = ["true", "yes", "1"]
+@router.get("/", response_class=PrettyJsonResponse)
+async def list_feeds(
+    requires_update: bool = None,
+    active: bool = None,
+    session: AsyncSession = Depends(get_db_session),
+):
+    query = select(Feed)
 
-    feeds = db.session.query(Feed).all()
+    if requires_update is True:
+        query = Feed.query_requires_update(query)
+    if active is True:
+        query = query.where(Feed.frequency != Frequency.NEVER)
 
-    requires_update = request.args.get("requires_update")
-    if requires_update and requires_update.lower() in POSITIVE:
-        feeds = filter(lambda x: x.requires_update(), feeds)
-
-    active = request.args.get("active")
-    if active and active.lower() in POSITIVE:
-        feeds = filter(lambda x: x.frequency != Frequency.NEVER, feeds)
-
-    return shared.return_json(
-        response=[feed.as_dict() for feed in feeds],
-    )
+    return [feed.as_dict() for feed in (await session.execute(query)).scalars().all()]
 
 
-@shared.data_is_json
-@router.route("/", methods=["PUT", "OPTIONS"])
-def create_feed():
-    body = request.get_json()
-
+@router.put("/", response_class=PrettyJsonResponse)
+async def create_feed(
+    session: AsyncSession = Depends(get_db_session),
+    **body: dict,
+):
     feed = Feed(**body)
 
-    db.session.add(feed)
-    db.session.commit()
-    db.session.refresh(feed)
+    session.add(feed)
+    await session.commit()
+    session.refresh(feed)
 
-    return shared.return_json(
-        response=feed.as_dict(),
-    )
+    return feed.as_dict()
 
 
-@router.route("/<int:feed_id>/", methods=["GET"])
-def read_feed(feed_id):
-    feed = db.session.query(Feed).filter_by(_id=feed_id).first()
+@router.get("/{feed_id}/", response_class=PrettyJsonResponse)
+async def read_feed(
+    feed_id: int,
+    session: AsyncSession = Depends(get_db_session),
+):
+    query = select(Feed).where(Feed._id == feed_id)
+    feed = (await session.execute(query)).scalars().first()
 
-    return shared.return_json(
-        response=feed.as_dict(),
-    )
+    return feed.as_dict()
 
 
-@shared.data_is_json
-@router.route("/<int:feed_id>/", methods=["PUT", "OPTIONS"])
-def update_feed(feed_id):
-    feed = db.session.query(Feed).filter_by(_id=feed_id).first()
-    body = request.get_json()
+@router.put("/{feed_id}/", response_class=PrettyJsonResponse)
+async def update_feed(
+    feed_id: int,
+    session: AsyncSession = Depends(get_db_session),
+    **body: dict,
+):
+    query = select(Feed).where(Feed._id == feed_id)
+    feed = (await session.execute(query)).scalars().first()
 
     feed.update_from_dict(body)
 
-    db.session.add(feed)
-    db.session.commit()
+    session.add(feed)
+    await session.commit()
 
-    return shared.return_json(
-        response=feed.as_dict(),
-    )
+    return feed.as_dict()
 
 
-@router.route("/<int:feed_id>/", methods=["DELETE"])
-def delete_feed(feed_id):
-    feed = db.session.query(Feed).filter_by(_id=feed_id)
+@router.delete("/{feed_id}/", response_class=PrettyJsonResponse)
+async def delete_feed(
+    feed_id: int,
+    session: AsyncSession = Depends(get_db_session),
+):
+    query = select(Feed).where(Feed._id == feed_id)
+    feed = (await session.execute(query)).scalars().first()
 
     feed.delete()
-    db.session.commit()
+    await session.commit()
 
-    return shared.return_json(
-        response={
-            "success": True,
-        },
-    )
+    return {
+        "success": True,
+    }
 
 
-@shared.data_is_json
-@router.route("/<int:feed_id>/", methods=["POST"])
-def push_updates(feed_id):
-    feed = db.session.query(Feed).filter_by(_id=feed_id).first()
-    updates = [Update(**x, feed_id=int(feed_id)) for x in request.get_json()]
+@router.post("/{feed_id}/", response_class=PrettyJsonResponse)
+async def push_updates(
+    feed_id: int,
+    updates: list[dict],
+    session: AsyncSession = Depends(get_db_session),
+):
+    query = select(Feed).where(Feed._id == feed_id)
+    query = query.options(joinedload(Feed.updates))
+    # session.get(User, 4)
+    feed = (await session.execute(query)).scalars().first()
+    updates = [Update(**x, feed_id=int(feed_id)) for x in updates]
 
-    new_updates = feed.ingest_updates(updates)
-
-    return shared.return_json(
-        response=new_updates,
-    )
+    return await feed.ingest_updates(updates)
 
 
-@router.route("/parse/", methods=["GET"])
-def explain_feed():
-    body = request.args
-    href = body["href"]
-    mode = body.get("mode", "explain")
-    id = body.get("_id")  # id of current feed if present
-
+@router.get("/parse/", response_class=PrettyJsonResponse)
+async def explain_feed(
+    href: str,
+    mode: str = "explain",
+    _id: int = None,
+    session: AsyncSession = Depends(get_db_session),
+):
     if mode not in ["explain", "push", "push_ignore"]:
         raise ValueError("Mode not supported")
-    if id:
-        feed = db.session.query(Feed).filter_by(_id=id).first()
+
+    if _id:
+        query = select(Feed).where(Feed._id == _id)
+        feed = (await session.execute(query)).scalars().first()
     else:
         feed = Feed.parse_href(href)
 
-    similar_feeds = feed.get_similar_feeds()
+    similar_feeds = await feed.get_similar_feeds()
 
     # if there are no similar feeds
     # then we can add it to the database and ignore responses
     if mode == "push" and not similar_feeds:
-        db.session.add(feed)
-        db.session.commit()
+        session.add(feed)
+        await session.commit()
         # we don't need to refresh the feed, because it's not used
-        db.session.refresh(feed)
+        session.refresh(feed)
     elif mode == "push_ignore":
         try:
-            db.session.add(feed)
-            db.session.commit()
+            session.add(feed)
+            await session.commit()
         except sqlalchemy_IntegrityError:
-            # ignoring it as expected behaviour
+            # ignoring it as expected behaviour:
+            # push_ignore is exactly to ignore this error
             pass
 
-    return shared.return_json(
-        response={
-            "explained": feed.as_dict(),
-            "similar_feeds": similar_feeds,
-        },
-    )
+    return {
+        "explained": feed.as_dict(),
+        "similar_feeds": [x.as_dict() for x in similar_feeds],
+    }
 
 
 # # It was used at some point, but it's not needed.
 # # Disabled as dangerous.
 # # curl -X GET "http://127.0.0.1:30010/feeds/parse/txt/"
 # @router.route("/parse/txt/", methods=["GET"])
-# def parse_explain_from_txt():
+# async def parse_explain_from_txt():
 #     import os
 #     import re
 #     import time
@@ -225,13 +232,12 @@ def explain_feed():
 
 
 # Generate backup of all feeds every 6 hours
-@scheduler.task("cron", id="backup_generator", hour="*/6")
+# @scheduler.scheduled_job("cron", id="backup_generator", hour="*/6")
 # @router.route("/backup/", methods=["GET"])  # for testing purposes
-def backup():
+async def backup():
+    # TODO: replace scheduler?
     with scheduler.app.app_context():
-        backup_new = Backup.dump()
+        backup_new = await Backup.dump()
 
         print(f"Generated backup {backup_new.filename}")
-        return shared.return_json(
-            response=backup_new.filename,
-        )
+        return backup_new.filename

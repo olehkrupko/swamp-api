@@ -2,8 +2,9 @@ import json
 import os
 from datetime import datetime
 
-from config.db import db
+from config.session import get_db_session, get_db_session_context
 from models.model_feeds import Feed
+from sqlalchemy import select
 
 
 class Backup:
@@ -57,12 +58,15 @@ class Backup:
     #############
 
     @staticmethod
-    def get_data():
-        return [x.as_dict() for x in db.session.query(Feed).all()]
+    async def get_data():
+        query = select(Feed)
+
+        async with get_db_session_context() as session:
+            return [feed.as_dict() for feed in (await session.execute(query)).scalars().all()]
 
     @classmethod
-    def dump(cls):
-        data = cls.get_data()
+    async def dump(cls):
+        data = await cls.get_data()
         filename = cls.today()
 
         with open(filename, "w") as f:
@@ -92,7 +96,7 @@ class Backup:
 
         return items
 
-    def restore(self, compare=True):
+    async def restore(self, compare=True):
         with open(self.filename) as f:
             json_data = json.load(f)
             if compare:
@@ -101,21 +105,22 @@ class Backup:
                 else:
                     return "Data is different"
             else:
-                for each in json_data:
-                    feed = Feed(
-                        title=each["title"],
-                        href=each["href"],
-                        href_user=each["href_user"],
-                        private=each["private"],
-                        frequency=each["frequency"],
-                        notes=each["notes"],
-                        json=each["json"],
-                        _id=each["_id"],
-                        _created=each["_created"],
-                        _delayed=None,
-                    )
-                    db.session.add(feed)
+                async with get_db_session_context() as session:
+                    for each in json_data:
+                        feed = Feed(
+                            title=each["title"],
+                            href=each["href"],
+                            href_user=each["href_user"],
+                            private=each["private"],
+                            frequency=each["frequency"],
+                            notes=each["notes"],
+                            json=each["json"],
+                            _id=each["_id"],
+                            _created=each["_created"],
+                            _delayed=None,
+                        )
+                        session.add(feed)
 
-                db.session.commit()
+                    await session.commit()
 
                 return "Restoration complete"

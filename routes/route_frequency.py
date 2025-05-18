@@ -1,14 +1,14 @@
-from flask import Blueprint
+from fastapi import APIRouter
 
-import routes._shared as shared
+from responses.PrettyJsonResponse import PrettyJsonResponse
 from services.service_frequency import Frequency
 
 
-router = Blueprint("frequency", __name__, url_prefix="/frequency")
+router = APIRouter(
+    prefix="/frequency",
+)
 
 
-@router.route("/", methods=["GET"])
+@router.get("/", response_class=PrettyJsonResponse)
 def list_frequencies():
-    return shared.return_json(
-        response=Frequency.list(),
-    )
+    return Frequency.list()

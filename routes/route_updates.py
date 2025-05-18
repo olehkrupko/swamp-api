@@ -1,34 +1,25 @@
 from os import getenv
 
-from flask import request, Blueprint
+from fastapi import APIRouter
 
-import routes._shared as shared
 from models.model_updates import Update
+from responses.PrettyJsonResponse import PrettyJsonResponse
 
 
-router = Blueprint("updates", __name__, url_prefix="/updates")
+router = APIRouter(
+    prefix="/updates",
+)
 
 
-@router.route("/", methods=["GET"])
-def list_updates():
-    kwargs = dict(request.args)
-    if getenv("MODE") == "PUBLIC":
-        kwargs["private"] = False
-
-    updates = Update.get_updates(**kwargs)
-
-    return shared.return_json(
-        response=updates,
-    )
+@router.get("/", response_class=PrettyJsonResponse)
+async def list_updates(
+    **body: dict,
+):
+    return await Update.get_updates(**body)
 
 
-@router.route("/parse/", methods=["GET"])
-def parse_updates():
-    body = request.args
-    href = body["href"]
-
-    response = Update.parse_href(href)
-
-    return shared.return_json(
-        response=response,
-    )
+@router.get("/parse/", response_class=PrettyJsonResponse)
+async def parse_updates(
+    href: str,
+):
+    return Update.parse_href(href)

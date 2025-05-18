@@ -5,18 +5,24 @@ from enum import Enum
 
 class Frequency(Enum):
     # active:
-    MINUTES = "minutes"
-    HOURS = "hours"
-    DAYS = "days"
-    WEEKS = "weeks"
-    MONTHS = "months"
-    YEARS = "years"
+    MINUTES = "MINUTES"
+    HOURS = "HOURS"
+    DAYS = "DAYS"
+    WEEKS = "WEEKS"
+    MONTHS = "MONTHS"
+    YEARS = "YEARS"
     # disabled:
-    NEVER = "never"
+    NEVER = "NEVER"
 
     @classmethod
     def list(cls):
         return list(map(lambda c: c.value, cls))
+
+    # def __str__(self):
+    #     return self.value
+
+    # def __repr__(self):
+    #     return f"Frequency.{self.value.upper()}"
 
     def delay(self):
         if self == self.MINUTES:

@@ -5,47 +5,56 @@ from zoneinfo import ZoneInfo
 
 import emoji
 import requests
+from sqlalchemy import Column, ForeignKey, String, DateTime, UniqueConstraint, Integer
+from sqlalchemy import select
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import relationship
+from sqlalchemy.orm import DeclarativeBase
 
-from config.db import db
+from config.session import get_db_session, get_db_session_context
+from models.model_base import Base
 from models.model_feeds import Feed
 
 
-class Update(db.Model):
+class Update(Base):
+    __tablename__ = "update"
     # CREATE INDEX update_dt_event_desc_index ON feed_updates.update (dt_event DESC NULLS LAST);
     # CREATE INDEX update_feed_id ON feed_updates.update (feed_id);
     # REINDEX (verbose, concurrently) TABLE feed_updates.update;
     __table_args__ = (
-        db.UniqueConstraint("feed_id", "href"),
+        UniqueConstraint("feed_id", "href"),
         {
             "schema": "feed_updates",
         },
     )
 
     # DATA STRUCTURE
-    id = db.Column(
-        db.Integer,
+    id: Mapped[int] = Column(
+        Integer,
         primary_key=True,
+        autoincrement=True,
     )
-    feed_id: Mapped[int] = mapped_column(
-        db.ForeignKey(
+    feed_id: Mapped[int] = Column(
+        ForeignKey(
             "feed_updates.feed._id",
             ondelete="CASCADE",
         ),
         nullable=False,
         index=True,
     )
-    feed: Mapped["Feed"] = relationship(back_populates="updates")
+    feed: Mapped["Feed"] = relationship(
+        "Feed",
+        back_populates="updates",
+    )
     # CORE / REQUIRED
-    name = db.Column(
-        db.String(300),
+    name: Mapped[str] = Column(
+        String(300),
         nullable=False,
         # convert_unicode=True,  # activate later?
     )
-    href = db.Column(
-        db.String(300),
+    href: Mapped[str] = Column(
+        String(300),
         nullable=False,
     )
 
@@ -55,17 +64,17 @@ class Update(db.Model):
         return self.dt_event
 
     # METADATA
-    dt_event = db.Column(  # rename
-        db.DateTime(timezone=True),
+    dt_event: Mapped[datetime] = Column(  # rename
+        DateTime(timezone=True),
         nullable=False,
         index=True,
     )
-    dt_original = db.Column(
-        db.DateTime(timezone=True),
+    dt_original: Mapped[datetime] = Column(
+        DateTime(timezone=True),
         nullable=False,
     )
-    dt_created = db.Column(
-        db.DateTime,
+    dt_created: Mapped[datetime] = Column(
+        DateTime,
         default=dt.datetime.utcnow,
         nullable=False,
     )
@@ -145,47 +154,31 @@ class Update(db.Model):
             self.dt_event = a_week_ago
 
     @classmethod
-    def get_updates(cls, limit=140, private=None, _id=None):
-        kwargs = {}
-        if private is not None:
-            kwargs["private"] = private
+    async def get_updates(cls, limit=300, private=None, _id=None):
+        query = select(Feed)
         if _id is not None:
-            kwargs["_id"] = _id
+            query = query.where(Feed._id == _id)
+        if private is not None:
+            query = query.where(Feed.private == private)
 
-        if not kwargs:
-            # updates first, feeds second
-            updates = (
-                db.session.query(cls).order_by(cls.dt_event.desc()).limit(limit).all()
-            )
+        async with get_db_session_context() as session:
+            feed_data = {x._id: x.as_dict() for x in (await session.execute(query)).scalars().all()}
 
-            feed_data = {
-                x._id: x.as_dict()
-                for x in db.session.query(Feed).filter(
-                    Feed._id.in_(set(x.feed_id for x in updates))
-                )
-            }
-        else:
-            # feeds first, updates second
-            feeds = db.session.query(Feed).filter_by(**kwargs)
-            feed_data = {x._id: x.as_dict() for x in feeds}
-
-            updates = (
-                db.session.query(cls)
-                .filter(cls.feed_id.in_([feed._id for feed in feeds]))
+            query = (
+                select(cls)
+                .where(cls.feed_id.in_(feed_data.keys()))
                 .order_by(cls.dt_event.desc())
                 .limit(limit)
-                .all()
             )
+            updates = (await session.execute(query)).scalars().all()
 
-        updates = [
-            dict(
-                x.as_dict(),
-                feed_data=feed_data[x.feed_id],
-            )
-            for x in updates
-        ]
+        results = []
+        for x in updates:
+            update = x.as_dict()
+            update["feed_data"] = feed_data[x.feed_id]
+            results.append(update)
 
-        return updates
+        return results
 
     @staticmethod
     def parse_href(href: str) -> list["Update"]:
