@@ -1,4 +1,3 @@
-import asyncio
 from os import getenv
 
 import telegram
@@ -24,7 +23,7 @@ class TelegramService:
         )
 
     @classmethod
-    def send_feed_updates(cls, feed, updates):
+    async def send_feed_updates(cls, feed, updates):
         if getenv("TELEGRAM_BROADCAST", False) != "enabled":
             return
         if not updates:
@@ -43,31 +42,25 @@ class TelegramService:
             )
             # cutting big messages and avoiding footer being sent alone
             if len(message) > 2000 and each != updates[-1]:
-                asyncio.run(
-                    cls.send_message(
-                        message,
-                    )
+                await cls.send_message(
+                    message,
                 )
                 message = ""
 
         message += f"\n([EDIT](http://192.168.0.155:30011/feeds/{feed._id}/edit))"
 
-        asyncio.run(
-            cls.send_message(
-                message,
-            )
+        await cls.send_message(
+            message,
         )
 
     @classmethod
-    def send_update(cls, update):
+    async def send_update(cls, update):
         message = cls.MESSAGE_MARKDOWN.format(
             name=telegram.helpers.escape_markdown(update.name),
             href=telegram.helpers.escape_markdown(update.href),
             feed_id=str(int(update.feed_id)),
         )
 
-        asyncio.run(
-            cls.send_message(
-                message,
-            )
+        await cls.send_message(
+            message,
         )

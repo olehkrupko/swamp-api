@@ -281,7 +281,7 @@ class Feed(Base):
             self.delay()
 
             if notify:
-                TelegramService.send_feed_updates(
+                await TelegramService.send_feed_updates(
                     feed=self,
                     updates=notify,
                 )
