@@ -18,6 +18,10 @@ from services.service_frequency import Frequency
 from services.service_telegram import TelegramService
 
 
+if TYPE_CHECKING:
+    from models.model_updates import Update
+
+
 class Feed(Base):
     __tablename__ = "feed"
     # __table__
