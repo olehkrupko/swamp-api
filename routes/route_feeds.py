@@ -103,7 +103,6 @@ async def push_updates(
     query = query.options(joinedload(Feed.updates))
     # session.get(User, 4)
     feed = (await session.execute(query)).scalars().first()
-    updates = [Update(**x, feed_id=int(feed_id)) for x in updates]
 
     return await feed.ingest_updates(updates)
 

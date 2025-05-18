@@ -208,17 +208,6 @@ class Feed(Base):
     # FEED PARSING LOGIC BELOW
     ##########################
 
-    def update_href_not_present(self, href):
-        PRESENT = False
-
-        if not self.updates:
-            return not PRESENT
-
-        if href in [x.href for x in self.updates]:
-            return PRESENT
-
-        return not PRESENT
-
     # filter is used to remove unnecessary items
     # {field}        - don't skip what's mentioned there
     # {field}_ignore - skip these ones
@@ -259,35 +248,39 @@ class Feed(Base):
 
     # ingest => add to database
     # notify => send as notification
-    async def ingest_updates(self, updates):
-        # sort items and limit amount of updates
+    async def ingest_updates(self, updates: list[dict]):
+        notify = []
+        ingested = []
+        self_href_list = [x.href for x in self.updates]
+
+        # convert to Update type, sort and limit amount
+        updates = [Update(**x, feed_id=self.feed_id) for x in updates]
         updates.sort(key=lambda x: x.datetime, reverse=False)
-        if "limit" in self.json and isinstance(self.json["limit"], int):
-            updates = updates[: self.json["limit"]]
+        if isinstance(self.json.get("limit", None), int):
+            updates = updates[:self.json["limit"]]
 
         async with get_db_session_context() as session:
-            ingested, notify = [], []
             for each_update in filter(self.update_filter, updates):
                 # checking if href is present in DB
-                if self.update_href_not_present(each_update.href):
-                    if self.updates:
-                        each_update.dt_now()
-                        notify.append(each_update)
-                    else:
-                        each_update.dt_event_adjust_first()
-                    session.add(each_update)
-                    ingested.append(each_update)
+                if not self.updates:
+                    each_update.dt_event_adjust_first()
+                elif each_update.href in self_href_list:
+                    each_update.dt_now()
+                    notify.append(each_update)
+                else:
+                    continue
+
+                session.add(each_update)
+                ingested.append(each_update)
 
             self.delay()
-
-            if notify:
-                await TelegramService.send_feed_updates(
-                    feed=self,
-                    updates=notify,
-                )
-
             await session.merge(self)
-            await session.commit()
+
+        if notify:
+            await TelegramService.send_feed_updates(
+                feed=self,
+                updates=notify,
+            )
 
         return [x.as_dict() for x in ingested]
 
