@@ -3,7 +3,7 @@ from os import getenv
 from typing import List
 from typing import TYPE_CHECKING
 
-import requests
+import aiohttp
 from sqlalchemy import String, JSON, Integer
 from sqlalchemy import or_
 from sqlalchemy import func
@@ -292,9 +292,11 @@ class Feed(Base):
         return [x.as_dict() for x in ingested]
 
     @staticmethod
-    def parse_href(href: str) -> "Feed":
+    async def parse_href(href: str) -> "Feed":
         URL = f"{ getenv('SWAMP_PARSER') }/parse/explained?href={href}"
 
-        results = requests.get(URL)
+        async with aiohttp.ClientSession() as session:
+            async with session.get(URL) as response:
+                results = await response.read()
 
         return Feed(**results.json())

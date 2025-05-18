@@ -25,7 +25,7 @@ class TelegramService:
 
     @classmethod
     def send_feed_updates(cls, feed, updates):
-        if getenv("TELEGRAM_BROADCAST", False) is not True:
+        if getenv("TELEGRAM_BROADCAST", False) != "enabled":
             return
         if not updates:
             raise ValueError(f"Bulk cannot be empty {updates=}")

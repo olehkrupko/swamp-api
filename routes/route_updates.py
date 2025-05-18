@@ -20,4 +20,4 @@ async def list_updates(
 async def parse_updates(
     href: str,
 ):
-    return Update.parse_href(href)
+    return await Update.parse_href(href)

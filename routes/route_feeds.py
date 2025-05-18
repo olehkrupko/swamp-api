@@ -122,7 +122,7 @@ async def explain_feed(
         query = select(Feed).where(Feed._id == _id)
         feed = (await session.execute(query)).scalars().first()
     else:
-        feed = Feed.parse_href(href)
+        feed = await Feed.parse_href(href)
 
     similar_feeds = await feed.get_similar_feeds()
 
@@ -208,7 +208,7 @@ async def explain_feed(
 
 #             session = Session(db.engine)
 #             try:
-#                 feed = Feed.parse_href(line)
+#                 feed = await Feed.parse_href(line)
 
 #                 if not feed.get_similar_feeds():
 #                     with session.begin():

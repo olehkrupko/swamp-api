@@ -3,8 +3,8 @@ from datetime import timedelta
 from os import getenv
 from zoneinfo import ZoneInfo
 
+import aiohttp
 import emoji
-import requests
 from sqlalchemy import Column, ForeignKey, String, DateTime, UniqueConstraint, Integer
 from sqlalchemy import select
 from sqlalchemy.orm import Mapped
@@ -180,10 +180,12 @@ class Update(Base):
         return results
 
     @staticmethod
-    def parse_href(href: str) -> list["Update"]:
+    async def parse_href(href: str) -> list["Update"]:
         URL = f"{ getenv('SWAMP_PARSER') }/parse/updates?href={href}"
 
-        results = requests.get(URL)
+        async with aiohttp.ClientSession() as session:
+            async with session.get(URL) as response:
+                results = await response.read()
 
         updates = [
             Update(
