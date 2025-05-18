@@ -152,7 +152,7 @@ class Update(Base):
             self.dt_event = a_week_ago
 
     @classmethod
-    async def get_updates(cls, limit=300, private=None, _id=None):
+    async def get_updates(cls, limit: bool | None, private: bool | None, _id: int | None) -> list:
         query = select(Feed)
         if _id is not None:
             query = query.where(Feed._id == _id)

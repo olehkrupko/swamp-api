@@ -11,9 +11,16 @@ router = APIRouter(
 
 @router.get("/", response_class=PrettyJsonResponse)
 async def list_updates(
-    **body: dict,
+    limit: int = 300,
+    private: bool = None,
+    # TODO: separate _id to its own endpoint  /feed/{feed_id}/updates ?
+    _id: int = None,
 ):
-    return await Update.get_updates(**body)
+    return await Update.get_updates(
+        limit=limit,
+        private=private,
+        _id=_id,
+    )
 
 
 @router.get("/parse/", response_class=PrettyJsonResponse)
