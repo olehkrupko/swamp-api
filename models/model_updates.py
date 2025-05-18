@@ -5,10 +5,20 @@ from zoneinfo import ZoneInfo
 
 import aiohttp
 import emoji
-from sqlalchemy import Column, ForeignKey, String, DateTime, UniqueConstraint, Integer
-from sqlalchemy import select
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import relationship
+from sqlalchemy import (
+    DateTime,
+    ForeignKey,
+    func,
+    Integer,
+    select,
+    String,
+    UniqueConstraint,
+)
+from sqlalchemy.orm import (
+    Mapped,
+    mapped_column,
+    relationship,
+)
 
 from config.session import get_db_session_context
 from models.model_base import Base
@@ -28,12 +38,12 @@ class Update(Base):
     )
 
     # DATA STRUCTURE
-    id: Mapped[int] = Column(
+    id: Mapped[int] = mapped_column(
         Integer,
         primary_key=True,
         autoincrement=True,
     )
-    feed_id: Mapped[int] = Column(
+    feed_id: Mapped[int] = mapped_column(
         ForeignKey(
             "feed_updates.feed._id",
             ondelete="CASCADE",
@@ -46,12 +56,12 @@ class Update(Base):
         back_populates="updates",
     )
     # CORE / REQUIRED
-    name: Mapped[str] = Column(
+    name: Mapped[str] = mapped_column(
         String(300),
         nullable=False,
         # convert_unicode=True,  # activate later?
     )
-    href: Mapped[str] = Column(
+    href: Mapped[str] = mapped_column(
         String(300),
         nullable=False,
     )
@@ -62,18 +72,18 @@ class Update(Base):
         return self.dt_event
 
     # METADATA
-    dt_event: Mapped[datetime] = Column(  # rename
+    dt_event: Mapped[datetime] = mapped_column(  # rename
         DateTime(timezone=True),
         nullable=False,
         index=True,
     )
-    dt_original: Mapped[datetime] = Column(
+    dt_original: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
     )
-    dt_created: Mapped[datetime] = Column(
+    dt_created: Mapped[datetime] = mapped_column(
         DateTime,
-        default=dt.datetime.utcnow,
+        server_default=func.now(tz=dt.UTC),
         nullable=False,
     )
 
