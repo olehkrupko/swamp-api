@@ -286,7 +286,7 @@ class Feed(Base):
                     updates=notify,
                 )
 
-            session.merge(self)
+            await session.merge(self)
             await session.commit()
 
         return [x.as_dict() for x in ingested]
