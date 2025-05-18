@@ -1,8 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from config.config import settings
-# from config.scheduler import scheduler
 from routes import route_feeds, route_updates, route_frequency
 
 

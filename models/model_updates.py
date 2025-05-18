@@ -7,12 +7,10 @@ import emoji
 import requests
 from sqlalchemy import Column, ForeignKey, String, DateTime, UniqueConstraint, Integer
 from sqlalchemy import select
-from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import relationship
-from sqlalchemy.orm import DeclarativeBase
 
-from config.session import get_db_session, get_db_session_context
+from config.session import get_db_session_context
 from models.model_base import Base
 from models.model_feeds import Feed
 
@@ -162,7 +160,8 @@ class Update(Base):
             query = query.where(Feed.private == private)
 
         async with get_db_session_context() as session:
-            feed_data = {x._id: x.as_dict() for x in (await session.execute(query)).scalars().all()}
+            feed = (await session.execute(query)).scalars().all()
+            feed_data = {x._id: x.as_dict() for x in feed}
 
             query = (
                 select(cls)

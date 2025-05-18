@@ -4,16 +4,15 @@ from typing import List
 from typing import TYPE_CHECKING
 
 import requests
-from sqlalchemy import Boolean, Column, DateTime, Enum, String, JSON, Integer
+from sqlalchemy import String, JSON, Integer
 from sqlalchemy import or_
 from sqlalchemy import func
 from sqlalchemy import select
-from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import relationship
 
-from config.session import get_db_session, get_db_session_context
+from config.session import get_db_session_context
 from models.model_base import Base
 from services.service_frequency import Frequency
 from services.service_telegram import TelegramService
@@ -144,11 +143,11 @@ class Feed(Base):
             query = select(Feed).where(
                 Feed._id != getattr(self, "id", None),
                 or_(
-                        Feed.title == self.title,
-                        # " - " is used to separate title from website name
-                        Feed.title == self.title.split(" - ")[0],
-                        Feed.href == self.href,
-                    ),
+                    Feed.title == self.title,
+                    # " - " is used to separate title from website name
+                    Feed.title == self.title.split(" - ")[0],
+                    Feed.href == self.href,
+                ),
             )
             similar_feeds = (await session.execute(query)).scalars().first()
 

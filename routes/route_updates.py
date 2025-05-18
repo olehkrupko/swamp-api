@@ -1,5 +1,3 @@
-from os import getenv
-
 from fastapi import APIRouter
 
 from models.model_updates import Update

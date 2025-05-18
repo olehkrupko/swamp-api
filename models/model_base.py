@@ -3,8 +3,6 @@ import enum
 import sqlalchemy
 from sqlalchemy.orm import DeclarativeBase
 
-from services.service_frequency import Frequency
-
 
 # declarative base class
 class Base(DeclarativeBase):

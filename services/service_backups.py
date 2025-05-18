@@ -2,7 +2,7 @@ import json
 import os
 from datetime import datetime
 
-from config.session import get_db_session, get_db_session_context
+from config.session import get_db_session_context
 from models.model_feeds import Feed
 from sqlalchemy import select
 

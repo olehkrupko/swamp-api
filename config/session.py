@@ -19,7 +19,7 @@ async_session = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncS
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     async with async_session() as session:
         try:
-            session.info['read_only'] = True
+            session.info["read_only"] = True
             yield session
             await session.commit()
         except exc.SQLAlchemyError:
@@ -31,7 +31,7 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
 async def get_db_session_context() -> AsyncGenerator[AsyncSession, None]:
     async with async_session() as session:
         try:
-            session.info['read_only'] = True
+            session.info["read_only"] = True
             yield session
             await session.commit()
         except exc.SQLAlchemyError:
