@@ -257,7 +257,7 @@ class Feed(Base):
         updates = [Update(**x, feed_id=self.feed_id) for x in updates]
         updates.sort(key=lambda x: x.datetime, reverse=False)
         if isinstance(self.json.get("limit", None), int):
-            updates = updates[:self.json["limit"]]
+            updates = updates[: self.json["limit"]]
 
         async with get_db_session_context() as session:
             for each_update in filter(self.update_filter, updates):

@@ -5,7 +5,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from config.session import get_db_session
 from config.scheduler import scheduler
 from models.model_feeds import Feed
-from models.model_updates import Update
 from responses.PrettyJsonResponse import PrettyJsonResponse
 from services.service_backups import Backup
 from services.service_frequency import Frequency
