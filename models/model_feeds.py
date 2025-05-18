@@ -18,10 +18,6 @@ from services.service_frequency import Frequency
 from services.service_telegram import TelegramService
 
 
-if TYPE_CHECKING:
-    from models.model_updates import Update
-
-
 class Feed(Base):
     __tablename__ = "feed"
     # __table__
@@ -248,13 +244,12 @@ class Feed(Base):
 
     # ingest => add to database
     # notify => send as notification
-    async def ingest_updates(self, updates: list[dict]):
+    async def ingest_updates(self, updates: list["Update"]) -> list[dict]:
         notify = []
         ingested = []
         self_href_list = [x.href for x in self.updates]
 
-        # convert to Update type, sort and limit amount
-        updates = [Update(**x, feed_id=self.feed_id) for x in updates]
+        # sort updates and limit amount
         updates.sort(key=lambda x: x.datetime, reverse=False)
         if isinstance(self.json.get("limit", None), int):
             updates = updates[: self.json["limit"]]
