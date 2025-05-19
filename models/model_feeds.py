@@ -8,6 +8,7 @@ from sqlalchemy import String, JSON, Integer
 from sqlalchemy import or_
 from sqlalchemy import func
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import relationship
@@ -141,20 +142,18 @@ class Feed(Base):
     def __repr__(self):
         return str(self.as_dict())
 
-    async def get_similar_feeds(self):
-        async with get_db_session_context() as session:
-            query = select(Feed).where(
-                Feed._id != getattr(self, "id", None),
-                or_(
-                    Feed.title == self.title,
-                    # " - " is used to separate title from website name
-                    Feed.title == self.title.split(" - ")[0],
-                    Feed.href == self.href,
-                ),
-            )
-            similar_feeds = (await session.execute(query)).unique().scalars().all()
+    async def get_similar_feeds(self, session: AsyncSession):
+        query = select(Feed).where(
+            Feed._id != getattr(self, "id", None),
+            or_(
+                Feed.title == self.title,
+                # " - " is used to separate title from website name
+                Feed.title == self.title.split(" - ")[0],
+                Feed.href == self.href,
+            ),
+        )
 
-        return similar_feeds
+        return (await session.execute(query)).unique().scalars().all()
 
     def update_attr(self, key: str, value):
         if not hasattr(self, key):
@@ -244,7 +243,7 @@ class Feed(Base):
 
     # ingest => add to database
     # notify => send as notification
-    async def ingest_updates(self, updates: list["Update"]) -> list[dict]:
+    async def ingest_updates(self, updates: list["Update"], session: AsyncSession) -> list[dict]:
         notify = []
         ingested = []
         self_href_list = [x.href for x in self.updates]
@@ -254,22 +253,21 @@ class Feed(Base):
         if isinstance(self.json.get("limit", None), int):
             updates = updates[: self.json["limit"]]
 
-        async with get_db_session_context() as session:
-            for each_update in filter(self.update_filter, updates):
-                # checking if href is present in DB
-                if not self.updates:
-                    each_update.dt_event_adjust_first()
-                elif each_update.href not in self_href_list:
-                    each_update.dt_now()
-                    notify.append(each_update)
-                else:
-                    continue
+        for each_update in filter(self.update_filter, updates):
+            # checking if href is present in DB
+            if not self.updates:
+                each_update.dt_event_adjust_first()
+            elif each_update.href not in self_href_list:
+                each_update.dt_now()
+                notify.append(each_update)
+            else:
+                continue
 
-                session.add(each_update)
-                ingested.append(each_update)
+            session.add(each_update)
+            ingested.append(each_update)
 
-            self.delay()
-            await session.merge(self)
+        self.delay()
+        session.add(self)
 
         if notify:
             await TelegramService.send_feed_updates(

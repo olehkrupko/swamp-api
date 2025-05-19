@@ -14,6 +14,7 @@ from sqlalchemy import (
     String,
     UniqueConstraint,
 )
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import (
     Mapped,
     mapped_column,
@@ -167,6 +168,7 @@ class Update(Base):
         limit: bool | None,
         private: bool | None,
         _id: int | None,
+        session: AsyncSession,
     ) -> list:
         query = select(Feed)
         if _id is not None:
@@ -174,17 +176,16 @@ class Update(Base):
         if private is not None:
             query = query.where(Feed.private == private)
 
-        async with get_db_session_context() as session:
-            feed = (await session.execute(query)).scalars().all()
-            feed_data = {x._id: x.as_dict() for x in feed}
+        feed = (await session.execute(query)).unique().scalars().all()
+        feed_data = {x._id: x.as_dict() for x in feed}
 
-            query = (
-                select(cls)
-                .where(cls.feed_id.in_(feed_data.keys()))
-                .order_by(cls.dt_event.desc())
-                .limit(limit)
-            )
-            updates = (await session.execute(query)).scalars().all()
+        query = (
+            select(cls)
+            .where(cls.feed_id.in_(feed_data.keys()))
+            .order_by(cls.dt_event.desc())
+            .limit(limit)
+        )
+        updates = (await session.execute(query)).unique().scalars().all()
 
         results = []
         for x in updates:

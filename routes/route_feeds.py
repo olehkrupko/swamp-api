@@ -65,7 +65,7 @@ async def explain_feed(
     else:
         feed = await Feed.parse_href(href)
 
-    similar_feeds = await feed.get_similar_feeds()
+    similar_feeds = await feed.get_similar_feeds(session)
 
     # if there are no similar feeds
     # then we can add it to the database and ignore responses
@@ -148,7 +148,7 @@ async def push_updates(
     feed = (await session.execute(query)).scalars().first()
     updates = [Update(**x, feed_id=feed._id) for x in updates]
 
-    return await feed.ingest_updates(updates)
+    return await feed.ingest_updates(updates, session)
 
 
 # # It was used at some point, but it's not needed.
@@ -238,10 +238,12 @@ async def push_updates(
 # Generate backup of all feeds every 6 hours
 # @scheduler.scheduled_job("cron", id="backup_generator", hour="*/6")
 # @router.route("/backup/", methods=["GET"])  # for testing purposes
-async def backup():
+async def backup(
+    session: AsyncSession = Depends(get_db_session)
+):
     # TODO: replace scheduler?
     with scheduler.app.app_context():
-        backup_new = await Backup.dump()
+        backup_new = await Backup.dump(session=session)
 
         print(f"Generated backup {backup_new.filename}")
         return backup_new.filename
