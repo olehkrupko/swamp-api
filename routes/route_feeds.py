@@ -49,6 +49,46 @@ async def create_feed(
     return feed.as_dict()
 
 
+@router.get("/parse/", response_class=PrettyJsonResponse)
+async def explain_feed(
+    href: str,
+    mode: str = "explain",
+    _id: int = None,
+    session: AsyncSession = Depends(get_db_session),
+):
+    if mode not in ["explain", "push", "push_ignore"]:
+        raise ValueError("Mode not supported")
+
+    if _id:
+        query = select(Feed).where(Feed._id == _id)
+        feed = (await session.execute(query)).scalars().first()
+    else:
+        feed = await Feed.parse_href(href)
+
+    similar_feeds = await feed.get_similar_feeds()
+
+    # if there are no similar feeds
+    # then we can add it to the database and ignore responses
+    if mode == "push" and not similar_feeds:
+        session.add(feed)
+        await session.commit()
+        # we don't need to refresh the feed, because it's not used
+        session.refresh(feed)
+    elif mode == "push_ignore":
+        try:
+            session.add(feed)
+            await session.commit()
+        except sqlalchemy_IntegrityError:
+            # ignoring it as expected behaviour:
+            # push_ignore is exactly to ignore this error
+            pass
+
+    return {
+        "explained": feed.as_dict(),
+        "similar_feeds": [x.as_dict() for x in similar_feeds],
+    }
+
+
 @router.get("/{feed_id}/", response_class=PrettyJsonResponse)
 async def read_feed(
     feed_id: int,
@@ -106,46 +146,6 @@ async def push_updates(
     updates = [Update(**x, feed_id=feed._id) for x in updates]
 
     return await feed.ingest_updates(updates)
-
-
-@router.get("/parse/", response_class=PrettyJsonResponse)
-async def explain_feed(
-    href: str,
-    mode: str = "explain",
-    _id: int = None,
-    session: AsyncSession = Depends(get_db_session),
-):
-    if mode not in ["explain", "push", "push_ignore"]:
-        raise ValueError("Mode not supported")
-
-    if _id:
-        query = select(Feed).where(Feed._id == _id)
-        feed = (await session.execute(query)).scalars().first()
-    else:
-        feed = await Feed.parse_href(href)
-
-    similar_feeds = await feed.get_similar_feeds()
-
-    # if there are no similar feeds
-    # then we can add it to the database and ignore responses
-    if mode == "push" and not similar_feeds:
-        session.add(feed)
-        await session.commit()
-        # we don't need to refresh the feed, because it's not used
-        session.refresh(feed)
-    elif mode == "push_ignore":
-        try:
-            session.add(feed)
-            await session.commit()
-        except sqlalchemy_IntegrityError:
-            # ignoring it as expected behaviour:
-            # push_ignore is exactly to ignore this error
-            pass
-
-    return {
-        "explained": feed.as_dict(),
-        "similar_feeds": [x.as_dict() for x in similar_feeds],
-    }
 
 
 # # It was used at some point, but it's not needed.
