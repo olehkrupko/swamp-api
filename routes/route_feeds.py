@@ -237,9 +237,7 @@ async def push_updates(
 # Generate backup of all feeds every 6 hours
 @scheduler.scheduled_job("cron", id="backup_generator", hour="*/6")
 # @router.route("/backup/", methods=["GET"])  # for testing purposes
-async def backup(
-    session: AsyncSession = Depends(get_db_session)
-) -> str:
+async def backup(session: AsyncSession = Depends(get_db_session)) -> str:
     # TODO: replace scheduler?
     with scheduler.app.app_context():
         backup_new = await Backup.dump(session=session)
