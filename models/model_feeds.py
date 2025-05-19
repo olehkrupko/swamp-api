@@ -283,6 +283,7 @@ class Feed(Base):
 
         async with aiohttp.ClientSession() as session:
             async with session.get(URL) as response:
-                results = await response.read()
+                results = await response.json()
+                results["frequency"] = results["frequency"].upper()
 
-        return Feed(**results.json())
+        return Feed(**results)
