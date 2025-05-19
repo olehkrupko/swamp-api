@@ -109,7 +109,11 @@ async def update_feed(
     query = select(Feed).where(Feed._id == feed_id)
     feed = (await session.execute(query)).scalars().first()
 
-    feed.update_from_dict(body)
+    for key, value in body.items():
+        feed.update_attr(
+            key=key,
+            value=value,
+        )
 
     session.add(feed)
     await session.commit()

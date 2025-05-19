@@ -156,25 +156,18 @@ class Feed(Base):
 
         return similar_feeds
 
-    def update_from_dict(self, data: dict):
-        for key, value in data.items():
-            self.update_attr(
-                key=key,
-                value=value,
-            )
-
     def update_attr(self, key: str, value):
         if not hasattr(self, key):
             # no field to update
-            raise ValueError(f"{key=} does not exist")
+            raise ValueError(f"{key=}/{value=} does not exist")
+        elif getattr(self, key) == value:
+            # nothing to update
+            return
         elif key[0] == "_":
             # you cannot update these fields
             raise ValueError(f"{key=} is read-only")
         elif key == "frequency":
             self.update_frequency(value)
-        elif getattr(self, key) == value:
-            # nothing to update
-            return
         else:
             setattr(self, key, value)
 
