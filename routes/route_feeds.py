@@ -102,13 +102,13 @@ async def read_feed(
 @router.put("/{feed_id}/", response_class=PrettyJsonResponse)
 async def update_feed(
     feed_id: int,
+    feed_updated: dict,
     session: AsyncSession = Depends(get_db_session),
-    **body: dict,
 ):
     query = select(Feed).where(Feed._id == feed_id)
     feed = (await session.execute(query)).scalars().first()
 
-    for key, value in body.items():
+    for key, value in feed_updated.items():
         feed.update_attr(
             key=key,
             value=value,
