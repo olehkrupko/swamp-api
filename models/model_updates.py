@@ -21,7 +21,6 @@ from sqlalchemy.orm import (
     relationship,
 )
 
-from config.session import get_db_session_context
 from models.model_base import Base
 from models.model_feeds import Feed
 

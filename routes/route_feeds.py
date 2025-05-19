@@ -10,7 +10,6 @@ from responses.PrettyJsonResponse import PrettyJsonResponse
 from services.service_backups import Backup
 from services.service_frequency import Frequency
 from sqlalchemy import select
-from sqlalchemy.orm import joinedload
 
 
 router = APIRouter(
@@ -240,7 +239,7 @@ async def push_updates(
 # @router.route("/backup/", methods=["GET"])  # for testing purposes
 async def backup(
     session: AsyncSession = Depends(get_db_session)
-):
+) -> str:
     # TODO: replace scheduler?
     with scheduler.app.app_context():
         backup_new = await Backup.dump(session=session)

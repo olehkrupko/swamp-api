@@ -4,16 +4,21 @@ from typing import List
 from typing import TYPE_CHECKING
 
 import aiohttp
-from sqlalchemy import String, JSON, Integer
-from sqlalchemy import or_
-from sqlalchemy import func
-from sqlalchemy import select
+from sqlalchemy import (
+    func,
+    Integer,
+    JSON,
+    or_,
+    select,
+    String,
+)
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import mapped_column
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import (
+    mapped_column,
+    Mapped,
+    relationship,
+)
 
-from config.session import get_db_session_context
 from models.model_base import Base
 from services.service_frequency import Frequency
 from services.service_telegram import TelegramService
@@ -243,7 +248,11 @@ class Feed(Base):
 
     # ingest => add to database
     # notify => send as notification
-    async def ingest_updates(self, updates: list["Update"], session: AsyncSession) -> list[dict]:
+    async def ingest_updates(
+        self,
+        updates: list["Update"],
+        session: AsyncSession,
+    ) -> list[dict]:
         notify = []
         ingested = []
         self_href_list = [x.href for x in self.updates]
