@@ -263,7 +263,7 @@ class Feed(Base):
                 # checking if href is present in DB
                 if not self.updates:
                     each_update.dt_event_adjust_first()
-                elif each_update.href in self_href_list:
+                elif each_update.href not in self_href_list:
                     each_update.dt_now()
                     notify.append(each_update)
                 else:
