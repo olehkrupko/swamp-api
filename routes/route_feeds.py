@@ -31,7 +31,7 @@ async def list_feeds(
     if active is True:
         query = query.where(Feed.frequency != Frequency.NEVER)
 
-    feeds = (await session.execute(query)).scalars().all()
+    feeds = (await session.execute(query)).unique().scalars().all()
     return [feed.as_dict() for feed in feeds]
 
 
@@ -140,7 +140,6 @@ async def push_updates(
     session: AsyncSession = Depends(get_db_session),
 ):
     query = select(Feed).where(Feed._id == feed_id)
-    query = query.options(joinedload(Feed.updates))
     # session.get(User, 4)
     feed = (await session.execute(query)).scalars().first()
     updates = [Update(**x, feed_id=feed._id) for x in updates]

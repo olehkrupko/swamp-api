@@ -85,7 +85,10 @@ class Feed(Base):
     )
     json: Mapped[dict] = mapped_column(JSON)
     # RELATIONSHIPS
-    updates: Mapped[List["Update"]] = relationship(back_populates="feed")
+    updates: Mapped[List["Update"]] = relationship(
+        back_populates="feed",
+        lazy="joined",
+    )
 
     def __init__(
         self,
@@ -149,7 +152,7 @@ class Feed(Base):
                     Feed.href == self.href,
                 ),
             )
-            similar_feeds = (await session.execute(query)).scalars().first()
+            similar_feeds = (await session.execute(query)).unique().scalars().all()
 
         return similar_feeds
 
