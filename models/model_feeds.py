@@ -34,7 +34,6 @@ logger = logging.getLogger(__name__)
 
 class Feed(Base):
     __tablename__ = "feed"
-    # __table__
 
     # TECHNICAL
     _id: Mapped[int] = mapped_column(
@@ -71,20 +70,7 @@ class Feed(Base):
         # Boolean,
         default=False,
     )
-    # frequency = Column(
-    #     Enum(
-    #         Frequency,
-    #         values_callable=lambda x: [str(each.value) for each in Frequency],
-    #     ),
-    #     default=Frequency.WEEKS,
-    # )
     frequency: Mapped[Frequency] = mapped_column(
-        # Enum(
-        #     Frequency,
-        #     # values_callable=lambda x: [str(each.value) for each in Frequency],
-        #     # ).values_callable,
-        # ),
-        # ).values_callable(lambda x: [str(each.value) for each in Frequency]),
         default=Frequency.WEEKS,
     )
     notes: Mapped[str] = mapped_column(

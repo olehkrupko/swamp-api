@@ -30,10 +30,11 @@ logger = logging.getLogger(__name__)
 
 
 class Update(Base):
-    __tablename__ = "update"
     # CREATE INDEX update_dt_event_desc_index ON feed_updates.update (dt_event DESC NULLS LAST);
     # CREATE INDEX update_feed_id ON feed_updates.update (feed_id);
     # REINDEX (verbose, concurrently) TABLE feed_updates.update;
+
+    __tablename__ = "update"
     __table_args__ = (
         UniqueConstraint("feed_id", "href"),
         Base.__table_args__,
