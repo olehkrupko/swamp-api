@@ -4,17 +4,15 @@ from enum import Enum
 
 
 class Frequency(Enum):
-    # TODO: it seems that the values are not used, Enum names are used instead
-
     # active:
-    MINUTES = None
-    HOURS = None
-    DAYS = None
-    WEEKS = None
-    MONTHS = None
-    YEARS = None
+    MINUTES = "MINUTES"
+    HOURS = "HOURS"
+    DAYS = "DAYS"
+    WEEKS = "WEEKS"
+    MONTHS = "MONTHS"
+    YEARS = "YEARS"
     # disabled:
-    NEVER = None
+    NEVER = "NEVER"
 
     @classmethod
     def list(cls):
