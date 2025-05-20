@@ -34,7 +34,7 @@ async def list_feeds(
     if active is True:
         query = query.where(Feed.frequency != Frequency.NEVER)
 
-    feeds = await SQLAlchemy.execute(
+    feeds = await SQLAlchemy.execute_all(
         query=query,
         session=session,
     )
@@ -67,7 +67,10 @@ async def explain_feed(
 
     if _id:
         query = select(Feed).where(Feed._id == _id)
-        feed = (await session.execute(query)).scalars().first()
+        feed = await SQLAlchemy.execute_first(
+            query=query,
+            session=session,
+        )
     else:
         feed = await Feed.parse_href(href)
 
@@ -101,7 +104,10 @@ async def read_feed(
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
 ):
     query = select(Feed).where(Feed._id == feed_id)
-    feed = (await session.execute(query)).scalars().first()
+    feed = await SQLAlchemy.execute_first(
+        query=query,
+        session=session,
+    )
 
     return feed.as_dict()
 
@@ -113,7 +119,10 @@ async def update_feed(
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
 ):
     query = select(Feed).where(Feed._id == feed_id)
-    feed = (await session.execute(query)).scalars().first()
+    feed = await SQLAlchemy.execute_first(
+        query=query,
+        session=session,
+    )
 
     for key, value in feed_updated.items():
         feed.update_attr(
@@ -133,7 +142,10 @@ async def delete_feed(
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
 ):
     query = select(Feed).where(Feed._id == feed_id)
-    feed = (await session.execute(query)).scalars().first()
+    feed = await SQLAlchemy.execute_first(
+        query=query,
+        session=session,
+    )
 
     feed.delete()
     await session.commit()
@@ -151,7 +163,10 @@ async def push_updates(
 ):
     query = select(Feed).where(Feed._id == feed_id)
     # session.get(User, 4)
-    feed = (await session.execute(query)).scalars().first()
+    feed = await SQLAlchemy.execute_first(
+        query=query,
+        session=session,
+    )
     updates = [Update(**x, feed_id=feed._id) for x in updates]
 
     return await feed.ingest_updates(updates, session)

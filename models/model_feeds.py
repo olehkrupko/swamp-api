@@ -147,7 +147,7 @@ class Feed(Base):
             ),
         )
 
-        return await SQLAlchemy.execute(
+        return await SQLAlchemy.execute_all(
             query=query,
             session=session,
         )

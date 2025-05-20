@@ -33,5 +33,8 @@ class SQLAlchemy:
                 await session.rollback()
                 raise
 
-    async def execute(query, session: AsyncSession):
+    async def execute_first(query, session: AsyncSession):
+        return (await session.execute(query)).scalars().first()
+
+    async def execute_all(query, session: AsyncSession):
         return (await session.execute(query)).unique().scalars().all()

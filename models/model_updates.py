@@ -181,7 +181,7 @@ class Update(Base):
         if private is not None:
             query = query.where(Feed.private == private)
 
-        feed = await SQLAlchemy.execute(
+        feed = await SQLAlchemy.execute_all(
             query=query,
             session=session,
         )
@@ -193,7 +193,7 @@ class Update(Base):
             .order_by(cls.dt_event.desc())
             .limit(limit)
         )
-        updates = await SQLAlchemy.execute(
+        updates = await SQLAlchemy.execute_all(
             query=query,
             session=session,
         )

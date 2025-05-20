@@ -62,7 +62,7 @@ class Backup:
     @staticmethod
     async def get_data(session: AsyncSession):
         query = select(Feed)
-        feeds = await SQLAlchemy.execute(
+        feeds = await SQLAlchemy.execute_all(
             query=query,
             session=session,
         )
