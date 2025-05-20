@@ -22,6 +22,7 @@ from sqlalchemy.orm import (
 from config.settings import settings
 from models.model_base import Base
 from services.service_frequency import Frequency
+from services.service_sqlalchemy import SQLAlchemy
 from services.service_telegram import TelegramService
 
 
@@ -148,7 +149,10 @@ class Feed(Base):
             ),
         )
 
-        return (await session.execute(query)).unique().scalars().all()
+        return await SQLAlchemy.execute(
+            query=query,
+            session=session,
+        )
 
     def update_attr(self, key: str, value):
         if not hasattr(self, key):

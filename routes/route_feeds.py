@@ -12,6 +12,8 @@ from services.service_backups import Backup
 from services.service_frequency import Frequency
 from sqlalchemy import select
 
+from services.service_sqlalchemy import SQLAlchemy
+
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +36,10 @@ async def list_feeds(
     if active is True:
         query = query.where(Feed.frequency != Frequency.NEVER)
 
-    feeds = (await session.execute(query)).unique().scalars().all()
+    feeds = await SQLAlchemy.execute(
+        query=query,
+        session=session,
+    )
     return [feed.as_dict() for feed in feeds]
 
 

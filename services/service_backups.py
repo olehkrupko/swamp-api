@@ -6,6 +6,8 @@ from models.model_feeds import Feed
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from services.service_sqlalchemy import SQLAlchemy
+
 
 class Backup:
     BACKUP_LOCATION = "/backups"
@@ -60,7 +62,10 @@ class Backup:
     @staticmethod
     async def get_data(session: AsyncSession):
         query = select(Feed)
-        feeds = (await session.execute(query)).unique().scalars().all()
+        feeds = await SQLAlchemy.execute(
+            query=query,
+            session=session,
+        )
         return [feed.as_dict() for feed in feeds]
 
     @classmethod

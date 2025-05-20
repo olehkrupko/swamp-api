@@ -24,6 +24,7 @@ from sqlalchemy.orm import (
 from config.settings import settings
 from models.model_base import Base
 from models.model_feeds import Feed
+from services.service_sqlalchemy import SQLAlchemy
 
 
 logger = logging.getLogger(__name__)
@@ -179,7 +180,10 @@ class Update(Base):
         if private is not None:
             query = query.where(Feed.private == private)
 
-        feed = (await session.execute(query)).unique().scalars().all()
+        feed = await SQLAlchemy.execute(
+            query=query,
+            session=session,
+        )
         feed_data = {x._id: x.as_dict() for x in feed}
 
         query = (
@@ -188,7 +192,10 @@ class Update(Base):
             .order_by(cls.dt_event.desc())
             .limit(limit)
         )
-        updates = (await session.execute(query)).unique().scalars().all()
+        updates = await SQLAlchemy.execute(
+            query=query,
+            session=session,
+        )
 
         results = []
         for x in updates:

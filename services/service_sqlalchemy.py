@@ -32,3 +32,6 @@ class SQLAlchemy:
             except exc.SQLAlchemyError:
                 await session.rollback()
                 raise
+
+    async def execute(query, session: AsyncSession):
+        return (await session.execute(query)).unique().scalars().all()
