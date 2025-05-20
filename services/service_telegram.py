@@ -22,7 +22,7 @@ class TelegramService:
 
     @classmethod
     async def send_feed_updates(cls, feed, updates):
-        if settings.TELEGRAM_BROADCAST is True:
+        if settings.TELEGRAM_BROADCAST is not True:
             return
         if not updates:
             raise ValueError(f"Bulk cannot be empty {updates=}")
