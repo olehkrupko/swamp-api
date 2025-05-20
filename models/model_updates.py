@@ -159,9 +159,7 @@ class Update(Base):
         )
 
     def dt_event_adjust_first(self):
-        raise ValueError(
-            "Update.dt_event_adjust_first() is disabled for now"
-        )
+        raise ValueError("Update.dt_event_adjust_first() is disabled for now")
         now = self.zone_fix(dt.datetime.now(ZoneInfo(settings.TIMEZONE_LOCAL)))
         a_week_ago = now - timedelta(days=7)
 
