@@ -136,14 +136,17 @@ class Feed(Base):
         return str(self.as_dict())
 
     async def get_similar_feeds(self, session: AsyncSession):
-        query = select(Feed).where(
-            Feed._id != getattr(self, "id", None),
-            or_(
-                Feed.title == self.title,
-                # " - " is used to separate title from website name
-                Feed.title == self.title.split(" - ")[0],
-                Feed.href == self.href,
-            ),
+        query = (
+            select(Feed)
+            .where(
+                Feed._id != getattr(self, "id", None),
+                or_(
+                    Feed.title == self.title,
+                    # " - " is usually used to separate title from website name
+                    Feed.title == self.title.split(" - ")[0],
+                    Feed.href == self.href,
+                ),
+            )
         )
 
         return await SQLAlchemy.execute(
@@ -154,7 +157,7 @@ class Feed(Base):
     def update_attr(self, key: str, value):
         if not hasattr(self, key):
             # no field to update
-            raise ValueError(f"{key=}/{value=} does not exist")
+            raise ValueError(f"{key=}: {value=} does not exist")
         elif getattr(self, key) == value:
             # nothing to update
             return

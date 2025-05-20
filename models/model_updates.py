@@ -198,9 +198,9 @@ class Update(Base):
         )
 
         results = []
-        for x in updates:
-            update = x.as_dict()
-            update["feed_data"] = feed_data[x.feed_id]
+        for each_update in updates:
+            update = each_update.as_dict()
+            update["feed_data"] = feed_data[each_update.feed_id]
             results.append(update)
 
         return results
