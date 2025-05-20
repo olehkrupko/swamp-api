@@ -1,6 +1,6 @@
-from os import getenv
-
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
+from config.settings import settings
 
-scheduler = AsyncIOScheduler(timezone=getenv("TIMEZONE_LOCAL"))
+
+scheduler = AsyncIOScheduler(timezone=settings.TIMEZONE_LOCAL)

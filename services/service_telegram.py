@@ -1,12 +1,10 @@
-from os import getenv
-
 import telegram
 from telegram.helpers import escape_markdown as em
 
+from config.settings import settings
+
 
 class TelegramService:
-    CHAT_ID = getenv("TELEGRAM_CHATID")
-    TOKEN = getenv("TELEGRAM_BOTTOKEN")
     PARSE_MODE = "markdown"
     MESSAGE_MARKDOWN = (
         "{name}\n"
@@ -16,15 +14,15 @@ class TelegramService:
 
     @classmethod
     async def send_message(cls, msg):
-        await telegram.Bot(cls.TOKEN).sendMessage(
+        await telegram.Bot(settings.TELEGRAM_BOTTOKEN).sendMessage(
             parse_mode=cls.PARSE_MODE,
-            chat_id=cls.CHAT_ID,
+            chat_id=settings.TELEGRAM_CHATID,
             text=msg,
         )
 
     @classmethod
     async def send_feed_updates(cls, feed, updates):
-        if getenv("TELEGRAM_BROADCAST", False) != "enabled":
+        if settings.TELEGRAM_BROADCAST != "enabled":
             return
         if not updates:
             raise ValueError(f"Bulk cannot be empty {updates=}")

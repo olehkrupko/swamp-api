@@ -1,6 +1,5 @@
 import logging
 from datetime import datetime
-from os import getenv
 from typing import List
 from typing import TYPE_CHECKING
 
@@ -20,6 +19,7 @@ from sqlalchemy.orm import (
     relationship,
 )
 
+from config.settings import settings
 from models.model_base import Base
 from services.service_frequency import Frequency
 from services.service_telegram import TelegramService
@@ -44,11 +44,11 @@ class Feed(Base):
     )
     _created: Mapped[datetime] = mapped_column(
         # DateTime,
-        server_default=func.now(tz=getenv("TIMEZONE_LOCAL")),
+        server_default=func.now(tz=settings.TIMEZONE_LOCAL),
     )
     _delayed: Mapped[datetime] = mapped_column(
         # DateTime,
-        server_default=func.now(tz=getenv("TIMEZONE_LOCAL")),
+        server_default=func.now(tz=settings.TIMEZONE_LOCAL),
     )
     # CORE / REQUIRED
     title: Mapped[str] = mapped_column(
@@ -292,7 +292,7 @@ class Feed(Base):
 
     @staticmethod
     async def parse_href(href: str) -> "Feed":
-        URL = f"{ getenv('SWAMP_PARSER') }/parse/explained?href={href}"
+        URL = f"{ settings.SWAMP_PARSER }/parse/explained?href={href}"
 
         async with aiohttp.ClientSession() as session:
             async with session.get(URL) as response:

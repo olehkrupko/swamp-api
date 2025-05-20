@@ -1,7 +1,6 @@
 import datetime as dt
 import logging
 from datetime import timedelta
-from os import getenv
 from zoneinfo import ZoneInfo
 
 import aiohttp
@@ -22,6 +21,7 @@ from sqlalchemy.orm import (
     relationship,
 )
 
+from config.settings import settings
 from models.model_base import Base
 from models.model_feeds import Feed
 
@@ -146,18 +146,18 @@ class Update(Base):
     def zone_fix(datetime):
         if datetime.tzinfo:
             # if tzinfo present — convert to current one
-            return datetime.astimezone(ZoneInfo(getenv("TIMEZONE_LOCAL")))
+            return datetime.astimezone(ZoneInfo(settings.TIMEZONE_LOCAL))
         else:
             # if no tzinfo — replace it with current one
-            return datetime.replace(tzinfo=ZoneInfo(getenv("TIMEZONE_LOCAL")))
+            return datetime.replace(tzinfo=ZoneInfo(settings.TIMEZONE_LOCAL))
 
     def dt_now(self):
         self.dt_event = self.zone_fix(
-            dt.datetime.now(ZoneInfo(getenv("TIMEZONE_LOCAL")))
+            dt.datetime.now(ZoneInfo(settings.TIMEZONE_LOCAL))
         )
 
     def dt_event_adjust_first(self):
-        now = self.zone_fix(dt.datetime.now(ZoneInfo(getenv("TIMEZONE_LOCAL"))))
+        now = self.zone_fix(dt.datetime.now(ZoneInfo(settings.TIMEZONE_LOCAL)))
         a_week_ago = now - timedelta(days=7)
 
         # all recent events are moved to the past to avoid confusion
@@ -199,7 +199,7 @@ class Update(Base):
 
     @staticmethod
     async def parse_href(href: str) -> list["Update"]:
-        URL = f"{ getenv('SWAMP_PARSER') }/parse/updates?href={href}"
+        URL = f"{ settings.SWAMP_PARSER }/parse/updates?href={href}"
 
         async with aiohttp.ClientSession() as session:
             async with session.get(URL) as response:
