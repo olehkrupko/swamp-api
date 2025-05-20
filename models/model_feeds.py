@@ -43,11 +43,9 @@ class Feed(Base):
         autoincrement=True,
     )
     _created: Mapped[datetime] = mapped_column(
-        # DateTime,
         server_default=func.now(tz=settings.TIMEZONE_LOCAL),
     )
     _delayed: Mapped[datetime] = mapped_column(
-        # DateTime,
         server_default=func.now(tz=settings.TIMEZONE_LOCAL),
     )
     # CORE / REQUIRED
@@ -68,7 +66,6 @@ class Feed(Base):
     )
     # METADATA
     private: Mapped[bool] = mapped_column(
-        # Boolean,
         default=False,
     )
     frequency: Mapped[Frequency] = mapped_column(
