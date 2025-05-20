@@ -1,6 +1,6 @@
 uvicorn==0.34.2
-asyncpg==0.30.0
 fastapi==0.115.12
+asyncpg==0.30.0
 SQLAlchemy[asyncio]==2.0.41
 feedparser==6.0.10
 python-dateutil==2.8.2
@@ -9,5 +9,5 @@ beautifulsoup4==4.12.2
 # sentry-sdk[flask]==1.29.0
 emoji==2.8.0
 python-telegram-bot==20.6
-pydantic-settings==2.9.1
 APScheduler==3.11.0
+pydantic-settings==2.9.1
