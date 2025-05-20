@@ -32,9 +32,7 @@ class Update(Base):
     # REINDEX (verbose, concurrently) TABLE feed_updates.update;
     __table_args__ = (
         UniqueConstraint("feed_id", "href"),
-        {
-            "schema": "feed_updates",
-        },
+        Base.__table_args__,
     )
 
     # DATA STRUCTURE
