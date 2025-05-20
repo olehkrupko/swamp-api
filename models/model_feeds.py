@@ -178,7 +178,7 @@ class Feed(Base):
         if self.frequency == Frequency.NEVER:
             return False
 
-        if  self._delayed <= datetime.now():
+        if self._delayed <= datetime.now():
             return query.where(
                 self.frequency != Frequency.NEVER,
                 self._delayed <= datetime.now(),
