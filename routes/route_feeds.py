@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.exc import IntegrityError as sqlalchemy_IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from config.session import get_db_session
+from services.service_sqlalchemy import SQLAlchemy
 from config.scheduler import scheduler
 from models.model_feeds import Feed
 from models.model_updates import Update
@@ -21,7 +21,7 @@ router = APIRouter(
 async def list_feeds(
     requires_update: bool = None,
     active: bool = None,
-    session: AsyncSession = Depends(get_db_session),
+    session: AsyncSession = Depends(SQLAlchemy.get_db_session),
 ):
     query = select(Feed)
 
@@ -36,7 +36,7 @@ async def list_feeds(
 
 @router.put("/", response_class=PrettyJsonResponse)
 async def create_feed(
-    session: AsyncSession = Depends(get_db_session),
+    session: AsyncSession = Depends(SQLAlchemy.get_db_session),
     **body: dict,
 ):
     feed = Feed(**body)
@@ -53,7 +53,7 @@ async def explain_feed(
     href: str,
     mode: str = "explain",
     _id: int = None,
-    session: AsyncSession = Depends(get_db_session),
+    session: AsyncSession = Depends(SQLAlchemy.get_db_session),
 ):
     if mode not in ["explain", "push", "push_ignore"]:
         raise ValueError("Mode not supported")
@@ -91,7 +91,7 @@ async def explain_feed(
 @router.get("/{feed_id}/", response_class=PrettyJsonResponse)
 async def read_feed(
     feed_id: int,
-    session: AsyncSession = Depends(get_db_session),
+    session: AsyncSession = Depends(SQLAlchemy.get_db_session),
 ):
     query = select(Feed).where(Feed._id == feed_id)
     feed = (await session.execute(query)).scalars().first()
@@ -103,7 +103,7 @@ async def read_feed(
 async def update_feed(
     feed_id: int,
     feed_updated: dict,
-    session: AsyncSession = Depends(get_db_session),
+    session: AsyncSession = Depends(SQLAlchemy.get_db_session),
 ):
     query = select(Feed).where(Feed._id == feed_id)
     feed = (await session.execute(query)).scalars().first()
@@ -123,7 +123,7 @@ async def update_feed(
 @router.delete("/{feed_id}/", response_class=PrettyJsonResponse)
 async def delete_feed(
     feed_id: int,
-    session: AsyncSession = Depends(get_db_session),
+    session: AsyncSession = Depends(SQLAlchemy.get_db_session),
 ):
     query = select(Feed).where(Feed._id == feed_id)
     feed = (await session.execute(query)).scalars().first()
@@ -140,7 +140,7 @@ async def delete_feed(
 async def push_updates(
     feed_id: int,
     updates: list[dict],
-    session: AsyncSession = Depends(get_db_session),
+    session: AsyncSession = Depends(SQLAlchemy.get_db_session),
 ):
     query = select(Feed).where(Feed._id == feed_id)
     # session.get(User, 4)
@@ -237,7 +237,7 @@ async def push_updates(
 # Generate backup of all feeds every 6 hours
 @scheduler.scheduled_job("cron", id="backup_generator", hour="*/6")
 # @router.route("/backup/", methods=["GET"])  # for testing purposes
-async def backup(session: AsyncSession = Depends(get_db_session)) -> str:
+async def backup(session: AsyncSession = Depends(SQLAlchemy.get_db_session)) -> str:
     # TODO: replace scheduler?
     with scheduler.app.app_context():
         backup_new = await Backup.dump(session=session)
