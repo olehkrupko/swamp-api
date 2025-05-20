@@ -12,8 +12,16 @@ from config.config import settings
 
 class SQLAlchemy:
     # Create engine and sessionmaker ONCE
-    engine = create_async_engine(settings.SQLALCHEMY_DATABASE_URI, future=True, echo=False)
-    async_session = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
+    engine = create_async_engine(
+        settings.SQLALCHEMY_DATABASE_URI,
+        future=True,
+        echo=False,
+    )
+    async_session = async_sessionmaker(
+        engine,
+        expire_on_commit=False,
+        class_=AsyncSession,
+    )
 
     @classmethod
     async def get_db_session(cls) -> AsyncGenerator[AsyncSession, None]:
