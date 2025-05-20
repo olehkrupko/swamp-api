@@ -136,17 +136,15 @@ class Feed(Base):
         return str(self.as_dict())
 
     async def get_similar_feeds(self, session: AsyncSession):
-        query = (
-            select(Feed)
-            .where(
-                Feed._id != getattr(self, "id", None),
-                or_(
-                    Feed.title == self.title,
-                    # " - " is usually used to separate title from website name
-                    Feed.title == self.title.split(" - ")[0],
-                    Feed.href == self.href,
-                ),
-            )
+        query = select(Feed)
+        query = query.where(
+            Feed._id != getattr(self, "id", None),
+            or_(
+                Feed.title == self.title,
+                # " - " is usually used to separate title from website name
+                Feed.title == self.title.split(" - ")[0],
+                Feed.href == self.href,
+            ),
         )
 
         return await SQLAlchemy.execute(
