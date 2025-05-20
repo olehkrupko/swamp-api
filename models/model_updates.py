@@ -1,4 +1,5 @@
 import datetime as dt
+import logging
 from datetime import timedelta
 from os import getenv
 from zoneinfo import ZoneInfo
@@ -23,6 +24,9 @@ from sqlalchemy.orm import (
 
 from models.model_base import Base
 from models.model_feeds import Feed
+
+
+logger = logging.getLogger(__name__)
 
 
 class Update(Base):

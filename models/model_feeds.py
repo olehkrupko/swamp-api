@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from os import getenv
 from typing import List
@@ -26,6 +27,9 @@ from services.service_telegram import TelegramService
 
 if TYPE_CHECKING:
     from models.model_updates import Update
+
+
+logger = logging.getLogger(__name__)
 
 
 class Feed(Base):

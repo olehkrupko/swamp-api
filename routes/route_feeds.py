@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, Depends
 from sqlalchemy.exc import IntegrityError as sqlalchemy_IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,6 +11,9 @@ from responses.PrettyJsonResponse import PrettyJsonResponse
 from services.service_backups import Backup
 from services.service_frequency import Frequency
 from sqlalchemy import select
+
+
+logger = logging.getLogger(__name__)
 
 
 router = APIRouter(
