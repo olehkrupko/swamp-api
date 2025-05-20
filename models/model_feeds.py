@@ -175,17 +175,12 @@ class Feed(Base):
             self.frequency = Frequency(value)
             self.delay()
 
-    def query_requires_update(self, query):
-        if self.frequency == Frequency.NEVER:
-            return False
-
-        if self._delayed <= datetime.now():
-            return query.where(
-                self.frequency != Frequency.NEVER,
-                self._delayed <= datetime.now(),
-            )
-
-        return False
+    @classmethod
+    def query_requires_update(cls, query):
+        return query.where(
+            cls.frequency != Frequency.NEVER,
+            cls._delayed <= datetime.now(),
+        )
 
     def delay(self):
         self._delayed = datetime.now() + self.frequency.delay()
