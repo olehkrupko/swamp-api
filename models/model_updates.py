@@ -52,6 +52,7 @@ class Update(Base):
     feed: Mapped["Feed"] = relationship(
         "Feed",
         back_populates="updates",
+        lazy="joined",
     )
     # CORE / REQUIRED
     name: Mapped[str] = mapped_column(
