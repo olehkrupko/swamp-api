@@ -211,7 +211,7 @@ class Update(Base):
 
         async with aiohttp.ClientSession() as session:
             async with session.get(URL) as response:
-                results = await response.read()
+                results = await response.json()
 
         updates = [
             Update(
@@ -220,7 +220,7 @@ class Update(Base):
                 datetime=x["datetime"],
                 feed_id=None,
             ).as_dict()
-            for x in results.json()
+            for x in results
         ]
 
         return updates
