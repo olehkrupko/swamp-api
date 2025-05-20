@@ -50,7 +50,7 @@ async def create_feed(
 
     session.add(feed)
     await session.commit()
-    session.refresh(feed)
+    await session.refresh(feed)
 
     return feed.as_dict()
 
@@ -79,7 +79,7 @@ async def explain_feed(
         session.add(feed)
         await session.commit()
         # we don't need to refresh the feed, because it's not used
-        session.refresh(feed)
+        await session.refresh(feed)
     elif mode == "push_ignore":
         try:
             session.add(feed)
