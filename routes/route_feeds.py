@@ -78,15 +78,13 @@ async def explain_feed(
 
     # if there are no similar feeds
     # then we can add it to the database and ignore responses
-    if mode == "push" and not similar_feeds:
+    if mode == "explain":
+        pass
+    elif mode == "push" and not similar_feeds:
         session.add(feed)
-        await session.commit()
-        # we don't need to refresh the feed, because it's not used
-        await session.refresh(feed)
     elif mode == "push_ignore":
         try:
             session.add(feed)
-            await session.commit()
         except sqlalchemy_IntegrityError:
             # ignoring it as expected behaviour:
             # push_ignore is exactly to ignore this error
@@ -131,7 +129,6 @@ async def update_feed(
         )
 
     session.add(feed)
-    await session.commit()
 
     return feed.as_dict()
 
@@ -147,8 +144,8 @@ async def delete_feed(
         session=session,
     )
 
-    session.delete(feed)
-    await session.commit()
+    session.add(feed)
+    await session.delete(feed)
 
     return {
         "success": True,

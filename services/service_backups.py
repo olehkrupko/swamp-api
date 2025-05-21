@@ -124,6 +124,6 @@ class Backup:
                     )
                     session.add(feed)
 
-                await session.commit()
+                # await session.commit()
 
                 return "Restoration complete"
