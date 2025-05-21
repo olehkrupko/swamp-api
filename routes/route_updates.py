@@ -18,7 +18,7 @@ async def list_updates(
     # TODO: separate _id to its own endpoint  /feed/{feed_id}/updates ?
     _id: int = None,
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
-):
+) -> list:
     return await Update.get_updates(
         limit=limit,
         private=private,
@@ -30,5 +30,5 @@ async def list_updates(
 @router.get("/parse/", response_class=PrettyJsonResponse)
 async def parse_updates(
     href: str,
-):
+) -> dict:
     return await Update.parse_href(href)
