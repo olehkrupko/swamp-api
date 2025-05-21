@@ -175,8 +175,6 @@ class Update(Base):
         _id: int | None,
         session: AsyncSession,
     ) -> list:
-        dt_start = dt.datetime.now()
-
         # prepare appropriate feeds as subquery
         subquery_feed_ids = select(Feed._id)
         if _id is not None:
