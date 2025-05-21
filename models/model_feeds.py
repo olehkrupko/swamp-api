@@ -81,7 +81,7 @@ class Feed(Base):
     # RELATIONSHIPS
     updates: Mapped[List["Update"]] = relationship(
         back_populates="feed",
-        lazy="joined",
+        lazy="select",
     )
 
     def __init__(
@@ -236,7 +236,7 @@ class Feed(Base):
     ) -> list[dict]:
         notify = []
         ingested = []
-        self_href_list = [x.href for x in self.updates]
+        self_updates = await self.awaitable_attrs.updates
 
         # sort updates and limit amount
         updates.sort(key=lambda x: x.datetime, reverse=False)
@@ -245,9 +245,9 @@ class Feed(Base):
 
         for each_update in filter(self.update_filter, updates):
             # checking if href is present in DB
-            if not self.updates:
+            if not self_updates:
                 each_update.dt_event_adjust_first()
-            elif each_update.href not in self_href_list:
+            elif each_update.href not in [x.href for x in self_updates]:
                 each_update.dt_now()
                 notify.append(each_update)
             else:

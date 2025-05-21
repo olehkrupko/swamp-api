@@ -37,4 +37,4 @@ class SQLAlchemy:
         return (await session.execute(query)).scalars().first()
 
     async def execute_all(query, session: AsyncSession):
-        return (await session.execute(query)).unique().scalars().all()
+        return (await session.execute(query)).scalars().all()

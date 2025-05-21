@@ -58,7 +58,7 @@ class Update(Base):
     feed: Mapped["Feed"] = relationship(
         "Feed",
         back_populates="updates",
-        lazy="joined",
+        lazy="select",
     )
     # CORE / REQUIRED
     name: Mapped[str] = mapped_column(
@@ -175,28 +175,37 @@ class Update(Base):
         _id: int | None,
         session: AsyncSession,
     ) -> list:
-        query = select(Feed)
+        dt_start = dt.datetime.now()
+
+        # prepare appropriate feeds as subquery
+        subquery_feed_ids = select(Feed._id)
         if _id is not None:
-            query = query.where(Feed._id == _id)
+            subquery_feed_ids = subquery_feed_ids.where(Feed._id == _id)
         if private is not None:
-            query = query.where(Feed.private == private)
+            subquery_feed_ids = subquery_feed_ids.where(Feed.private == private)
 
-        feed = await SQLAlchemy.execute_all(
-            query=query,
-            session=session,
-        )
-        feed_data = {x._id: x.as_dict() for x in feed}
-
-        query = (
+        # prepare updates as main query
+        query_updates = (
             select(cls)
-            .where(cls.feed_id.in_(feed_data.keys()))
+            .where(cls.feed_id.in_(subquery_feed_ids))
             .order_by(cls.dt_event.desc())
             .limit(limit)
         )
         updates = await SQLAlchemy.execute_all(
-            query=query,
+            query=query_updates,
             session=session,
         )
+
+        # prepare feed data as secondary query
+        query_feed_data = select(Feed)
+        query_feed_data = query_feed_data.where(
+            Feed._id.in_([x.feed_id for x in updates])
+        )
+        feed_data = await SQLAlchemy.execute_all(
+            query=query_feed_data,
+            session=session,
+        )
+        feed_data = {x._id: x.as_dict() for x in feed_data}
 
         results = []
         for each_update in updates:
