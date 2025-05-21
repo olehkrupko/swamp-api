@@ -43,10 +43,10 @@ async def list_feeds(
 
 @router.put("/", response_class=PrettyJsonResponse)
 async def create_feed(
+    feed_updated: dict,
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
-    **body: dict,
 ):
-    feed = Feed(**body)
+    feed = Feed(**feed_updated)
 
     session.add(feed)
     await session.commit()
