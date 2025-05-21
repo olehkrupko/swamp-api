@@ -147,7 +147,7 @@ async def delete_feed(
         session=session,
     )
 
-    feed.delete()
+    session.delete(feed)
     await session.commit()
 
     return {
