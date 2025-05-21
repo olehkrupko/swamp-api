@@ -1,51 +1,73 @@
 import datetime as dt
+import logging
 from datetime import timedelta
-from os import getenv
 from zoneinfo import ZoneInfo
 
+import aiohttp
 import emoji
-import requests
-from sqlalchemy.orm import mapped_column
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import relationship
+from sqlalchemy import (
+    DateTime,
+    ForeignKey,
+    func,
+    Integer,
+    select,
+    String,
+    UniqueConstraint,
+)
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import (
+    Mapped,
+    mapped_column,
+    relationship,
+)
 
-from config.db import db
+from config.settings import settings
+from models.model_base import Base
 from models.model_feeds import Feed
+from services.service_sqlalchemy import SQLAlchemy
 
 
-class Update(db.Model):
+logger = logging.getLogger(__name__)
+
+
+class Update(Base):
     # CREATE INDEX update_dt_event_desc_index ON feed_updates.update (dt_event DESC NULLS LAST);
     # CREATE INDEX update_feed_id ON feed_updates.update (feed_id);
     # REINDEX (verbose, concurrently) TABLE feed_updates.update;
+
+    __tablename__ = "update"
     __table_args__ = (
-        db.UniqueConstraint("feed_id", "href"),
-        {
-            "schema": "feed_updates",
-        },
+        UniqueConstraint("feed_id", "href"),
+        Base.__table_args__,
     )
 
     # DATA STRUCTURE
-    id = db.Column(
-        db.Integer,
+    id: Mapped[int] = mapped_column(
+        Integer,
         primary_key=True,
+        autoincrement=True,
     )
     feed_id: Mapped[int] = mapped_column(
-        db.ForeignKey(
+        ForeignKey(
             "feed_updates.feed._id",
             ondelete="CASCADE",
         ),
         nullable=False,
         index=True,
     )
-    feed: Mapped["Feed"] = relationship(back_populates="updates")
+    feed: Mapped["Feed"] = relationship(
+        "Feed",
+        back_populates="updates",
+        lazy="select",
+    )
     # CORE / REQUIRED
-    name = db.Column(
-        db.String(300),
+    name: Mapped[str] = mapped_column(
+        String(300),
         nullable=False,
         # convert_unicode=True,  # activate later?
     )
-    href = db.Column(
-        db.String(300),
+    href: Mapped[str] = mapped_column(
+        String(300),
         nullable=False,
     )
 
@@ -55,18 +77,18 @@ class Update(db.Model):
         return self.dt_event
 
     # METADATA
-    dt_event = db.Column(  # rename
-        db.DateTime(timezone=True),
+    dt_event: Mapped[datetime] = mapped_column(  # rename
+        DateTime(timezone=True),
         nullable=False,
         index=True,
     )
-    dt_original = db.Column(
-        db.DateTime(timezone=True),
+    dt_original: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
         nullable=False,
     )
-    dt_created = db.Column(
-        db.DateTime,
-        default=dt.datetime.utcnow,
+    dt_created: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(tz=dt.UTC),
         nullable=False,
     )
 
@@ -126,18 +148,19 @@ class Update(db.Model):
     def zone_fix(datetime):
         if datetime.tzinfo:
             # if tzinfo present — convert to current one
-            return datetime.astimezone(ZoneInfo(getenv("TIMEZONE_LOCAL")))
+            return datetime.astimezone(ZoneInfo(settings.TIMEZONE_LOCAL))
         else:
             # if no tzinfo — replace it with current one
-            return datetime.replace(tzinfo=ZoneInfo(getenv("TIMEZONE_LOCAL")))
+            return datetime.replace(tzinfo=ZoneInfo(settings.TIMEZONE_LOCAL))
 
     def dt_now(self):
         self.dt_event = self.zone_fix(
-            dt.datetime.now(ZoneInfo(getenv("TIMEZONE_LOCAL")))
+            dt.datetime.now(ZoneInfo(settings.TIMEZONE_LOCAL))
         )
 
     def dt_event_adjust_first(self):
-        now = self.zone_fix(dt.datetime.now(ZoneInfo(getenv("TIMEZONE_LOCAL"))))
+        raise ValueError("Update.dt_event_adjust_first() is disabled for now")
+        now = self.zone_fix(dt.datetime.now(ZoneInfo(settings.TIMEZONE_LOCAL)))
         a_week_ago = now - timedelta(days=7)
 
         # all recent events are moved to the past to avoid confusion
@@ -145,53 +168,58 @@ class Update(db.Model):
             self.dt_event = a_week_ago
 
     @classmethod
-    def get_updates(cls, limit=140, private=None, _id=None):
-        kwargs = {}
-        if private is not None:
-            kwargs["private"] = private
+    async def get_updates(
+        cls,
+        limit: bool | None,
+        private: bool | None,
+        _id: int | None,
+        session: AsyncSession,
+    ) -> list:
+        # prepare appropriate feeds as subquery
+        subquery_feed_ids = select(Feed._id)
         if _id is not None:
-            kwargs["_id"] = _id
+            subquery_feed_ids = subquery_feed_ids.where(Feed._id == _id)
+        if private is not None:
+            subquery_feed_ids = subquery_feed_ids.where(Feed.private == private)
 
-        if not kwargs:
-            # updates first, feeds second
-            updates = (
-                db.session.query(cls).order_by(cls.dt_event.desc()).limit(limit).all()
-            )
+        # prepare updates as main query
+        query_updates = (
+            select(cls)
+            .where(cls.feed_id.in_(subquery_feed_ids))
+            .order_by(cls.dt_event.desc())
+            .limit(limit)
+        )
+        updates = await SQLAlchemy.execute_all(
+            query=query_updates,
+            session=session,
+        )
 
-            feed_data = {
-                x._id: x.as_dict()
-                for x in db.session.query(Feed).filter(
-                    Feed._id.in_(set(x.feed_id for x in updates))
-                )
-            }
-        else:
-            # feeds first, updates second
-            feeds = db.session.query(Feed).filter_by(**kwargs)
-            feed_data = {x._id: x.as_dict() for x in feeds}
+        # prepare feed data as secondary query
+        query_feed_data = select(Feed)
+        query_feed_data = query_feed_data.where(
+            Feed._id.in_([x.feed_id for x in updates])
+        )
+        feed_data = await SQLAlchemy.execute_all(
+            query=query_feed_data,
+            session=session,
+        )
+        feed_data = {x._id: x.as_dict() for x in feed_data}
 
-            updates = (
-                db.session.query(cls)
-                .filter(cls.feed_id.in_([feed._id for feed in feeds]))
-                .order_by(cls.dt_event.desc())
-                .limit(limit)
-                .all()
-            )
+        results = []
+        for each_update in updates:
+            update = each_update.as_dict()
+            update["feed_data"] = feed_data[each_update.feed_id]
+            results.append(update)
 
-        updates = [
-            dict(
-                x.as_dict(),
-                feed_data=feed_data[x.feed_id],
-            )
-            for x in updates
-        ]
-
-        return updates
+        return results
 
     @staticmethod
-    def parse_href(href: str) -> list["Update"]:
-        URL = f"{ getenv('SWAMP_PARSER') }/parse/updates?href={href}"
+    async def parse_href(href: str) -> list["Update"]:
+        URL = f"{ settings.SWAMP_PARSER }/parse/updates?href={href}"
 
-        results = requests.get(URL)
+        async with aiohttp.ClientSession() as session:
+            async with session.get(URL) as response:
+                results = await response.json()
 
         updates = [
             Update(
@@ -200,7 +228,7 @@ class Update(db.Model):
                 datetime=x["datetime"],
                 feed_id=None,
             ).as_dict()
-            for x in results.json()
+            for x in results
         ]
 
         return updates

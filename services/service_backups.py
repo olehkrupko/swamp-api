@@ -2,8 +2,11 @@ import json
 import os
 from datetime import datetime
 
-from config.db import db
 from models.model_feeds import Feed
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from services.service_sqlalchemy import SQLAlchemy
 
 
 class Backup:
@@ -57,12 +60,17 @@ class Backup:
     #############
 
     @staticmethod
-    def get_data():
-        return [x.as_dict() for x in db.session.query(Feed).all()]
+    async def get_data(session: AsyncSession):
+        query = select(Feed)
+        feeds = await SQLAlchemy.execute_all(
+            query=query,
+            session=session,
+        )
+        return [feed.as_dict() for feed in feeds]
 
     @classmethod
-    def dump(cls):
-        data = cls.get_data()
+    async def dump(cls, session: AsyncSession):
+        data = await cls.get_data(session)
         filename = cls.today()
 
         with open(filename, "w") as f:
@@ -92,7 +100,7 @@ class Backup:
 
         return items
 
-    def restore(self, compare=True):
+    async def restore(self, session: AsyncSession, compare=True):
         with open(self.filename) as f:
             json_data = json.load(f)
             if compare:
@@ -114,8 +122,8 @@ class Backup:
                         _created=each["_created"],
                         _delayed=None,
                     )
-                    db.session.add(feed)
+                    session.add(feed)
 
-                db.session.commit()
+                # await session.commit()
 
                 return "Restoration complete"

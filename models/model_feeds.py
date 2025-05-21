@@ -1,17 +1,28 @@
+import logging
 from datetime import datetime
-from os import getenv
 from typing import List
 from typing import TYPE_CHECKING
 
-import requests
-from sqlalchemy import or_
-from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import mapped_column
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import relationship
+import aiohttp
+from sqlalchemy import (
+    func,
+    Integer,
+    JSON,
+    or_,
+    select,
+    String,
+)
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import (
+    mapped_column,
+    Mapped,
+    relationship,
+)
 
-from config.db import db
+from config.settings import settings
+from models.model_base import Base
 from services.service_frequency import Frequency
+from services.service_sqlalchemy import SQLAlchemy
 from services.service_telegram import TelegramService
 
 
@@ -19,60 +30,59 @@ if TYPE_CHECKING:
     from models.model_updates import Update
 
 
-class Feed(db.Model):
-    __table_args__ = {
-        "schema": "feed_updates",
-    }
+logger = logging.getLogger(__name__)
+
+
+class Feed(Base):
+    __tablename__ = "feed"
 
     # TECHNICAL
     _id: Mapped[int] = mapped_column(
+        Integer,
         primary_key=True,
+        autoincrement=True,
     )
-    _created = db.Column(
-        db.DateTime,
-        default=datetime.utcnow,
+    _created: Mapped[datetime] = mapped_column(
+        server_default=func.now(tz=settings.TIMEZONE_LOCAL),
     )
-    _delayed = db.Column(
-        db.DateTime,
-        default=None,
+    _delayed: Mapped[datetime] = mapped_column(
+        server_default=func.now(tz=settings.TIMEZONE_LOCAL),
     )
     # CORE / REQUIRED
-    title = db.Column(
-        db.String(100),
+    title: Mapped[str] = mapped_column(
+        String(100),
         unique=True,
         nullable=False,
     )
-    href = db.Column(
-        db.String(200),
+    href: Mapped[str] = mapped_column(
+        String(200),
         unique=False,
         nullable=False,
     )
-    href_user = db.Column(
-        db.String(200),
+    href_user: Mapped[str] = mapped_column(
+        String(200),
         unique=False,
         nullable=True,
     )
     # METADATA
-    private = db.Column(
-        db.Boolean,
+    private: Mapped[bool] = mapped_column(
         default=False,
     )
-    frequency = db.Column(
-        db.Enum(
-            Frequency,
-            values_callable=lambda x: [str(each.value) for each in Frequency],
-        ),
+    frequency: Mapped[Frequency] = mapped_column(
         default=Frequency.WEEKS,
     )
-    notes = db.Column(
-        db.String(200),
+    notes: Mapped[str] = mapped_column(
+        String(200),
         default="",
         nullable=True,
         unique=False,
     )
-    json = db.Column(JSONB)
+    json: Mapped[dict] = mapped_column(JSON)
     # RELATIONSHIPS
-    updates: Mapped[List["Update"]] = relationship(back_populates="feed")
+    updates: Mapped[List["Update"]] = relationship(
+        back_populates="feed",
+        lazy="select",
+    )
 
     def __init__(
         self,
@@ -117,7 +127,7 @@ class Feed(db.Model):
             "href": self.href,
             "href_user": self.href_user,
             "private": self.private,
-            "frequency": self.frequency.value,
+            "frequency": self.frequency,
             "notes": self.notes,
             "json": self.json,
         }
@@ -125,44 +135,35 @@ class Feed(db.Model):
     def __repr__(self):
         return str(self.as_dict())
 
-    def get_similar_feeds(self):
-        similar_feeds = (
-            db.session.query(Feed)
-            .filter(
-                # ignoring current feed if exists:
-                Feed._id != getattr(self, "id", None),
-                # checking for matching title or href:
-                or_(
-                    Feed.title == self.title,
-                    # " - " is used to separate title from website name
-                    Feed.title == self.title.split(" - ")[0],
-                    Feed.href == self.href,
-                ),
-            )
-            .all()
+    async def get_similar_feeds(self, session: AsyncSession):
+        query = select(Feed)
+        query = query.where(
+            Feed._id != getattr(self, "id", None),
+            or_(
+                Feed.title == self.title,
+                # " - " is usually used to separate title from website name
+                Feed.title == self.title.split(" - ")[0],
+                Feed.href == self.href,
+            ),
         )
 
-        return [x.as_dict() for x in similar_feeds]
-
-    def update_from_dict(self, data: dict):
-        for key, value in data.items():
-            self.update_attr(
-                key=key,
-                value=value,
-            )
+        return await SQLAlchemy.execute_all(
+            query=query,
+            session=session,
+        )
 
     def update_attr(self, key: str, value):
         if not hasattr(self, key):
             # no field to update
-            raise ValueError(f"{key=} does not exist")
+            raise ValueError(f"{key=}: {value=} does not exist")
+        elif getattr(self, key) == value:
+            # nothing to update
+            return
         elif key[0] == "_":
             # you cannot update these fields
             raise ValueError(f"{key=} is read-only")
         elif key == "frequency":
             self.update_frequency(value)
-        elif getattr(self, key) == value:
-            # nothing to update
-            return
         else:
             setattr(self, key, value)
 
@@ -174,16 +175,12 @@ class Feed(db.Model):
             self.frequency = Frequency(value)
             self.delay()
 
-    def requires_update(self):
-        if self.frequency == Frequency.NEVER:
-            return False
-
-        if not self._delayed:
-            return True
-        elif self._delayed <= datetime.now():
-            return True
-
-        return False
+    @classmethod
+    def query_requires_update(cls, query):
+        return query.where(
+            cls.frequency != Frequency.NEVER,
+            cls._delayed <= datetime.now(),
+        )
 
     def delay(self):
         self._delayed = datetime.now() + self.frequency.delay()
@@ -191,17 +188,6 @@ class Feed(db.Model):
     ##########################
     # FEED PARSING LOGIC BELOW
     ##########################
-
-    def update_href_not_present(self, href):
-        PRESENT = False
-
-        if not self.updates:
-            return not PRESENT
-
-        if href in [x.href for x in self.updates]:
-            return PRESENT
-
-        return not PRESENT
 
     # filter is used to remove unnecessary items
     # {field}        - don't skip what's mentioned there
@@ -243,41 +229,51 @@ class Feed(db.Model):
 
     # ingest => add to database
     # notify => send as notification
-    def ingest_updates(self, updates):
-        # sort items and limit amount of updates
+    async def ingest_updates(
+        self,
+        updates: list["Update"],
+        session: AsyncSession,
+    ) -> list[dict]:
+        notify = []
+        ingested = []
+        self_updates = await self.awaitable_attrs.updates
+
+        # sort updates and limit amount
         updates.sort(key=lambda x: x.datetime, reverse=False)
-        if "limit" in self.json and isinstance(self.json["limit"], int):
+        if isinstance(self.json.get("limit", None), int):
             updates = updates[: self.json["limit"]]
 
-        ingested, notify = [], []
         for each_update in filter(self.update_filter, updates):
             # checking if href is present in DB
-            if self.update_href_not_present(each_update.href):
-                if self.updates:
-                    each_update.dt_now()
-                    notify.append(each_update)
-                else:
-                    each_update.dt_event_adjust_first()
-                db.session.add(each_update)
-                ingested.append(each_update)
+            if not self_updates:
+                each_update.dt_event_adjust_first()
+            elif each_update.href not in [x.href for x in self_updates]:
+                each_update.dt_now()
+                notify.append(each_update)
+            else:
+                continue
+
+            session.add(each_update)
+            ingested.append(each_update)
 
         self.delay()
+        session.add(self)
 
         if notify:
-            TelegramService.send_feed_updates(
+            await TelegramService.send_feed_updates(
                 feed=self,
                 updates=notify,
             )
 
-        db.session.add(self)
-        db.session.commit()
-
         return [x.as_dict() for x in ingested]
 
     @staticmethod
-    def parse_href(href: str) -> "Feed":
-        URL = f"{ getenv('SWAMP_PARSER') }/parse/explained?href={href}"
+    async def parse_href(href: str) -> "Feed":
+        URL = f"{ settings.SWAMP_PARSER }/parse/explained?href={href}"
 
-        results = requests.get(URL)
+        async with aiohttp.ClientSession() as session:
+            async with session.get(URL) as response:
+                results = await response.json()
+                results["frequency"] = results["frequency"].upper()
 
-        return Feed(**results.json())
+        return Feed(**results)

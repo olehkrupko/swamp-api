@@ -1,13 +1,10 @@
-import asyncio
-from os import getenv
-
 import telegram
 from telegram.helpers import escape_markdown as em
 
+from config.settings import settings
+
 
 class TelegramService:
-    CHAT_ID = getenv("TELEGRAM_CHATID")
-    TOKEN = getenv("TELEGRAM_BOTTOKEN")
     PARSE_MODE = "markdown"
     MESSAGE_MARKDOWN = (
         "{name}\n"
@@ -17,15 +14,15 @@ class TelegramService:
 
     @classmethod
     async def send_message(cls, msg):
-        await telegram.Bot(cls.TOKEN).sendMessage(
+        await telegram.Bot(settings.TELEGRAM_BOTTOKEN).sendMessage(
             parse_mode=cls.PARSE_MODE,
-            chat_id=cls.CHAT_ID,
+            chat_id=settings.TELEGRAM_CHATID,
             text=msg,
         )
 
     @classmethod
-    def send_feed_updates(cls, feed, updates):
-        if getenv("TELEGRAM_BROADCAST", False) is not True:
+    async def send_feed_updates(cls, feed, updates):
+        if settings.TELEGRAM_BROADCAST is not True:
             return
         if not updates:
             raise ValueError(f"Bulk cannot be empty {updates=}")
@@ -43,31 +40,25 @@ class TelegramService:
             )
             # cutting big messages and avoiding footer being sent alone
             if len(message) > 2000 and each != updates[-1]:
-                asyncio.run(
-                    cls.send_message(
-                        message,
-                    )
+                await cls.send_message(
+                    message,
                 )
                 message = ""
 
         message += f"\n([EDIT](http://192.168.0.155:30011/feeds/{feed._id}/edit))"
 
-        asyncio.run(
-            cls.send_message(
-                message,
-            )
+        await cls.send_message(
+            message,
         )
 
     @classmethod
-    def send_update(cls, update):
+    async def send_update(cls, update):
         message = cls.MESSAGE_MARKDOWN.format(
             name=telegram.helpers.escape_markdown(update.name),
             href=telegram.helpers.escape_markdown(update.href),
             feed_id=str(int(update.feed_id)),
         )
 
-        asyncio.run(
-            cls.send_message(
-                message,
-            )
+        await cls.send_message(
+            message,
         )

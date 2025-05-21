@@ -5,14 +5,14 @@ from enum import Enum
 
 class Frequency(Enum):
     # active:
-    MINUTES = "minutes"
-    HOURS = "hours"
-    DAYS = "days"
-    WEEKS = "weeks"
-    MONTHS = "months"
-    YEARS = "years"
+    MINUTES = "MINUTES"
+    HOURS = "HOURS"
+    DAYS = "DAYS"
+    WEEKS = "WEEKS"
+    MONTHS = "MONTHS"
+    YEARS = "YEARS"
     # disabled:
-    NEVER = "never"
+    NEVER = "NEVER"
 
     @classmethod
     def list(cls):

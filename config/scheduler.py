@@ -1,4 +1,6 @@
-from flask_apscheduler import APScheduler
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
+from config.settings import settings
 
 
-scheduler = APScheduler()
+scheduler = AsyncIOScheduler(timezone=settings.TIMEZONE_LOCAL)

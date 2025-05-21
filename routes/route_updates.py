@@ -1,34 +1,34 @@
-from os import getenv
+from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from flask import request, Blueprint
-
-import routes._shared as shared
+from services.service_sqlalchemy import SQLAlchemy
 from models.model_updates import Update
+from responses.PrettyJsonResponse import PrettyJsonResponse
 
 
-router = Blueprint("updates", __name__, url_prefix="/updates")
+router = APIRouter(
+    prefix="/updates",
+)
 
 
-@router.route("/", methods=["GET"])
-def list_updates():
-    kwargs = dict(request.args)
-    if getenv("MODE") == "PUBLIC":
-        kwargs["private"] = False
-
-    updates = Update.get_updates(**kwargs)
-
-    return shared.return_json(
-        response=updates,
+@router.get("/", response_class=PrettyJsonResponse)
+async def list_updates(
+    limit: int = 300,
+    private: bool = None,
+    # TODO: separate _id to its own endpoint  /feed/{feed_id}/updates ?
+    _id: int = None,
+    session: AsyncSession = Depends(SQLAlchemy.get_db_session),
+):
+    return await Update.get_updates(
+        limit=limit,
+        private=private,
+        _id=_id,
+        session=session,
     )
 
 
-@router.route("/parse/", methods=["GET"])
-def parse_updates():
-    body = request.args
-    href = body["href"]
-
-    response = Update.parse_href(href)
-
-    return shared.return_json(
-        response=response,
-    )
+@router.get("/parse/", response_class=PrettyJsonResponse)
+async def parse_updates(
+    href: str,
+):
+    return await Update.parse_href(href)
