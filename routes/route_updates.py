@@ -32,3 +32,4 @@ async def parse_updates(
     href: str,
 ) -> dict:
     return await Update.parse_href(href)
+    # TODO: return 422 if swamp-parser fails
