@@ -26,6 +26,7 @@ async def list_feeds(
     requires_update: bool = None,
     active: bool = None,
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
+    # TODO: replace requires_update & active with mode argument
 ):
     query = select(Feed)
 
@@ -38,6 +39,7 @@ async def list_feeds(
         query=query,
         session=session,
     )
+
     return [feed.as_dict() for feed in feeds]
 
 

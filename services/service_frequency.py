@@ -18,12 +18,6 @@ class Frequency(Enum):
     def list(cls):
         return list(map(lambda c: c.value, cls))
 
-    # def __str__(self):
-    #     return self.value
-
-    # def __repr__(self):
-    #     return f"Frequency.{self.value.upper()}"
-
     def delay(self):
         if self == self.MINUTES:
             return timedelta(
