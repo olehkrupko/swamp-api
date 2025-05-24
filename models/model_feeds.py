@@ -82,6 +82,7 @@ class Feed(Base):
     updates: Mapped[List["Update"]] = relationship(
         back_populates="feed",
         lazy="select",
+        cascade="all, delete",
     )
 
     def __init__(
