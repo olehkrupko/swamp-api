@@ -36,7 +36,9 @@ def test_list_updates():
 
 
 def test_parse_updates():
-    response = client.get("/updates/parse/?href=https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw/videos")
+    response = client.get(
+        "/updates/parse/?href=https://www.youtube.com/channel/UCXuqSBlHAE6Xw-yeJA0Tunw/videos"
+    )
     assert response.status_code == 200
     assert isinstance(response.json(), list)
     # assert response.status_code in (200, 422)
