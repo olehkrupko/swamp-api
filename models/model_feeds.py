@@ -43,10 +43,10 @@ class Feed(Base):
         autoincrement=True,
     )
     _created: Mapped[datetime] = mapped_column(
-        server_default=func.now(tz=settings.TIMEZONE_LOCAL),
+        insert_default=func.now(),
     )
     _delayed: Mapped[datetime] = mapped_column(
-        server_default=func.now(tz=settings.TIMEZONE_LOCAL),
+        insert_default=func.now(),
     )
     # CORE / REQUIRED
     title: Mapped[str] = mapped_column(
@@ -82,6 +82,7 @@ class Feed(Base):
     updates: Mapped[List["Update"]] = relationship(
         back_populates="feed",
         lazy="select",
+        cascade="all, delete",
     )
 
     def __init__(

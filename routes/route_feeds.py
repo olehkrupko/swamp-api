@@ -66,6 +66,7 @@ async def explain_feed(
 ):
     if mode not in ["explain", "push", "push_ignore"]:
         raise ValueError("Mode not supported")
+    # if json["tags"] is not None: check each tag for DB presence before saving it
 
     if _id:
         query = select(Feed).where(Feed._id == _id)

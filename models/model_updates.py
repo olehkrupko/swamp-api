@@ -88,7 +88,7 @@ class Update(Base):
     )
     dt_created: Mapped[datetime] = mapped_column(
         DateTime,
-        server_default=func.now(tz=dt.UTC),
+        insert_default=func.now(),
         nullable=False,
     )
 
