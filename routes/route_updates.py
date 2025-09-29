@@ -30,6 +30,6 @@ async def list_updates(
 @router.get("/parse/", response_class=PrettyJsonResponse)
 async def parse_updates(
     href: str,
-) -> dict:
+) -> list:
     return await Update.parse_href(href)
     # TODO: return 422 if swamp-parser fails
