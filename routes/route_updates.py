@@ -19,7 +19,6 @@ async def list_updates(
     _id: int = None,
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
 ):
-    x = 1 / 0
     return await Update.get_updates(
         limit=limit,
         private=private,
