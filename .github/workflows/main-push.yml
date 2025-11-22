@@ -20,3 +20,4 @@ jobs:
           image-name: ${{ github.repository }}
           is-latest: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          Dockerfile: Dockerfile.python
