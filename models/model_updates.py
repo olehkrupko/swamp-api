@@ -1,3 +1,4 @@
+from typing import Optional
 import datetime as dt
 import logging
 from datetime import timedelta
@@ -77,16 +78,16 @@ class Update(Base):
         return self.dt_event
 
     # METADATA
-    dt_event: Mapped[datetime] = mapped_column(  # rename
+    dt_event: Mapped[dt.datetime] = mapped_column(  # rename
         DateTime(timezone=True),
         nullable=False,
         index=True,
     )
-    dt_original: Mapped[datetime] = mapped_column(
+    dt_original: Mapped[dt.datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
     )
-    dt_created: Mapped[datetime] = mapped_column(
+    dt_created: Mapped[dt.datetime] = mapped_column(
         DateTime,
         insert_default=func.now(),
         nullable=False,
@@ -169,9 +170,9 @@ class Update(Base):
     @classmethod
     async def get_updates(
         cls,
-        limit: bool | None,
-        private: bool | None,
-        _id: int | None,
+        limit: Optional[int],
+        private: Optional[bool],
+        _id: Optional[int],
         session: AsyncSession,
     ) -> list:
         # prepare appropriate feeds as subquery
