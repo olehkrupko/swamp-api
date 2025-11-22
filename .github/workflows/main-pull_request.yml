@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: build, tag & push Docker image
-        uses: olehkrupko/actions/python-docker@main
+        uses: olehkrupko/actions/docker-ghcr@main
         with:
           image-name: ${{ github.repository }}
           is-latest: false
