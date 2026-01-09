@@ -19,6 +19,14 @@ async def login(response: Response, form_data: OAuth2PasswordRequestForm = Depen
     if not auth.get("success", False):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password")
 
-    return {
-        "accessToken": await User.generate_token(data={"sub": auth["username"]}, expires_days=7),
-    }
+    EXPIRATION_DAYS = 7
+
+    response.set_cookie(
+        key="access_token",
+        value=await User.generate_token(data={"sub": auth["username"]}, expires_days=EXPIRATION_DAYS),
+        httponly=True,
+        # secure=True,    # Ensures the cookie is only sent over HTTPS (highly recommended for production)
+        max_age=EXPIRATION_DAYS*24*3600,   # Cookie expiration time in seconds (e.g., 1 hour)
+        samesite="Strict", # Helps prevent CSRF attacks
+    )
+    return {"success": True}
