@@ -1,10 +1,12 @@
+from contextlib import asynccontextmanager
 from os import getenv
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import sentry_sdk
 
-from routes import route_feeds, route_updates, route_frequency
+from models.model_users import User
+from routes import route_auth, route_feeds, route_frequency, route_updates
 
 
 sentry_sdk.init(
@@ -26,6 +28,15 @@ sentry_sdk.init(
 )
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # run on startup
+    User.generate_password()
+
+    yield
+    # run on shutdown
+
+
 # Initialize FastAPI app
 app = FastAPI(
     title="swamp-api",
@@ -33,10 +44,12 @@ app = FastAPI(
         GitHub: [swamp-api](https://github.com/olehkrupko/swamp-api)
     """,
     version="V4",
+    lifespan=lifespan,
 )
+app.include_router(route_auth.router)
 app.include_router(route_feeds.router)  # not in use for now
-app.include_router(route_updates.router)
 app.include_router(route_frequency.router)
+app.include_router(route_updates.router)
 
 
 # CORS configuration
