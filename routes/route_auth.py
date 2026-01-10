@@ -1,6 +1,4 @@
-import logging
-
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from models.model_users import User
@@ -34,10 +32,6 @@ async def login(response: Response, form_data: OAuth2PasswordRequestForm = Depen
 
 
 @router.get("/verify/", response_class=PrettyJsonResponse)
-async def verify(request: Request):
-    token = request.cookies.get("access_token", "")
-
-    if await User.verify_token(token):
-        return {"success": True}
-
-    return {"success": False}
+@User.admin_only()
+async def verify():
+    return {"success": True, "description": "Admin access confirmed"}

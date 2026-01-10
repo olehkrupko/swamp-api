@@ -4,6 +4,7 @@ from os import getenv, environ
 
 import jwt
 from argon2 import PasswordHasher, exceptions as argon2_exceptions
+from fastapi import Request
 
 from services.service_cache import Cache
 
@@ -69,3 +70,18 @@ class User:
             return False
 
         return True
+
+    def admin_only():
+        def decorator(func):
+            async def wrapper(request: Request):
+                token = request.cookies.get("access_token", "")
+
+                verify_admin = await User.verify_token(token)
+                if verify_admin:
+                    return await func()
+                else:
+                    return {"success": False, "description": "Admin access required"}
+
+            return wrapper
+
+        return decorator
