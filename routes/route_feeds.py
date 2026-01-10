@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError as sqlalchemy_IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -45,7 +45,11 @@ async def list_feeds(
     return [feed.as_dict() for feed in feeds]
 
 
-@router.put("/", response_class=PrettyJsonResponse, dependencies=[Depends(User.admin_only)])
+@router.put(
+    "/",
+    response_class=PrettyJsonResponse,
+    dependencies=[Depends(User.admin_only)],
+)
 async def create_feed(
     feed_updated: dict,
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
@@ -115,7 +119,11 @@ async def read_feed(
     return feed.as_dict()
 
 
-@router.put("/{feed_id}/", response_class=PrettyJsonResponse, dependencies=[Depends(User.admin_only)])
+@router.put(
+    "/{feed_id}/",
+    response_class=PrettyJsonResponse,
+    dependencies=[Depends(User.admin_only)],
+)
 async def update_feed(
     feed_id: int,
     feed_updated: dict,
@@ -138,7 +146,11 @@ async def update_feed(
     return feed.as_dict()
 
 
-@router.delete("/{feed_id}/", response_class=PrettyJsonResponse, dependencies=[Depends(User.admin_only)])
+@router.delete(
+    "/{feed_id}/",
+    response_class=PrettyJsonResponse,
+    dependencies=[Depends(User.admin_only)],
+)
 async def delete_feed(
     feed_id: int,
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
