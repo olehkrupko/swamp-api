@@ -157,7 +157,7 @@ async def delete_feed(
     }
 
 
-@router.post("/{feed_id}/", response_class=PrettyJsonResponse, dependencies=[Depends(User.admin_only)])
+@router.post("/{feed_id}/", response_class=PrettyJsonResponse)
 async def push_updates(
     feed_id: int,
     updates: list[dict],
