@@ -1,5 +1,6 @@
 import logging
-from fastapi import APIRouter, Depends
+
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError as sqlalchemy_IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from config.scheduler import scheduler
 from models.model_feeds import Feed
 from models.model_updates import Update
+from models.model_users import User
 from responses.PrettyJsonResponse import PrettyJsonResponse
 from services.service_backups import Backup
 from services.service_frequency import Frequency
@@ -43,7 +45,7 @@ async def list_feeds(
     return [feed.as_dict() for feed in feeds]
 
 
-@router.put("/", response_class=PrettyJsonResponse)
+@router.put("/", response_class=PrettyJsonResponse, dependencies=[Depends(User.admin_only)])
 async def create_feed(
     feed_updated: dict,
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
@@ -113,7 +115,7 @@ async def read_feed(
     return feed.as_dict()
 
 
-@router.put("/{feed_id}/", response_class=PrettyJsonResponse)
+@router.put("/{feed_id}/", response_class=PrettyJsonResponse, dependencies=[Depends(User.admin_only)])
 async def update_feed(
     feed_id: int,
     feed_updated: dict,
@@ -136,7 +138,7 @@ async def update_feed(
     return feed.as_dict()
 
 
-@router.delete("/{feed_id}/", response_class=PrettyJsonResponse)
+@router.delete("/{feed_id}/", response_class=PrettyJsonResponse, dependencies=[Depends(User.admin_only)])
 async def delete_feed(
     feed_id: int,
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
@@ -155,7 +157,7 @@ async def delete_feed(
     }
 
 
-@router.post("/{feed_id}/", response_class=PrettyJsonResponse)
+@router.post("/{feed_id}/", response_class=PrettyJsonResponse, dependencies=[Depends(User.admin_only)])
 async def push_updates(
     feed_id: int,
     updates: list[dict],
