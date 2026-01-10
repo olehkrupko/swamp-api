@@ -31,7 +31,6 @@ async def login(response: Response, form_data: OAuth2PasswordRequestForm = Depen
     return {"success": True}
 
 
-@router.get("/verify/", response_class=PrettyJsonResponse)
-@User.admin_only()
+@router.get("/verify/", response_class=PrettyJsonResponse, dependencies=[Depends(User.admin_only)])
 async def verify():
     return {"success": True, "description": "Admin access confirmed"}

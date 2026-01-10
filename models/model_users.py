@@ -3,8 +3,8 @@ from datetime import datetime, timedelta, timezone
 from os import getenv, environ
 
 import jwt
-from argon2 import PasswordHasher, exceptions as argon2_exceptions
-from fastapi import Request
+from argon2 import exceptions as argon2_exceptions, PasswordHasher
+from fastapi import HTTPException, Request, status
 
 from services.service_cache import Cache
 
@@ -71,17 +71,12 @@ class User:
 
         return True
 
-    def admin_only():
-        def decorator(func):
-            async def wrapper(request: Request):
-                token = request.cookies.get("access_token", "")
+    async def admin_only(request: Request):
+        token = request.cookies.get("access_token", "")
+        if not token:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token not present")
 
-                verify_admin = await User.verify_token(token)
-                if verify_admin:
-                    return await func()
-                else:
-                    return {"success": False, "description": "Admin access required"}
+        if await User.verify_token(token):
+            return True
 
-            return wrapper
-
-        return decorator
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Permission denied")
