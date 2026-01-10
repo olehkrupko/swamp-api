@@ -55,7 +55,10 @@ app.include_router(route_updates.router)
 # CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Adjust this for production
+    allow_origins=[
+        "http://127.0.0.1:34001",
+        "http://127.0.0.1:34004",
+    ],  # Adjust this for production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

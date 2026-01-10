@@ -38,14 +38,34 @@ class User:
         return FAILURE
 
     @classmethod
-    async def generate_token(cls, data: dict, expires_days: int) -> str:
-        to_encode = data.copy()
-        to_encode["exp"] = datetime.now(timezone.utc) + timedelta(days=expires_days)
+    async def generate_token(cls, username: str, expires_days: int) -> str:
+        to_encode = {
+            "sub": username,
+            "exp": datetime.now(timezone.utc) + timedelta(days=expires_days),
+        }
 
-        access_token = jwt.encode(to_encode, getenv("ADMIN_HASH"), algorithm="HS256")
+        access_token = jwt.encode(to_encode, getenv("SECRET_KEY"), algorithm="HS256")
         await Cache.set(
             timeout={"days": expires_days},
             value=access_token,
         )
 
         return access_token
+
+    async def verify_token(token: str) -> bool:
+        if not token:
+            return False
+
+        try:
+            payload = jwt.decode(token, getenv("SECRET_KEY"), algorithms=["HS256"])
+            username = payload.get("sub")
+            if username is None:
+                return False
+        except jwt.PyJWTError:
+            return False
+
+        cached_token = await Cache.get()
+        if cached_token != token:
+            return False
+
+        return True
