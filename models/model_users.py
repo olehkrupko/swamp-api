@@ -82,4 +82,7 @@ class User:
         if await User.verify_token(token):
             return True
 
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Permission denied")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Permission denied",
+        )

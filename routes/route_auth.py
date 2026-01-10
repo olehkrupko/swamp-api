@@ -33,8 +33,8 @@ async def login(response: Response, form_data: OAuth2PasswordRequestForm = Depen
         ),
         httponly=True,
         # secure=True,    # only HTTPS
-        max_age=EXPIRATION_DAYS*24*3600,
-        samesite="Strict", # Helps prevent CSRF attacks
+        max_age=EXPIRATION_DAYS * 24 * 3600,
+        samesite="Strict",  # Helps prevent CSRF attacks
         # domain=None,  # Set to your domain in production
     )
     return {"success": True}
