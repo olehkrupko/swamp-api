@@ -39,11 +39,11 @@ logger = logging.getLogger(__name__)
 
 class Update(Base):
     """SQLAlchemy ORM model for feed updates/items.
-    
+
     Represents individual updates or items from a feed source.
     Each update is linked to a parent Feed and contains the update's
     name, URL, and various timestamps.
-    
+
     Attributes:
         id: Primary key (auto-incrementing).
         feed_id: Foreign key to parent Feed.
@@ -98,7 +98,7 @@ class Update(Base):
     @property
     def datetime(self):
         """Get the event datetime.
-        
+
         Returns:
             datetime: The event datetime of this update.
         """
@@ -128,16 +128,16 @@ class Update(Base):
         feed_id: int = None,
     ):
         """Initialize an Update instance.
-        
+
         Processes update name (removes emojis, hashtags, underscores),
         handles datetime parsing and timezone conversion.
-        
+
         Args:
             name: Update title/name.
             datetime: ISO format datetime string.
             href: URL link to the update.
             feed_id: Parent feed ID.
-            
+
         Raises:
             ValueError: If datetime is not a string.
         """
@@ -170,7 +170,7 @@ class Update(Base):
 
     def as_dict(self):
         """Convert Update instance to dictionary representation.
-        
+
         Returns:
             dict: Update data as dictionary.
         """
@@ -194,13 +194,13 @@ class Update(Base):
     @staticmethod
     def zone_fix(datetime):
         """Convert datetime to local timezone.
-        
+
         If datetime has tzinfo, convert to local timezone.
         If no tzinfo, replace with local timezone.
-        
+
         Args:
             datetime: Timezone-aware or naive datetime.
-            
+
         Returns:
             datetime: Datetime with local timezone.
         """
@@ -219,7 +219,7 @@ class Update(Base):
 
     def dt_event_adjust_first(self):
         """Adjust dt_event backward if it's very recent.
-        
+
         For first ingestion, moves recent events to a week ago to avoid
         confusion with actual new updates.
         """
@@ -239,16 +239,16 @@ class Update(Base):
         session: AsyncSession,
     ) -> list:
         """Retrieve updates with optional filtering.
-        
+
         Fetches updates from selected feeds with optional privacy and
         count filtering. Enriches updates with parent feed data.
-        
+
         Args:
             limit: Max number of updates to return.
             private: Filter by feed privacy (None = all).
             _id: Filter by specific feed ID (None = all).
             session: SQLAlchemy async session.
-            
+
         Returns:
             list: List of update dicts with nested feed_data.
         """
@@ -293,12 +293,12 @@ class Update(Base):
     @staticmethod
     async def parse_href(href: str) -> list["Update"]:
         """Parse updates from a feed URL.
-        
+
         Calls the swamp-parser service to extract updates from a feed URL.
-        
+
         Args:
             href: Feed URL to parse.
-            
+
         Returns:
             list: List of Update dicts with name, href, and datetime.
         """

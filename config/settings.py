@@ -11,7 +11,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     """Application configuration settings loaded from environment variables.
-    
+
     Attributes:
         SQLALCHEMY_DATABASE_URI: PostgreSQL database connection URI.
         TIMEZONE_LOCAL: Local timezone for the application (e.g., 'Europe/Kyiv').

@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncAttrs
 
 class Base(AsyncAttrs, DeclarativeBase):
     """Base class for all SQLAlchemy ORM models.
-    
+
     Configuration:
         - All models use the 'feed_updates' schema by default
         - Async attributes are supported through AsyncAttrs mixin

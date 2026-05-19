@@ -11,7 +11,7 @@ from config.settings import settings
 
 class TelegramService:
     """Telegram notification helper service.
-    
+
     Sends single messages and bulk feed update notifications through Telegram.
     """
     PARSE_MODE = "markdown"
@@ -33,7 +33,7 @@ class TelegramService:
     @classmethod
     async def send_feed_updates(cls, feed, updates):
         """Send a bulk notification of feed updates to Telegram.
-        
+
         Args:
             feed: Feed object containing metadata.
             updates: List of Update objects.
