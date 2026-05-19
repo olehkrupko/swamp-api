@@ -11,7 +11,7 @@ emoji==2.8.0
 python-telegram-bot==20.6
 APScheduler==3.11.0
 pydantic-settings==2.9.1
-python-multipart==0.0.6  # required to parse data from HTML forms
+python-multipart==0.0.26  # required to parse data from HTML forms
 argon2-cffi==25.1.0  # password hashing
 PyJWT==2.10.1  # generates tokens for user authentication
 redis==5.0.4  # storing admin access token
