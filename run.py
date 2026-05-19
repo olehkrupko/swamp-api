@@ -1,3 +1,12 @@
+"""FastAPI application entry point for the Swamp API.
+
+This module initializes and configures the FastAPI application with:
+- CORS middleware for cross-origin requests
+- Sentry SDK for error tracking and monitoring
+- API routers for authentication, feeds, updates, and frequency management
+- Application lifespan management for startup/shutdown tasks
+"""
+
 from contextlib import asynccontextmanager
 from os import getenv
 
@@ -30,6 +39,14 @@ sentry_sdk.init(
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """Manage application lifecycle with startup and shutdown events.
+    
+    Args:
+        app: The FastAPI application instance.
+        
+    Yields:
+        None during the running phase of the application.
+    """
     # run on startup
     User.generate_password()
 

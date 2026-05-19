@@ -1,3 +1,8 @@
+"""Update retrieval and parsing routes.
+
+Provides endpoints for listing updates and parsing updates from feed URLs.
+"""
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -19,6 +24,17 @@ async def list_updates(
     _id: int = None,
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
 ) -> list:
+    """List updates with optional filtering.
+    
+    Args:
+        limit: Maximum number of updates to return (default 300).
+        private: Filter by feed privacy (None = all).
+        _id: Filter by specific feed ID (None = all).
+        session: SQLAlchemy async session.
+        
+    Returns:
+        list: List of update dicts enriched with feed data.
+    """
     return await Update.get_updates(
         limit=limit,
         private=private,
@@ -31,5 +47,16 @@ async def list_updates(
 async def parse_updates(
     href: str,
 ) -> list:
+    """Parse updates from a feed URL.
+    
+    Args:
+        href: Feed URL to parse.
+        
+    Returns:
+        list: List of update dicts.
+        
+    Raises:
+        HTTPException: 422 if swamp-parser fails.
+    """
     return await Update.parse_href(href)
     # TODO: return 422 if swamp-parser fails

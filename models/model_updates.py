@@ -1,3 +1,9 @@
+"""Update data model for feed content updates.
+
+Defines the Update ORM model representing individual updates/items
+from feeds with timestamps and content metadata.
+"""
+
 from typing import Optional
 import datetime as dt
 import logging
@@ -32,6 +38,23 @@ logger = logging.getLogger(__name__)
 
 
 class Update(Base):
+    """SQLAlchemy ORM model for feed updates/items.
+    
+    Represents individual updates or items from a feed source.
+    Each update is linked to a parent Feed and contains the update's
+    name, URL, and various timestamps.
+    
+    Attributes:
+        id: Primary key (auto-incrementing).
+        feed_id: Foreign key to parent Feed.
+        feed: Relationship to parent Feed object.
+        name: Update title/name (max 300 chars).
+        href: Update URL/link (max 300 chars).
+        dt_event: Event datetime (indexed, timezone-aware).
+        dt_original: Original event datetime (timezone-aware).
+        dt_created: Database creation timestamp.
+    """
+
     # CREATE INDEX update_dt_event_desc_index ON feed_updates.update (dt_event DESC NULLS LAST);
     # CREATE INDEX update_feed_id ON feed_updates.update (feed_id);
     # REINDEX (verbose, concurrently) TABLE feed_updates.update;
@@ -74,7 +97,11 @@ class Update(Base):
 
     @property
     def datetime(self):
-        """Get the current voltage."""
+        """Get the event datetime.
+        
+        Returns:
+            datetime: The event datetime of this update.
+        """
         return self.dt_event
 
     # METADATA
@@ -100,6 +127,20 @@ class Update(Base):
         href: str,
         feed_id: int = None,
     ):
+        """Initialize an Update instance.
+        
+        Processes update name (removes emojis, hashtags, underscores),
+        handles datetime parsing and timezone conversion.
+        
+        Args:
+            name: Update title/name.
+            datetime: ISO format datetime string.
+            href: URL link to the update.
+            feed_id: Parent feed ID.
+            
+        Raises:
+            ValueError: If datetime is not a string.
+        """
         # name
         # transforming emojis to normal words:s
         name = emoji.demojize(name, delimiters=(" ", " "))
@@ -128,6 +169,11 @@ class Update(Base):
         self.feed_id = feed_id
 
     def as_dict(self):
+        """Convert Update instance to dictionary representation.
+        
+        Returns:
+            dict: Update data as dictionary.
+        """
         return {
             # DATA STRUCTURE
             "id": self.id,
@@ -147,6 +193,17 @@ class Update(Base):
 
     @staticmethod
     def zone_fix(datetime):
+        """Convert datetime to local timezone.
+        
+        If datetime has tzinfo, convert to local timezone.
+        If no tzinfo, replace with local timezone.
+        
+        Args:
+            datetime: Timezone-aware or naive datetime.
+            
+        Returns:
+            datetime: Datetime with local timezone.
+        """
         if datetime.tzinfo:
             # if tzinfo present — convert to current one
             return datetime.astimezone(ZoneInfo(settings.TIMEZONE_LOCAL))
@@ -155,11 +212,17 @@ class Update(Base):
             return datetime.replace(tzinfo=ZoneInfo(settings.TIMEZONE_LOCAL))
 
     def dt_now(self):
+        """Set dt_event to current time in local timezone."""
         self.dt_event = self.zone_fix(
             dt.datetime.now(ZoneInfo(settings.TIMEZONE_LOCAL))
         )
 
     def dt_event_adjust_first(self):
+        """Adjust dt_event backward if it's very recent.
+        
+        For first ingestion, moves recent events to a week ago to avoid
+        confusion with actual new updates.
+        """
         now = self.zone_fix(dt.datetime.now(ZoneInfo(settings.TIMEZONE_LOCAL)))
         a_week_ago = now - timedelta(days=7)
 
@@ -175,6 +238,20 @@ class Update(Base):
         _id: Optional[int],
         session: AsyncSession,
     ) -> list:
+        """Retrieve updates with optional filtering.
+        
+        Fetches updates from selected feeds with optional privacy and
+        count filtering. Enriches updates with parent feed data.
+        
+        Args:
+            limit: Max number of updates to return.
+            private: Filter by feed privacy (None = all).
+            _id: Filter by specific feed ID (None = all).
+            session: SQLAlchemy async session.
+            
+        Returns:
+            list: List of update dicts with nested feed_data.
+        """
         # prepare appropriate feeds as subquery
         subquery_feed_ids = select(Feed._id)
         if _id is not None:
@@ -215,6 +292,16 @@ class Update(Base):
 
     @staticmethod
     async def parse_href(href: str) -> list["Update"]:
+        """Parse updates from a feed URL.
+        
+        Calls the swamp-parser service to extract updates from a feed URL.
+        
+        Args:
+            href: Feed URL to parse.
+            
+        Returns:
+            list: List of Update dicts with name, href, and datetime.
+        """
         URL = f"{ settings.SWAMP_PARSER }/parse/updates?href={href}"
 
         async with aiohttp.ClientSession() as session:

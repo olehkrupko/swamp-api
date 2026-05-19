@@ -1,3 +1,9 @@
+"""Feed management routes.
+
+Provides endpoints for listing, creating, reading, updating, and deleting feeds,
+plus parsing and similarity checking functionality.
+"""
+
 import logging
 
 from fastapi import APIRouter, Depends
@@ -30,6 +36,16 @@ async def list_feeds(
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
     # TODO: replace requires_update & active with mode argument
 ):
+    """List all feeds with optional status filtering.
+    
+    Args:
+        requires_update: When True, only feeds that require updates are returned.
+        active: When True, only non-NEVER feeds are returned.
+        session: SQLAlchemy async session.
+        
+    Returns:
+        list: List of feed dictionaries.
+    """
     query = select(Feed)
 
     if requires_update is True:
@@ -54,6 +70,15 @@ async def create_feed(
     feed_updated: dict,
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
 ):
+    """Create a new feed.
+    
+    Args:
+        feed_updated: Feed data as dict.
+        session: SQLAlchemy async session.
+        
+    Returns:
+        dict: Created feed as dict.
+    """
     feed = Feed(**feed_updated)
 
     session.add(feed)
@@ -70,6 +95,20 @@ async def explain_feed(
     _id: int = None,
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
 ):
+    """Parse and analyze a feed URL.
+    
+    Args:
+        href: Feed URL to parse.
+        mode: "explain" (dry-run), "push" (add if unique), or "push_ignore" (add anyway).
+        _id: Optional feed ID to re-parse.
+        session: SQLAlchemy async session.
+        
+    Returns:
+        dict: Explained feed and similar feeds list.
+        
+    Raises:
+        ValueError: If mode is not valid.
+    """
     if mode not in ["explain", "push", "push_ignore"]:
         raise ValueError("Mode not supported")
     # if json["tags"] is not None: check each tag for DB presence before saving it
@@ -110,6 +149,15 @@ async def read_feed(
     feed_id: int,
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
 ):
+    """Get a specific feed by ID.
+    
+    Args:
+        feed_id: Feed ID to retrieve.
+        session: SQLAlchemy async session.
+        
+    Returns:
+        dict: Feed data as dict.
+    """
     query = select(Feed).where(Feed._id == feed_id)
     feed = await SQLAlchemy.execute_first(
         query=query,
@@ -129,6 +177,16 @@ async def update_feed(
     feed_updated: dict,
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
 ):
+    """Update an existing feed.
+    
+    Args:
+        feed_id: Feed ID to update.
+        feed_updated: Feed update data as dict.
+        session: SQLAlchemy async session.
+        
+    Returns:
+        dict: Updated feed as dict.
+    """
     query = select(Feed).where(Feed._id == feed_id)
     feed = await SQLAlchemy.execute_first(
         query=query,
@@ -155,6 +213,15 @@ async def delete_feed(
     feed_id: int,
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
 ):
+    """Delete a feed and all associated updates.
+    
+    Args:
+        feed_id: Feed ID to delete.
+        session: SQLAlchemy async session.
+        
+    Returns:
+        dict: {'success': True}
+    """
     query = select(Feed).where(Feed._id == feed_id)
     feed = await SQLAlchemy.execute_first(
         query=query,
@@ -175,6 +242,16 @@ async def push_updates(
     updates: list[dict],
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
 ):
+    """Ingest updates for a feed.
+    
+    Args:
+        feed_id: Feed ID to add updates to.
+        updates: List of update dicts.
+        session: SQLAlchemy async session.
+        
+    Returns:
+        list: List of ingested updates as dicts.
+    """
     query = select(Feed).where(Feed._id == feed_id)
     # session.get(User, 4)
     feed = await SQLAlchemy.execute_first(

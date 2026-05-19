@@ -1,3 +1,8 @@
+"""Telegram notification helpers.
+
+Provides methods for sending messages and feed update notifications via Telegram.
+"""
+
 import telegram
 from telegram.helpers import escape_markdown as em
 
@@ -5,6 +10,10 @@ from config.settings import settings
 
 
 class TelegramService:
+    """Telegram notification helper service.
+    
+    Sends single messages and bulk feed update notifications through Telegram.
+    """
     PARSE_MODE = "markdown"
     MESSAGE_MARKDOWN = (
         "{name}\n"
@@ -14,6 +23,7 @@ class TelegramService:
 
     @classmethod
     async def send_message(cls, msg):
+        """Send a plain Telegram message using the configured bot."""
         await telegram.Bot(settings.TELEGRAM_BOTTOKEN).sendMessage(
             parse_mode=cls.PARSE_MODE,
             chat_id=settings.TELEGRAM_CHATID,
@@ -22,6 +32,12 @@ class TelegramService:
 
     @classmethod
     async def send_feed_updates(cls, feed, updates):
+        """Send a bulk notification of feed updates to Telegram.
+        
+        Args:
+            feed: Feed object containing metadata.
+            updates: List of Update objects.
+        """
         if settings.TELEGRAM_BROADCAST is not True:
             return
         if not updates:
@@ -53,6 +69,7 @@ class TelegramService:
 
     @classmethod
     async def send_update(cls, update):
+        """Send a single update notification to Telegram."""
         message = cls.MESSAGE_MARKDOWN.format(
             name=telegram.helpers.escape_markdown(update.name),
             href=telegram.helpers.escape_markdown(update.href),

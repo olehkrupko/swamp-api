@@ -1,3 +1,8 @@
+"""Backup utilities for feed data.
+
+Handles exporting and restoring feed backups from JSON files.
+"""
+
 import json
 import os
 from datetime import datetime
@@ -10,6 +15,10 @@ from services.service_sqlalchemy import SQLAlchemy
 
 
 class Backup:
+    """Backup manager for feed data.
+    
+    Handles exporting feed records to JSON files and restoring from backups.
+    """
     BACKUP_LOCATION = "/backups"
     FILENAME_FORMAT = "%Y-%m-%d.json"
 
@@ -24,12 +33,14 @@ class Backup:
 
     @classmethod
     def today(cls):
+        """Return the backup filename for today's date."""
         folder = cls.BACKUP_LOCATION
         date = datetime.now().strftime(cls.FILENAME_FORMAT)
         return f"{folder}/{date}"
 
     @classmethod
     def validate_name(cls, filename):
+        """Validate a backup filename against expected folder and date pattern."""
         folder, file = filename.rsplit("/", 1)
 
         # check if filename is valid
@@ -44,7 +55,7 @@ class Backup:
 
     @classmethod
     def validate_file(cls, filename):
-        # check if file is valid
+        """Validate that the backup file exists and contains valid JSON."""
         try:
             with open(filename, "r") as f:
                 json.load(f)
@@ -61,6 +72,7 @@ class Backup:
 
     @staticmethod
     async def get_data(session: AsyncSession):
+        """Retrieve all feed data from the database for backup export."""
         query = select(Feed)
         feeds = await SQLAlchemy.execute_all(
             query=query,
@@ -70,6 +82,7 @@ class Backup:
 
     @classmethod
     async def dump(cls, session: AsyncSession):
+        """Dump current feed data to today's backup file."""
         data = await cls.get_data(session)
         filename = cls.today()
 
@@ -86,6 +99,7 @@ class Backup:
 
     @classmethod
     def list(cls):
+        """List valid backup files in the backup folder."""
         items = []
         for filename in os.listdir(path=cls.BACKUP_LOCATION):
             filename = f"{ cls.BACKUP_LOCATION }/{ filename }"
@@ -101,6 +115,15 @@ class Backup:
         return items
 
     async def restore(self, session: AsyncSession, compare=True):
+        """Restore feed data from this backup file.
+        
+        Args:
+            session: SQLAlchemy async session.
+            compare: If True, compare backup content with current DB data.
+            
+        Returns:
+            str: Restoration status message.
+        """
         with open(self.filename) as f:
             json_data = json.load(f)
             if compare:
