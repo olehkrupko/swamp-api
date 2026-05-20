@@ -1,9 +1,16 @@
+"""Frequency scheduling helpers.
+
+Defines supported feed frequencies and generates randomized delay intervals.
+"""
+
 import random
 from datetime import timedelta
 from enum import Enum
 
 
 class Frequency(Enum):
+    """Feed update frequency options and helper delay calculations."""
+
     # active:
     MINUTES = "MINUTES"
     HOURS = "HOURS"
@@ -15,10 +22,12 @@ class Frequency(Enum):
     NEVER = "NEVER"
 
     @classmethod
-    def list(cls):
+    def list(cls) -> list[str]:
+        """Return a list of all available frequency values."""
         return list(map(lambda c: c.value, cls))
 
-    def delay(self):
+    def delay(self) -> timedelta:
+        """Return a randomized delay timedelta for the frequency."""
         if self == self.MINUTES:
             return timedelta(
                 minutes=random.randint(3, 60),

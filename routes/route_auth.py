@@ -1,3 +1,8 @@
+"""Authentication routes for admin login and token verification.
+
+Provides endpoints for admin user login and token-based authentication.
+"""
+
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -12,7 +17,23 @@ router = APIRouter(
 
 # curl -F username=XXXX -F password=XXXX "http://localhost:34001/auth/login/"
 @router.post("/login/", response_class=PrettyJsonResponse)
-async def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
+async def login(
+    response: Response, form_data: OAuth2PasswordRequestForm = Depends()
+) -> dict[str, bool]:
+    """Admin user login endpoint.
+
+    Authenticates user credentials and sets an HTTP-only authentication cookie.
+
+    Args:
+        response: FastAPI response object to set cookies.
+        form_data: Username and password from form submission.
+
+    Returns:
+        dict: {'success': True} on successful login.
+
+    Raises:
+        HTTPException: 401 if credentials are invalid.
+    """
     EXPIRATION_DAYS = 7
 
     auth = User.authenticate_user(
@@ -45,5 +66,16 @@ async def login(response: Response, form_data: OAuth2PasswordRequestForm = Depen
     response_class=PrettyJsonResponse,
     dependencies=[Depends(User.admin_only)],
 )
-async def verify():
+async def verify() -> dict[str, object]:
+    """Verify admin authentication token.
+
+    Checks that the request has a valid authentication token.
+    This is a protected endpoint requiring valid admin credentials.
+
+    Returns:
+        dict: {'success': True, 'description': 'Admin access confirmed'}
+
+    Raises:
+        HTTPException: 401 or 403 if not authenticated.
+    """
     return {"success": True, "description": "Admin access confirmed"}

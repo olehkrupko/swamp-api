@@ -1,5 +1,12 @@
+"""Feed data model and feed management logic.
+
+Defines the Feed ORM model for managing content feeds with parsing,
+filtering, and update ingestion capabilities.
+"""
+
 import logging
 from datetime import datetime
+from typing import Any
 from typing import List
 from typing import TYPE_CHECKING
 
@@ -12,6 +19,7 @@ from sqlalchemy import (
     select,
     String,
 )
+from sqlalchemy.sql import Select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import (
     mapped_column,
@@ -34,6 +42,25 @@ logger = logging.getLogger(__name__)
 
 
 class Feed(Base):
+    """SQLAlchemy ORM model for content feeds.
+
+    Represents a feed source with metadata, frequency settings, and
+    associated updates. Supports feed parsing from URLs and filtering updates.
+
+    Attributes:
+        _id: Primary key (auto-incrementing).
+        _created: Timestamp when feed was created.
+        _delayed: Timestamp of next scheduled parse.
+        title: Feed title (unique, max 100 chars).
+        href: Primary feed URL (max 200 chars).
+        href_user: User-friendly feed URL (max 200 chars).
+        private: Whether feed is private/hidden.
+        frequency: Update frequency (enum).
+        notes: Optional feed notes (max 200 chars).
+        json: Flexible JSON metadata (tags, region, filter, limit, etc.).
+        updates: Relationship to Update objects.
+    """
+
     __tablename__ = "feed"
 
     # TECHNICAL
@@ -87,17 +114,35 @@ class Feed(Base):
 
     def __init__(
         self,
-        title,
-        href,
-        href_user,
-        private,
-        frequency,
-        notes,
-        json,
-        _id=None,
-        _created=None,
-        _delayed=None,
-    ):
+        title: str,
+        href: str,
+        href_user: str | None,
+        private: bool,
+        frequency: str | Frequency,
+        notes: str,
+        json: dict[str, Any],
+        _id: int | None = None,
+        _created: datetime | None = None,
+        _delayed: datetime | None = None,
+    ) -> None:
+        """Initialize a Feed instance.
+
+        Args:
+            title: Feed title (unique).
+            href: Primary feed URL.
+            href_user: User-friendly feed URL.
+            private: Whether feed is private.
+            frequency: Update frequency (str or Frequency enum).
+            notes: Optional notes about the feed.
+            json: Metadata dictionary (tags, region, filter, etc.).
+            _id: Primary key (optional, auto-generated).
+            _created: Creation timestamp (optional, auto-generated).
+            _delayed: Next parse timestamp (optional, auto-generated).
+
+        Raises:
+            ValueError: If frequency is not str or Frequency enum.
+            Exception: If _id, _created, _delayed are partially provided.
+        """
         self.title = title
         self.href = href
         self.href_user = href_user
@@ -119,7 +164,12 @@ class Feed(Base):
         elif _id or _created or _delayed:
             raise Exception("Pass all or none of [_id, _created, _delayed]")
 
-    def as_dict(self) -> dict:
+    def as_dict(self) -> dict[str, object]:
+        """Convert Feed instance to dictionary representation.
+
+        Returns:
+            dict: Feed data as dictionary with all fields.
+        """
         return {
             "_id": self._id,
             "_created": str(self._created),
@@ -133,10 +183,21 @@ class Feed(Base):
             "json": self.json,
         }
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self.as_dict())
 
-    async def get_similar_feeds(self, session: AsyncSession):
+    async def get_similar_feeds(self, session: AsyncSession) -> list["Feed"]:
+        """Find similar feeds in the database.
+
+        Searches for feeds with matching title, title prefix, or href.
+        Excludes the current feed from results.
+
+        Args:
+            session: SQLAlchemy async session.
+
+        Returns:
+            list: List of similar Feed objects.
+        """
         query = select(Feed)
         query = query.where(
             Feed._id != getattr(self, "id", None),
@@ -153,7 +214,16 @@ class Feed(Base):
             session=session,
         )
 
-    def update_attr(self, key: str, value):
+    def update_attr(self, key: str, value: object) -> None:
+        """Update a feed attribute with validation.
+
+        Args:
+            key: The attribute name to update.
+            value: The new value.
+
+        Raises:
+            ValueError: If key doesn't exist or is read-only.
+        """
         if not hasattr(self, key):
             # no field to update
             raise ValueError(f"{key=}: {value=} does not exist")
@@ -168,7 +238,12 @@ class Feed(Base):
         else:
             setattr(self, key, value)
 
-    def update_frequency(self, value):
+    def update_frequency(self, value: str) -> None:
+        """Update feed frequency and recalculate next parse delay.
+
+        Args:
+            value: New frequency value (str).
+        """
         if self.frequency.value == value:
             # nothing to update
             return
@@ -177,13 +252,22 @@ class Feed(Base):
             self.delay()
 
     @classmethod
-    def query_requires_update(cls, query):
+    def query_requires_update(cls, query: Select) -> Select:
+        """Filter query to only feeds that need updating.
+
+        Args:
+            query: SQLAlchemy query to filter.
+
+        Returns:
+            Query: Filtered query for feeds with frequency != NEVER and past due.
+        """
         return query.where(
             cls.frequency != Frequency.NEVER,
             cls._delayed <= datetime.now(),
         )
 
-    def delay(self):
+    def delay(self) -> None:
+        """Set the next scheduled parse time based on frequency."""
         self._delayed = datetime.now() + self.frequency.delay()
 
     ##########################
@@ -195,7 +279,21 @@ class Feed(Base):
     # {field}_ignore - skip these ones
     # in case of future review:
     # SELECT _id, title, json FROM feed_updates.feed WHERE json ? 'filter'
-    def update_filter(self, update):
+    def update_filter(self, update: "Update") -> bool:
+        """Check if an update matches the feed's filter criteria.
+
+        Supports filtering by name and href fields with inclusive and
+        exclusive (ignore) options stored in feed.json['filter'].
+
+        Args:
+            update: Update object to filter.
+
+        Returns:
+            bool: True if update passes filter, False otherwise.
+
+        Raises:
+            TypeError: If filter value is not str or list.
+        """
         # adding it to make code more readable
         KEEP = True
         SUPPORTED_FIELDS = ["name", "href"]
@@ -217,12 +315,15 @@ class Feed(Base):
 
             # replace with python filter?
             for each_value in filter_value:
-                if filter_name in SUPPORTED_FIELDS and each_value not in field_value:
+                if (
+                    filter_name in SUPPORTED_FIELDS
+                    and each_value.lower() not in field_value.lower()
+                ):
                     return not KEEP
                 elif (
                     "_ignore" in filter_name
                     and filter_name.replace("_ignore", "") in SUPPORTED_FIELDS
-                    and each_value in field_value
+                    and each_value.lower() in field_value.lower()
                 ):
                     return not KEEP
 
@@ -234,7 +335,19 @@ class Feed(Base):
         self,
         updates: list["Update"],
         session: AsyncSession,
-    ) -> list[dict]:
+    ) -> list[dict[str, object]]:
+        """Ingest new updates into the database and send notifications.
+
+        Filters updates, prevents duplicates, and sends Telegram notifications
+        for new updates. Updates are sorted by datetime and limited if configured.
+
+        Args:
+            updates: List of Update objects to ingest.
+            session: SQLAlchemy async session.
+
+        Returns:
+            list: List of ingested Update objects as dicts.
+        """
         notify = []
         ingested = []
         self_updates = await self.awaitable_attrs.updates
@@ -270,6 +383,17 @@ class Feed(Base):
 
     @staticmethod
     async def parse_href(href: str) -> "Feed":
+        """Parse a feed URL and return a Feed object.
+
+        Calls the swamp-parser service to analyze the URL and extract
+        feed metadata.
+
+        Args:
+            href: Feed URL to parse.
+
+        Returns:
+            Feed: Feed object with parsed metadata.
+        """
         URL = f"{ settings.SWAMP_PARSER }/parse/explained?href={href}"
 
         async with aiohttp.ClientSession() as session:

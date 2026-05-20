@@ -1,3 +1,8 @@
+"""Backup utilities for feed data.
+
+Handles exporting and restoring feed backups from JSON files.
+"""
+
 import json
 import os
 from datetime import datetime
@@ -10,10 +15,15 @@ from services.service_sqlalchemy import SQLAlchemy
 
 
 class Backup:
+    """Backup manager for feed data.
+
+    Handles exporting feed records to JSON files and restoring from backups.
+    """
+
     BACKUP_LOCATION = "/backups"
     FILENAME_FORMAT = "%Y-%m-%d.json"
 
-    def __init__(self, filename=None):
+    def __init__(self, filename: str | None = None) -> None:
         if self.validate_name(filename):
             self.filename = filename
         else:
@@ -23,13 +33,15 @@ class Backup:
         return f"<Backup filename='{self.filename}'>"
 
     @classmethod
-    def today(cls):
+    def today(cls) -> str:
+        """Return the backup filename for today's date."""
         folder = cls.BACKUP_LOCATION
         date = datetime.now().strftime(cls.FILENAME_FORMAT)
         return f"{folder}/{date}"
 
     @classmethod
-    def validate_name(cls, filename):
+    def validate_name(cls, filename: str) -> bool:
+        """Validate a backup filename against expected folder and date pattern."""
         folder, file = filename.rsplit("/", 1)
 
         # check if filename is valid
@@ -43,8 +55,8 @@ class Backup:
         return True
 
     @classmethod
-    def validate_file(cls, filename):
-        # check if file is valid
+    def validate_file(cls, filename: str) -> bool:
+        """Validate that the backup file exists and contains valid JSON."""
         try:
             with open(filename, "r") as f:
                 json.load(f)
@@ -60,7 +72,8 @@ class Backup:
     #############
 
     @staticmethod
-    async def get_data(session: AsyncSession):
+    async def get_data(session: AsyncSession) -> list[dict[str, object]]:
+        """Retrieve all feed data from the database for backup export."""
         query = select(Feed)
         feeds = await SQLAlchemy.execute_all(
             query=query,
@@ -69,7 +82,8 @@ class Backup:
         return [feed.as_dict() for feed in feeds]
 
     @classmethod
-    async def dump(cls, session: AsyncSession):
+    async def dump(cls, session: AsyncSession) -> "Backup":
+        """Dump current feed data to today's backup file."""
         data = await cls.get_data(session)
         filename = cls.today()
 
@@ -85,7 +99,8 @@ class Backup:
     ################
 
     @classmethod
-    def list(cls):
+    def list(cls) -> list["Backup"]:
+        """List valid backup files in the backup folder."""
         items = []
         for filename in os.listdir(path=cls.BACKUP_LOCATION):
             filename = f"{ cls.BACKUP_LOCATION }/{ filename }"
@@ -100,7 +115,16 @@ class Backup:
 
         return items
 
-    async def restore(self, session: AsyncSession, compare=True):
+    async def restore(self, session: AsyncSession, compare: bool = True) -> str:
+        """Restore feed data from this backup file.
+
+        Args:
+            session: SQLAlchemy async session.
+            compare: If True, compare backup content with current DB data.
+
+        Returns:
+            str: Restoration status message.
+        """
         with open(self.filename) as f:
             json_data = json.load(f)
             if compare:
