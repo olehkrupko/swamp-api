@@ -7,6 +7,7 @@ and role-based access control for the API.
 import logging
 from datetime import datetime, timedelta, timezone
 from os import getenv, environ
+from typing import Optional
 
 import jwt
 from argon2 import exceptions as argon2_exceptions, PasswordHasher
@@ -38,7 +39,7 @@ class User:
         environ["ADMIN_HASH"] = PasswordHasher().hash(getenv("ADMIN_PASS"))
 
     @classmethod
-    def get_user(cls, username: str):
+    def get_user(cls, username: str) -> Optional[dict[str, str]]:
         """Retrieve user credentials if username matches admin user.
 
         Args:
@@ -51,7 +52,7 @@ class User:
             return {"username": username, "hashed_password": getenv("ADMIN_HASH")}
 
     @classmethod
-    def authenticate_user(cls, username: str, password: str) -> dict:
+    def authenticate_user(cls, username: str, password: str) -> dict[str, object]:
         """Authenticate user credentials.
 
         Args:
@@ -125,7 +126,7 @@ class User:
 
         return True
 
-    async def admin_only(request: Request):
+    async def admin_only(request: Request) -> bool:
         """Dependency for FastAPI routes requiring admin authentication.
 
         Args:

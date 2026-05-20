@@ -22,11 +22,11 @@ class Frequency(Enum):
     NEVER = "NEVER"
 
     @classmethod
-    def list(cls):
+    def list(cls) -> list[str]:
         """Return a list of all available frequency values."""
         return list(map(lambda c: c.value, cls))
 
-    def delay(self):
+    def delay(self) -> timedelta:
         """Return a randomized delay timedelta for the frequency."""
         if self == self.MINUTES:
             return timedelta(

@@ -17,7 +17,7 @@ router = APIRouter(
 
 # curl -F username=XXXX -F password=XXXX "http://localhost:34001/auth/login/"
 @router.post("/login/", response_class=PrettyJsonResponse)
-async def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
+async def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends()) -> dict[str, bool]:
     """Admin user login endpoint.
 
     Authenticates user credentials and sets an HTTP-only authentication cookie.
@@ -64,7 +64,7 @@ async def login(response: Response, form_data: OAuth2PasswordRequestForm = Depen
     response_class=PrettyJsonResponse,
     dependencies=[Depends(User.admin_only)],
 )
-async def verify():
+async def verify() -> dict[str, object]:
     """Verify admin authentication token.
 
     Checks that the request has a valid authentication token.

@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
+from sqlalchemy.sql import Select
 
 from config.settings import settings
 
@@ -49,10 +50,10 @@ class SQLAlchemy:
                 await session.rollback()
                 raise
 
-    async def execute_first(query, session: AsyncSession):
+    async def execute_first(query: Select, session: AsyncSession) -> object:
         """Execute a query and return the first scalar result."""
         return (await session.execute(query)).scalars().first()
 
-    async def execute_all(query, session: AsyncSession):
+    async def execute_all(query: Select, session: AsyncSession) -> list[object]:
         """Execute a query and return all scalar results."""
         return (await session.execute(query)).scalars().all()

@@ -3,10 +3,16 @@
 Provides methods for sending messages and feed update notifications via Telegram.
 """
 
+from typing import TYPE_CHECKING
+
 import telegram
 from telegram.helpers import escape_markdown as em
 
 from config.settings import settings
+
+if TYPE_CHECKING:
+    from models.model_feeds import Feed
+    from models.model_updates import Update
 
 
 class TelegramService:
@@ -23,7 +29,7 @@ class TelegramService:
     )
 
     @classmethod
-    async def send_message(cls, msg):
+    async def send_message(cls, msg: str) -> None:
         """Send a plain Telegram message using the configured bot."""
         await telegram.Bot(settings.TELEGRAM_BOTTOKEN).sendMessage(
             parse_mode=cls.PARSE_MODE,
@@ -32,7 +38,7 @@ class TelegramService:
         )
 
     @classmethod
-    async def send_feed_updates(cls, feed, updates):
+    async def send_feed_updates(cls, feed: "Feed", updates: list["Update"]) -> None:
         """Send a bulk notification of feed updates to Telegram.
 
         Args:
@@ -69,7 +75,7 @@ class TelegramService:
         )
 
     @classmethod
-    async def send_update(cls, update):
+    async def send_update(cls, update: "Update") -> None:
         """Send a single update notification to Telegram."""
         message = cls.MESSAGE_MARKDOWN.format(
             name=telegram.helpers.escape_markdown(update.name),

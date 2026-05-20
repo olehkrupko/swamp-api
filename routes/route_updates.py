@@ -19,11 +19,11 @@ router = APIRouter(
 @router.get("/", response_class=PrettyJsonResponse)
 async def list_updates(
     limit: int = 300,
-    private: bool = None,
+    private: bool | None = None,
     # TODO: separate _id to its own endpoint  /feed/{feed_id}/updates ?
-    _id: int = None,
+    _id: int | None = None,
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
-) -> list:
+) -> list[dict[str, object]]:
     """List updates with optional filtering.
 
     Args:
@@ -46,7 +46,7 @@ async def list_updates(
 @router.get("/parse/", response_class=PrettyJsonResponse)
 async def parse_updates(
     href: str,
-) -> list:
+) -> list[dict[str, object]]:
     """Parse updates from a feed URL.
 
     Args:

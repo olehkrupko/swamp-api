@@ -96,7 +96,7 @@ class Update(Base):
     )
 
     @property
-    def datetime(self):
+    def datetime(self) -> dt.datetime:
         """Get the event datetime.
 
         Returns:
@@ -126,7 +126,7 @@ class Update(Base):
         datetime: str,
         href: str,
         feed_id: int = None,
-    ):
+    ) -> None:
         """Initialize an Update instance.
 
         Processes update name (removes emojis, hashtags, underscores),
@@ -168,7 +168,7 @@ class Update(Base):
         self.dt_original = datetime
         self.feed_id = feed_id
 
-    def as_dict(self):
+    def as_dict(self) -> dict[str, object]:
         """Convert Update instance to dictionary representation.
 
         Returns:
@@ -188,11 +188,11 @@ class Update(Base):
             "dt_created": self.dt_created,
         }
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self.as_dict())
 
     @staticmethod
-    def zone_fix(datetime):
+    def zone_fix(datetime: dt.datetime) -> dt.datetime:
         """Convert datetime to local timezone.
 
         If datetime has tzinfo, convert to local timezone.
@@ -211,13 +211,13 @@ class Update(Base):
             # if no tzinfo — replace it with current one
             return datetime.replace(tzinfo=ZoneInfo(settings.TIMEZONE_LOCAL))
 
-    def dt_now(self):
+    def dt_now(self) -> None:
         """Set dt_event to current time in local timezone."""
         self.dt_event = self.zone_fix(
             dt.datetime.now(ZoneInfo(settings.TIMEZONE_LOCAL))
         )
 
-    def dt_event_adjust_first(self):
+    def dt_event_adjust_first(self) -> None:
         """Adjust dt_event backward if it's very recent.
 
         For first ingestion, moves recent events to a week ago to avoid
@@ -237,7 +237,7 @@ class Update(Base):
         private: Optional[bool],
         _id: Optional[int],
         session: AsyncSession,
-    ) -> list:
+    ) -> list[dict[str, object]]:
         """Retrieve updates with optional filtering.
 
         Fetches updates from selected feeds with optional privacy and
@@ -291,7 +291,7 @@ class Update(Base):
         return results
 
     @staticmethod
-    async def parse_href(href: str) -> list["Update"]:
+    async def parse_href(href: str) -> list[dict[str, object]]:
         """Parse updates from a feed URL.
 
         Calls the swamp-parser service to extract updates from a feed URL.

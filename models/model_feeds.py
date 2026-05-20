@@ -6,6 +6,7 @@ filtering, and update ingestion capabilities.
 
 import logging
 from datetime import datetime
+from typing import Any
 from typing import List
 from typing import TYPE_CHECKING
 
@@ -18,6 +19,7 @@ from sqlalchemy import (
     select,
     String,
 )
+from sqlalchemy.sql import Select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import (
     mapped_column,
@@ -112,17 +114,17 @@ class Feed(Base):
 
     def __init__(
         self,
-        title,
-        href,
-        href_user,
-        private,
-        frequency,
-        notes,
-        json,
-        _id=None,
-        _created=None,
-        _delayed=None,
-    ):
+        title: str,
+        href: str,
+        href_user: str | None,
+        private: bool,
+        frequency: str | Frequency,
+        notes: str,
+        json: dict[str, Any],
+        _id: int | None = None,
+        _created: datetime | None = None,
+        _delayed: datetime | None = None,
+    ) -> None:
         """Initialize a Feed instance.
 
         Args:
@@ -162,7 +164,7 @@ class Feed(Base):
         elif _id or _created or _delayed:
             raise Exception("Pass all or none of [_id, _created, _delayed]")
 
-    def as_dict(self) -> dict:
+    def as_dict(self) -> dict[str, object]:
         """Convert Feed instance to dictionary representation.
 
         Returns:
@@ -181,10 +183,10 @@ class Feed(Base):
             "json": self.json,
         }
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self.as_dict())
 
-    async def get_similar_feeds(self, session: AsyncSession):
+    async def get_similar_feeds(self, session: AsyncSession) -> list["Feed"]:
         """Find similar feeds in the database.
 
         Searches for feeds with matching title, title prefix, or href.
@@ -212,7 +214,7 @@ class Feed(Base):
             session=session,
         )
 
-    def update_attr(self, key: str, value):
+    def update_attr(self, key: str, value: object) -> None:
         """Update a feed attribute with validation.
 
         Args:
@@ -236,7 +238,7 @@ class Feed(Base):
         else:
             setattr(self, key, value)
 
-    def update_frequency(self, value):
+    def update_frequency(self, value: str) -> None:
         """Update feed frequency and recalculate next parse delay.
 
         Args:
@@ -250,7 +252,7 @@ class Feed(Base):
             self.delay()
 
     @classmethod
-    def query_requires_update(cls, query):
+    def query_requires_update(cls, query: Select) -> Select:
         """Filter query to only feeds that need updating.
 
         Args:
@@ -264,7 +266,7 @@ class Feed(Base):
             cls._delayed <= datetime.now(),
         )
 
-    def delay(self):
+    def delay(self) -> None:
         """Set the next scheduled parse time based on frequency."""
         self._delayed = datetime.now() + self.frequency.delay()
 
@@ -277,7 +279,7 @@ class Feed(Base):
     # {field}_ignore - skip these ones
     # in case of future review:
     # SELECT _id, title, json FROM feed_updates.feed WHERE json ? 'filter'
-    def update_filter(self, update):
+    def update_filter(self, update: "Update") -> bool:
         """Check if an update matches the feed's filter criteria.
 
         Supports filtering by name and href fields with inclusive and
@@ -333,7 +335,7 @@ class Feed(Base):
         self,
         updates: list["Update"],
         session: AsyncSession,
-    ) -> list[dict]:
+    ) -> list[dict[str, object]]:
         """Ingest new updates into the database and send notifications.
 
         Filters updates, prevents duplicates, and sends Telegram notifications

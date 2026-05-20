@@ -6,6 +6,7 @@ Provides helper functions to store and retrieve the admin auth token.
 import logging
 from datetime import datetime, timedelta
 from os import getenv
+from typing import Optional
 
 import redis.asyncio as redis
 
@@ -25,12 +26,12 @@ class Cache:
         return "swamp-api:auth:admin-access-token"
 
     @staticmethod
-    def timeout(timeout: dict) -> datetime:
+    def timeout(timeout: dict[str, int]) -> datetime:
         """Calculate a Redis expiration datetime from timeout kwargs."""
         return datetime.now() + timedelta(**timeout)
 
     @classmethod
-    async def get(cls) -> str:
+    async def get(cls) -> Optional[str]:
         """Retrieve the cached admin access token from Redis."""
         r = await redis.from_url(getenv("REDIS"), decode_responses=True)
         async with r.pipeline(transaction=True) as pipe:
@@ -41,7 +42,7 @@ class Cache:
             return values[0]
 
     @classmethod
-    async def set(cls, value: str, timeout: dict):
+    async def set(cls, value: str, timeout: dict[str, int]) -> None:
         """Store the admin access token in Redis with expiration."""
         r = await redis.from_url(getenv("REDIS"), decode_responses=True)
         async with r.pipeline(transaction=True) as pipe:

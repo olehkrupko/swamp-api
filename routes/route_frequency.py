@@ -15,7 +15,7 @@ router = APIRouter(
 
 
 @router.get("/", response_class=PrettyJsonResponse)
-def list_frequencies() -> list:
+def list_frequencies() -> list[str]:
     """Return configured feed frequency options.
 
     Returns:

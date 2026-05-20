@@ -7,6 +7,7 @@ This module initializes and configures the FastAPI application with:
 - Application lifespan management for startup/shutdown tasks
 """
 
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from os import getenv
 
@@ -38,7 +39,7 @@ sentry_sdk.init(
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Manage application lifecycle with startup and shutdown events.
 
     Args:

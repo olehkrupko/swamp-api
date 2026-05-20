@@ -31,11 +31,11 @@ router = APIRouter(
 
 @router.get("/", response_class=PrettyJsonResponse)
 async def list_feeds(
-    requires_update: bool = None,
-    active: bool = None,
+    requires_update: bool | None = None,
+    active: bool | None = None,
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
     # TODO: replace requires_update & active with mode argument
-):
+) -> list[dict[str, object]]:
     """List all feeds with optional status filtering.
 
     Args:
@@ -67,9 +67,9 @@ async def list_feeds(
     dependencies=[Depends(User.admin_only)],
 )
 async def create_feed(
-    feed_updated: dict,
+    feed_updated: dict[str, object],
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
-):
+) -> dict[str, object]:
     """Create a new feed.
 
     Args:
@@ -92,9 +92,9 @@ async def create_feed(
 async def explain_feed(
     href: str,
     mode: str = "explain",
-    _id: int = None,
+    _id: int | None = None,
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
-):
+) -> dict[str, object]:
     """Parse and analyze a feed URL.
 
     Args:
@@ -148,7 +148,7 @@ async def explain_feed(
 async def read_feed(
     feed_id: int,
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
-):
+) -> dict[str, object]:
     """Get a specific feed by ID.
 
     Args:
@@ -174,9 +174,9 @@ async def read_feed(
 )
 async def update_feed(
     feed_id: int,
-    feed_updated: dict,
+    feed_updated: dict[str, object],
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
-):
+) -> dict[str, object]:
     """Update an existing feed.
 
     Args:
@@ -212,7 +212,7 @@ async def update_feed(
 async def delete_feed(
     feed_id: int,
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
-):
+) -> dict[str, bool]:
     """Delete a feed and all associated updates.
 
     Args:
@@ -239,9 +239,9 @@ async def delete_feed(
 @router.post("/{feed_id}/", response_class=PrettyJsonResponse)
 async def push_updates(
     feed_id: int,
-    updates: list[dict],
+    updates: list[dict[str, object]],
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
-):
+) -> list[dict[str, object]]:
     """Ingest updates for a feed.
 
     Args:
