@@ -19,6 +19,7 @@ class Backup:
 
     Handles exporting feed records to JSON files and restoring from backups.
     """
+
     BACKUP_LOCATION = "/backups"
     FILENAME_FORMAT = "%Y-%m-%d.json"
 

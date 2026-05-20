@@ -14,6 +14,7 @@ class PrettyJsonResponse(Response):
     Renders responses as pretty-printed JSON with 4-space indentation,
     sorted keys, and no NaN values. Ensures consistent output formatting.
     """
+
     media_type = "application/json"
 
     def render(self, content: typing.Any) -> bytes:

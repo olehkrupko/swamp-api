@@ -313,7 +313,10 @@ class Feed(Base):
 
             # replace with python filter?
             for each_value in filter_value:
-                if filter_name in SUPPORTED_FIELDS and each_value.lower() not in field_value.lower():
+                if (
+                    filter_name in SUPPORTED_FIELDS
+                    and each_value.lower() not in field_value.lower()
+                ):
                     return not KEEP
                 elif (
                     "_ignore" in filter_name

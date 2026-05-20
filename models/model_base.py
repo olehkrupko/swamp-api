@@ -19,6 +19,7 @@ class Base(AsyncAttrs, DeclarativeBase):
         - Async attributes are supported through AsyncAttrs mixin
         - Python Enum types are mapped to native SQL enums
     """
+
     __table_args__ = {
         "schema": "feed_updates",
     }

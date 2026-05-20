@@ -21,6 +21,7 @@ class SQLAlchemy:
     Provides a single global async engine and async sessionmaker for the
     application, plus helper methods for common query execution patterns.
     """
+
     # Create engine and sessionmaker ONCE
     engine = create_async_engine(
         settings.SQLALCHEMY_DATABASE_URI,

@@ -10,6 +10,7 @@ from enum import Enum
 
 class Frequency(Enum):
     """Feed update frequency options and helper delay calculations."""
+
     # active:
     MINUTES = "MINUTES"
     HOURS = "HOURS"

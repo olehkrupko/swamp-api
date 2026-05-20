@@ -20,6 +20,7 @@ class Settings(BaseSettings):
         TELEGRAM_BROADCAST: Whether to broadcast updates to Telegram.
         TELEGRAM_BOTTOKEN: Telegram bot authentication token.
     """
+
     SQLALCHEMY_DATABASE_URI: str = getenv("SQLALCHEMY_DB_URI")
     TIMEZONE_LOCAL: str = getenv("TIMEZONE_LOCAL")
     SWAMP_PARSER: str = getenv("SWAMP_PARSER")
