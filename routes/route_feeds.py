@@ -37,12 +37,12 @@ async def list_feeds(
     # TODO: replace requires_update & active with mode argument
 ):
     """List all feeds with optional status filtering.
-    
+
     Args:
         requires_update: When True, only feeds that require updates are returned.
         active: When True, only non-NEVER feeds are returned.
         session: SQLAlchemy async session.
-        
+
     Returns:
         list: List of feed dictionaries.
     """
@@ -71,11 +71,11 @@ async def create_feed(
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
 ):
     """Create a new feed.
-    
+
     Args:
         feed_updated: Feed data as dict.
         session: SQLAlchemy async session.
-        
+
     Returns:
         dict: Created feed as dict.
     """
@@ -96,16 +96,16 @@ async def explain_feed(
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
 ):
     """Parse and analyze a feed URL.
-    
+
     Args:
         href: Feed URL to parse.
         mode: "explain" (dry-run), "push" (add if unique), or "push_ignore" (add anyway).
         _id: Optional feed ID to re-parse.
         session: SQLAlchemy async session.
-        
+
     Returns:
         dict: Explained feed and similar feeds list.
-        
+
     Raises:
         ValueError: If mode is not valid.
     """
@@ -150,11 +150,11 @@ async def read_feed(
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
 ):
     """Get a specific feed by ID.
-    
+
     Args:
         feed_id: Feed ID to retrieve.
         session: SQLAlchemy async session.
-        
+
     Returns:
         dict: Feed data as dict.
     """
@@ -178,12 +178,12 @@ async def update_feed(
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
 ):
     """Update an existing feed.
-    
+
     Args:
         feed_id: Feed ID to update.
         feed_updated: Feed update data as dict.
         session: SQLAlchemy async session.
-        
+
     Returns:
         dict: Updated feed as dict.
     """
@@ -214,11 +214,11 @@ async def delete_feed(
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
 ):
     """Delete a feed and all associated updates.
-    
+
     Args:
         feed_id: Feed ID to delete.
         session: SQLAlchemy async session.
-        
+
     Returns:
         dict: {'success': True}
     """
@@ -243,12 +243,12 @@ async def push_updates(
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
 ):
     """Ingest updates for a feed.
-    
+
     Args:
         feed_id: Feed ID to add updates to.
         updates: List of update dicts.
         session: SQLAlchemy async session.
-        
+
     Returns:
         list: List of ingested updates as dicts.
     """

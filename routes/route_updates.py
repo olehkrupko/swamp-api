@@ -25,13 +25,13 @@ async def list_updates(
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
 ) -> list:
     """List updates with optional filtering.
-    
+
     Args:
         limit: Maximum number of updates to return (default 300).
         private: Filter by feed privacy (None = all).
         _id: Filter by specific feed ID (None = all).
         session: SQLAlchemy async session.
-        
+
     Returns:
         list: List of update dicts enriched with feed data.
     """
@@ -48,13 +48,13 @@ async def parse_updates(
     href: str,
 ) -> list:
     """Parse updates from a feed URL.
-    
+
     Args:
         href: Feed URL to parse.
-        
+
     Returns:
         list: List of update dicts.
-        
+
     Raises:
         HTTPException: 422 if swamp-parser fails.
     """

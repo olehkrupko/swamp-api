@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 class Cache:
     """Cache helper for auth tokens using Redis.
-    
+
     Stores and retrieves a single admin access token from Redis by key.
     """
 

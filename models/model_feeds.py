@@ -41,10 +41,10 @@ logger = logging.getLogger(__name__)
 
 class Feed(Base):
     """SQLAlchemy ORM model for content feeds.
-    
+
     Represents a feed source with metadata, frequency settings, and
     associated updates. Supports feed parsing from URLs and filtering updates.
-    
+
     Attributes:
         _id: Primary key (auto-incrementing).
         _created: Timestamp when feed was created.
@@ -124,7 +124,7 @@ class Feed(Base):
         _delayed=None,
     ):
         """Initialize a Feed instance.
-        
+
         Args:
             title: Feed title (unique).
             href: Primary feed URL.
@@ -136,7 +136,7 @@ class Feed(Base):
             _id: Primary key (optional, auto-generated).
             _created: Creation timestamp (optional, auto-generated).
             _delayed: Next parse timestamp (optional, auto-generated).
-            
+
         Raises:
             ValueError: If frequency is not str or Frequency enum.
             Exception: If _id, _created, _delayed are partially provided.
@@ -164,7 +164,7 @@ class Feed(Base):
 
     def as_dict(self) -> dict:
         """Convert Feed instance to dictionary representation.
-        
+
         Returns:
             dict: Feed data as dictionary with all fields.
         """
@@ -186,13 +186,13 @@ class Feed(Base):
 
     async def get_similar_feeds(self, session: AsyncSession):
         """Find similar feeds in the database.
-        
+
         Searches for feeds with matching title, title prefix, or href.
         Excludes the current feed from results.
-        
+
         Args:
             session: SQLAlchemy async session.
-            
+
         Returns:
             list: List of similar Feed objects.
         """
@@ -214,11 +214,11 @@ class Feed(Base):
 
     def update_attr(self, key: str, value):
         """Update a feed attribute with validation.
-        
+
         Args:
             key: The attribute name to update.
             value: The new value.
-            
+
         Raises:
             ValueError: If key doesn't exist or is read-only.
         """
@@ -238,7 +238,7 @@ class Feed(Base):
 
     def update_frequency(self, value):
         """Update feed frequency and recalculate next parse delay.
-        
+
         Args:
             value: New frequency value (str).
         """
@@ -252,10 +252,10 @@ class Feed(Base):
     @classmethod
     def query_requires_update(cls, query):
         """Filter query to only feeds that need updating.
-        
+
         Args:
             query: SQLAlchemy query to filter.
-            
+
         Returns:
             Query: Filtered query for feeds with frequency != NEVER and past due.
         """
@@ -279,16 +279,16 @@ class Feed(Base):
     # SELECT _id, title, json FROM feed_updates.feed WHERE json ? 'filter'
     def update_filter(self, update):
         """Check if an update matches the feed's filter criteria.
-        
+
         Supports filtering by name and href fields with inclusive and
         exclusive (ignore) options stored in feed.json['filter'].
-        
+
         Args:
             update: Update object to filter.
-            
+
         Returns:
             bool: True if update passes filter, False otherwise.
-            
+
         Raises:
             TypeError: If filter value is not str or list.
         """
@@ -332,14 +332,14 @@ class Feed(Base):
         session: AsyncSession,
     ) -> list[dict]:
         """Ingest new updates into the database and send notifications.
-        
+
         Filters updates, prevents duplicates, and sends Telegram notifications
         for new updates. Updates are sorted by datetime and limited if configured.
-        
+
         Args:
             updates: List of Update objects to ingest.
             session: SQLAlchemy async session.
-            
+
         Returns:
             list: List of ingested Update objects as dicts.
         """
@@ -379,13 +379,13 @@ class Feed(Base):
     @staticmethod
     async def parse_href(href: str) -> "Feed":
         """Parse a feed URL and return a Feed object.
-        
+
         Calls the swamp-parser service to analyze the URL and extract
         feed metadata.
-        
+
         Args:
             href: Feed URL to parse.
-            
+
         Returns:
             Feed: Feed object with parsed metadata.
         """

@@ -40,10 +40,10 @@ sentry_sdk.init(
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Manage application lifecycle with startup and shutdown events.
-    
+
     Args:
         app: The FastAPI application instance.
-        
+
     Yields:
         None during the running phase of the application.
     """

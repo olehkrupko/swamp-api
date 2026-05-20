@@ -17,7 +17,7 @@ from config.settings import settings
 
 class SQLAlchemy:
     """Utility class for SQLAlchemy async engine and session management.
-    
+
     Provides a single global async engine and async sessionmaker for the
     application, plus helper methods for common query execution patterns.
     """
@@ -36,7 +36,7 @@ class SQLAlchemy:
     @classmethod
     async def get_db_session(cls) -> AsyncGenerator[AsyncSession, None]:
         """Provide an async database session context manager.
-        
+
         Yields:
             AsyncSession: Managed SQLAlchemy async session.
         """

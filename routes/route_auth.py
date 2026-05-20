@@ -19,16 +19,16 @@ router = APIRouter(
 @router.post("/login/", response_class=PrettyJsonResponse)
 async def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
     """Admin user login endpoint.
-    
+
     Authenticates user credentials and sets an HTTP-only authentication cookie.
-    
+
     Args:
         response: FastAPI response object to set cookies.
         form_data: Username and password from form submission.
-        
+
     Returns:
         dict: {'success': True} on successful login.
-        
+
     Raises:
         HTTPException: 401 if credentials are invalid.
     """
@@ -66,13 +66,13 @@ async def login(response: Response, form_data: OAuth2PasswordRequestForm = Depen
 )
 async def verify():
     """Verify admin authentication token.
-    
+
     Checks that the request has a valid authentication token.
     This is a protected endpoint requiring valid admin credentials.
-    
+
     Returns:
         dict: {'success': True, 'description': 'Admin access confirmed'}
-        
+
     Raises:
         HTTPException: 401 or 403 if not authenticated.
     """

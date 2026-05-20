@@ -20,18 +20,18 @@ logger = logging.getLogger(__name__)
 
 class User:
     """Admin user authentication and token management.
-    
+
     This is a lightweight user model for single admin user authentication.
     Uses Argon2 for password hashing and JWT for token-based auth.
     """
-    
+
     @classmethod
     def generate_password(cls) -> bytes:
         """Hash and store the admin password from environment variable.
-        
+
         Sets ADMIN_HASH in the environment with the Argon2-hashed password
         read from ADMIN_PASS environment variable.
-        
+
         Returns:
             bytes: The hashed password bytes.
         """
@@ -40,10 +40,10 @@ class User:
     @classmethod
     def get_user(cls, username: str):
         """Retrieve user credentials if username matches admin user.
-        
+
         Args:
             username: The username to look up.
-            
+
         Returns:
             dict: User dict with username and hashed_password, or None if not found.
         """
@@ -53,11 +53,11 @@ class User:
     @classmethod
     def authenticate_user(cls, username: str, password: str) -> dict:
         """Authenticate user credentials.
-        
+
         Args:
             username: The username to authenticate.
             password: The plain text password to verify.
-            
+
         Returns:
             dict: {'success': True, ...user_data} on success,
                   {'success': False} on failure.
@@ -78,11 +78,11 @@ class User:
     @classmethod
     async def generate_token(cls, username: str, expires_days: int) -> str:
         """Generate a JWT access token for the user.
-        
+
         Args:
             username: The username to encode in the token.
             expires_days: Number of days until token expiration.
-            
+
         Returns:
             str: The JWT token string.
         """
@@ -101,10 +101,10 @@ class User:
 
     async def verify_token(token: str) -> bool:
         """Verify JWT token validity and presence in cache.
-        
+
         Args:
             token: The JWT token to verify.
-            
+
         Returns:
             bool: True if token is valid and cached, False otherwise.
         """
@@ -127,13 +127,13 @@ class User:
 
     async def admin_only(request: Request):
         """Dependency for FastAPI routes requiring admin authentication.
-        
+
         Args:
             request: The HTTP request object.
-            
+
         Returns:
             bool: True if admin is authenticated.
-            
+
         Raises:
             HTTPException: 401 if token is missing, 403 if invalid.
         """

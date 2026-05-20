@@ -16,7 +16,7 @@ from services.service_sqlalchemy import SQLAlchemy
 
 class Backup:
     """Backup manager for feed data.
-    
+
     Handles exporting feed records to JSON files and restoring from backups.
     """
     BACKUP_LOCATION = "/backups"
@@ -116,11 +116,11 @@ class Backup:
 
     async def restore(self, session: AsyncSession, compare=True):
         """Restore feed data from this backup file.
-        
+
         Args:
             session: SQLAlchemy async session.
             compare: If True, compare backup content with current DB data.
-            
+
         Returns:
             str: Restoration status message.
         """
