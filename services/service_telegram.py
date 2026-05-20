@@ -14,6 +14,7 @@ class TelegramService:
 
     Sends single messages and bulk feed update notifications through Telegram.
     """
+
     PARSE_MODE = "markdown"
     MESSAGE_MARKDOWN = (
         "{name}\n"
