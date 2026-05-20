@@ -6,7 +6,6 @@ Handles exporting and restoring feed backups from JSON files.
 import json
 import os
 from datetime import datetime
-from typing import Any
 
 from models.model_feeds import Feed
 from sqlalchemy import select
