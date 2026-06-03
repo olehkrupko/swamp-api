@@ -4,14 +4,14 @@ asyncpg==0.31.0
 SQLAlchemy[asyncio]==2.0.41
 feedparser==6.0.10
 python-dateutil==2.8.2
-aiohttp==3.13.4
+aiohttp==3.14.0
 beautifulsoup4==4.12.2
 sentry-sdk[fastapi]==2.39.0
 emoji==2.8.0
 python-telegram-bot==20.6
 APScheduler==3.11.0
 pydantic-settings==2.9.1
-python-multipart==0.0.26  # required to parse data from HTML forms
+python-multipart==0.0.27  # required to parse data from HTML forms
 argon2-cffi==25.1.0  # password hashing
 PyJWT==2.10.1  # generates tokens for user authentication
 redis==5.0.4  # storing admin access token
