@@ -76,8 +76,10 @@ app.add_middleware(
     allow_origins=[
         "http://127.0.0.1:34001",
         "http://127.0.0.1:34004",
-        "https://swamp.krupko.space",
-        "https://api.swamp.krupko.space",
+        # "https://swamp.krupko.space",
+        # "https://api.swamp.krupko.space",
+        "http://ds220-plus:34001",
+        "http://ds220-plus:34004",
     ],  # Adjust this for production
     allow_credentials=True,
     allow_methods=["*"],
