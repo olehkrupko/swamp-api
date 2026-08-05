@@ -189,6 +189,7 @@ class Update(Base):
         }
 
     def __repr__(self) -> str:
+        """Return a dictionary-style string representation of the update."""
         return str(self.as_dict())
 
     @staticmethod

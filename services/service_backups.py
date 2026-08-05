@@ -24,12 +24,14 @@ class Backup:
     FILENAME_FORMAT = "%Y-%m-%d.json"
 
     def __init__(self, filename: str | None = None) -> None:
+        """Initialize a Backup object and validate its filename."""
         if self.validate_name(filename):
             self.filename = filename
         else:
             raise RuntimeError(f"Generated {filename=} is wrong")
 
     def __repr__(self) -> str:
+        """Return a human-readable Backup representation."""
         return f"<Backup filename='{self.filename}'>"
 
     @classmethod

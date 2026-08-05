@@ -184,6 +184,7 @@ class Feed(Base):
         }
 
     def __repr__(self) -> str:
+        """Return a dictionary-style string representation of the feed."""
         return str(self.as_dict())
 
     async def get_similar_feeds(self, session: AsyncSession) -> list["Feed"]:
