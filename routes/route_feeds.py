@@ -1,3 +1,9 @@
+"""Feed management routes.
+
+Provides endpoints for listing, creating, reading, updating, and deleting feeds,
+plus parsing and similarity checking functionality.
+"""
+
 import logging
 
 from fastapi import APIRouter, Depends
@@ -25,11 +31,21 @@ router = APIRouter(
 
 @router.get("/", response_class=PrettyJsonResponse)
 async def list_feeds(
-    requires_update: bool = None,
-    active: bool = None,
+    requires_update: bool | None = None,
+    active: bool | None = None,
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
     # TODO: replace requires_update & active with mode argument
-):
+) -> list[dict[str, object]]:
+    """List all feeds with optional status filtering.
+
+    Args:
+        requires_update: When True, only feeds that require updates are returned.
+        active: When True, only non-NEVER feeds are returned.
+        session: SQLAlchemy async session.
+
+    Returns:
+        list: List of feed dictionaries.
+    """
     query = select(Feed)
 
     if requires_update is True:
@@ -51,9 +67,18 @@ async def list_feeds(
     dependencies=[Depends(User.admin_only)],
 )
 async def create_feed(
-    feed_updated: dict,
+    feed_updated: dict[str, object],
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
-):
+) -> dict[str, object]:
+    """Create a new feed.
+
+    Args:
+        feed_updated: Feed data as dict.
+        session: SQLAlchemy async session.
+
+    Returns:
+        dict: Created feed as dict.
+    """
     feed = Feed(**feed_updated)
 
     session.add(feed)
@@ -67,9 +92,23 @@ async def create_feed(
 async def explain_feed(
     href: str,
     mode: str = "explain",
-    _id: int = None,
+    _id: int | None = None,
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
-):
+) -> dict[str, object]:
+    """Parse and analyze a feed URL.
+
+    Args:
+        href: Feed URL to parse.
+        mode: "explain" (dry-run), "push" (add if unique), or "push_ignore" (add anyway).
+        _id: Optional feed ID to re-parse.
+        session: SQLAlchemy async session.
+
+    Returns:
+        dict: Explained feed and similar feeds list.
+
+    Raises:
+        ValueError: If mode is not valid.
+    """
     if mode not in ["explain", "push", "push_ignore"]:
         raise ValueError("Mode not supported")
     # if json["tags"] is not None: check each tag for DB presence before saving it
@@ -109,7 +148,16 @@ async def explain_feed(
 async def read_feed(
     feed_id: int,
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
-):
+) -> dict[str, object]:
+    """Get a specific feed by ID.
+
+    Args:
+        feed_id: Feed ID to retrieve.
+        session: SQLAlchemy async session.
+
+    Returns:
+        dict: Feed data as dict.
+    """
     query = select(Feed).where(Feed._id == feed_id)
     feed = await SQLAlchemy.execute_first(
         query=query,
@@ -126,9 +174,19 @@ async def read_feed(
 )
 async def update_feed(
     feed_id: int,
-    feed_updated: dict,
+    feed_updated: dict[str, object],
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
-):
+) -> dict[str, object]:
+    """Update an existing feed.
+
+    Args:
+        feed_id: Feed ID to update.
+        feed_updated: Feed update data as dict.
+        session: SQLAlchemy async session.
+
+    Returns:
+        dict: Updated feed as dict.
+    """
     query = select(Feed).where(Feed._id == feed_id)
     feed = await SQLAlchemy.execute_first(
         query=query,
@@ -154,7 +212,16 @@ async def update_feed(
 async def delete_feed(
     feed_id: int,
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
-):
+) -> dict[str, bool]:
+    """Delete a feed and all associated updates.
+
+    Args:
+        feed_id: Feed ID to delete.
+        session: SQLAlchemy async session.
+
+    Returns:
+        dict: {'success': True}
+    """
     query = select(Feed).where(Feed._id == feed_id)
     feed = await SQLAlchemy.execute_first(
         query=query,
@@ -172,9 +239,19 @@ async def delete_feed(
 @router.post("/{feed_id}/", response_class=PrettyJsonResponse)
 async def push_updates(
     feed_id: int,
-    updates: list[dict],
+    updates: list[dict[str, object]],
     session: AsyncSession = Depends(SQLAlchemy.get_db_session),
-):
+) -> list[dict[str, object]]:
+    """Ingest updates for a feed.
+
+    Args:
+        feed_id: Feed ID to add updates to.
+        updates: List of update dicts.
+        session: SQLAlchemy async session.
+
+    Returns:
+        list: List of ingested updates as dicts.
+    """
     query = select(Feed).where(Feed._id == feed_id)
     # session.get(User, 4)
     feed = await SQLAlchemy.execute_first(
