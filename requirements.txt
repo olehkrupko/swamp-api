@@ -13,5 +13,5 @@ APScheduler==3.11.0
 pydantic-settings==2.9.1
 python-multipart==0.0.31  # required to parse data from HTML forms
 argon2-cffi==25.1.0  # password hashing
-PyJWT==2.13.0  # generates tokens for user authentication
+PyJWT==2.15.0  # generates tokens for user authentication
 redis==5.0.4  # storing admin access token
